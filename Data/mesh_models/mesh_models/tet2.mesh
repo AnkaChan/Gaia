@@ -1,0 +1,26 @@
+MeshVersionFormatted 1
+
+Dimension
+3
+
+Vertices
+5
+0 0 0  1
+1 0 0  1
+0 1 0  1
+0 0 1  1
+-1 0 0 1
+
+Tetrahedra
+2
+1 2 3 4  1
+1 5 3 4  1
+
+Triangles
+6
+1 3 2 1
+1 2 4 1
+2 3 4 1
+1 5 3 1
+1 4 5 1
+3 5 4 1

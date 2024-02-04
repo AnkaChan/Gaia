@@ -1,0 +1,37 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# Executables
+*.out
+*.app
+
+**/.idea
+**/__pycache__
+**/.vs
+*.npy
+/CPP_Simulation/P10_VBDDynamics/CMakeSettings.json
+/CPP_Simulation/P15_VBDCloth/CMakeSettings.json
+/CPP_Simulation/P11_PBDDynamics_VolumetricCollision/out
+/out
+/CPP_Simulation/P11_PBDDynamics_VolumetricCollision/CMakeSettings.json
