@@ -30,8 +30,5 @@
 **/__pycache__
 **/.vs
 *.npy
-/CPP_Simulation/P10_VBDDynamics/CMakeSettings.json
-/CPP_Simulation/P15_VBDCloth/CMakeSettings.json
-/CPP_Simulation/P11_PBDDynamics_VolumetricCollision/out
-/out
-/CPP_Simulation/P11_PBDDynamics_VolumetricCollision/CMakeSettings.json
+
+

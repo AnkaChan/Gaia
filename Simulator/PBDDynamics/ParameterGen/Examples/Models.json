@@ -1,0 +1,42 @@
+{
+  "Models": [
+    {
+      "constantVelDamping": 0.0,
+      "density": 50.0,
+      "devCompliance": 9.999999747378752e-05,
+      "devDamping": 0.019999999552965164,
+      "exponentialVelDamping": 1.0,
+      "friction_dynamic": 0.11999999731779099,
+      "friction_static": 0.15000000596046448,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": -1.0,
+      "noGravZoneThreshold": 0.0,
+      "path": "C:\\Code\\03_Graphics\\Energy-Based-Dynamics-Dev\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t",
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "C:\\Code\\03_Graphics\\Energy-Based-Dynamics-Dev\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        0.0,
+        10.0,
+        0.0
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "volCompliance": 0.0,
+      "volDamping": 0.0
+    }
+  ]
+}

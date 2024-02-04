@@ -1,0 +1,75 @@
+{
+  "CollisionParams": {
+    "allowCCD": true,
+    "allowDCD": true,
+    "checkFeasibleRegion": true,
+    "checkTetTraverse": true,
+    "handleSelfCollision": true,
+    "stopTraversingAfterPassingQueryPoint": true,
+    "tetrahedralTraverseForNonSelfIntersection": true
+  },
+  "PhysicsParams": {
+    "boundaryFrictionDynamic": 0.4000000059604645,
+    "boundaryFrictionStatic": 0.5,
+    "bowlCap": false,
+    "bowlCenter": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "bowlOuterRadius": 1.0499999523162842,
+    "bowlRadius": 1.0,
+    "checkAndUpdateWorldBounds": true,
+    "collisionDetectionSubSteps": 1,
+    "constantVelDamping": -1.0,
+    "debug": true,
+    "debugVerboseLvl": 1,
+    "doCollDetectionOnlyForFirstIteration": true,
+    "doStatistics": false,
+    "gravity": [
+      0.0,
+      -10.0,
+      0.0
+    ],
+    "iterations": 1,
+    "maxInversionSolveMultiplier": 2.0,
+    "maxSurfaceInversionSolveMultiplier": 3.0,
+    "minParallizationBatchSize": 100,
+    "numFrames": 5000,
+    "numSubsteps": 20,
+    "numThreadsBoundarySolve": 128,
+    "numThreadsMaterialSolve": 32,
+    "outputExt": "ply",
+    "outputIntermediateState": false,
+    "outputRecoveryState": true,
+    "outputRecoveryStateStep": 10,
+    "outputStatistics": false,
+    "outputT": false,
+    "outputVTK": false,
+    "perMeshParallelization": true,
+    "perTetParallelization": false,
+    "saveAllModelsTogether": true,
+    "saveSimulationParameters": true,
+    "shaderFolderPath": "",
+    "showSubstepProgress": false,
+    "showTimeConsumption": false,
+    "smoothSurfaceNormal": true,
+    "solveInvertedTets": true,
+    "stepInvariantVelDamping": false,
+    "timeStep": 0.01666666753590107,
+    "useBowlGround": false,
+    "usePlaneGround": true,
+    "worldBounds": [
+      [
+        -10.0,
+        0.0,
+        -10.0
+      ],
+      [
+        10.0,
+        20.0,
+        10.0
+      ]
+    ]
+  }
+}
