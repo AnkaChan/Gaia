@@ -1,7 +1,9 @@
 # Gaia
+
+<img alt="teaser.gif" src="https://github.com/AnkaChan/Gaia/blob/main/teaser.gif?raw=true" data-hpc="true" class="Box-sc-g0xbh4-0 kzRgrI" height="256px">
+
 The Gaia engine is a C++ codebase primarily designed for physics-based simulations. It can be compiled as a standalone simulator or integrated into other applications as a third-party module.
 It provides a set of useful tools, including a powerful triangular/tet mesh data structure, a convenient parameter IO module, a set of efficient collision detectors, and a virtual physics framework that can be extended to support all sorts of solvers.
-
 
 Gaia is engineered to enhance the efficiency of both developers and the hardware it operates on. Occasionally, compromises are necessary since optimizing for one can adversely affect the other. It may not have the smartest design in every way. However, it's assured that Gaia is free from any stupid designs.
 
