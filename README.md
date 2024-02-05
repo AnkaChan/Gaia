@@ -63,7 +63,7 @@ Path-to-PBDDynamics.exe Models.json Parameters.json output-folder -R [PATH-to-Ga
 The first argument, "Models.json", specifies the details of the models to be simulated, while "Parameters.json" contains the physics parameters for the simulation. The third argument, "output-folder", designates the directory where the simulation results will be stored. The keyword argument "-R [PATH-to-Gaia-Repository]" is used to replace the placeholder "${REPO_ROOT}" found in "Models.json" and "Parameters.json" with the actual path to the Gaia repository, simplifying the loading process. To discover more command-line options, execute:
 ```PBDDyanmics -h```.
 
-Given the complexity of manually creating "Models.json" and "Parameters.json", GAIA offers some Python scripts that can automatically generate the simulation command for you. Those scripts covers most of the experiments included in my paper: "Shortest Path to Boundary for Self Intersecting Meshes".
+Given the complexity of manually creating "Models.json" and "Parameters.json", GAIA offers some Python scripts that can automatically generate the simulation command for you. Those scripts covers most of the experiments included in my paper: "Shortest Path to Boundary for Self Intersecting Meshes". Please see: Gaia/Simulator/PBDDynamics/ParameterGen/ for those commands.
 
 ## Common Problems
 
