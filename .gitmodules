@@ -1,12 +1,14 @@
 [submodule "Simulator/3rdParty/cmake-git-version-tracking"]
 	path = Simulator/3rdParty/cmake-git-version-tracking
-	url = git@github.com:andrew-hardin/cmake-git-version-tracking.git
+	url = https://github.com/andrew-hardin/cmake-git-version-tracking.git
 [submodule "Simulator/3rdParty/CuMatrix"]
 	path = Simulator/3rdParty/CuMatrix
-	url = git@github.com:AnkaChan/CuMatrix.git
+	url = https://github.com/AnkaChan/CuMatrix.git
+
 [submodule "Simulator/3rdParty/MeshFrame2"]
 	path = Simulator/3rdParty/MeshFrame2
-	url = git@github.com:AnkaChan/MeshFrame2.git
+	url = https://github.com/AnkaChan/MeshFrame2.git
+
 [submodule "Simulator/3rdParty/oneTBB"]
 	path = Simulator/3rdParty/oneTBB
-	url = git@github.com:oneapi-src/oneTBB.git
+	url = https://github.com/oneapi-src/oneTBB.git
