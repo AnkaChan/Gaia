@@ -4,10 +4,10 @@
 #define ABSOLUTE_RELAXIATION (1e-6f)
 
 
-bool GAIA::checkFeasibleRegion(const embree::Vec3fa& p, TriMeshFEM* pTM, int32_t faceId, ClosestPointOnTriangleType pointType, float feasibleRegionEpsilon)
+bool GAIA::checkFeasibleRegion(const embree::Vec3fa& p, const TriMeshFEM* pTM, int32_t faceId, ClosestPointOnTriangleType pointType, float feasibleRegionEpsilon)
 {
     bool inFeasibleRegion = true;
-    int32_t* faceVIds = pTM->facePos.col(faceId).data();
+    const int32_t* faceVIds = pTM->facePos.col(faceId).data();
     switch (pointType)
     {
     case ClosestPointOnTriangleType::AtInterior:
@@ -41,7 +41,7 @@ bool GAIA::checkFeasibleRegion(const embree::Vec3fa& p, TriMeshFEM* pTM, int32_t
     return inFeasibleRegion;
 }
 
-bool GAIA::checkEdgeFeasibleRegion(const embree::Vec3fa& p, TriMeshFEM* pMesh, int32_t faceId, int32_t edgeId,
+bool GAIA::checkEdgeFeasibleRegion(const embree::Vec3fa& p, const TriMeshFEM* pMesh, int32_t faceId, int32_t edgeId,
     int32_t edgeVId1, int32_t edgeVId2, float feasibleRegionEpsilon)
 {
     int32_t neighborFaceId = pMesh->pTopology->faces3NeighborFaces(edgeId, faceId);
@@ -86,7 +86,7 @@ bool GAIA::checkEdgeFeasibleRegion(const embree::Vec3fa& p, TriMeshFEM* pMesh, i
     return true;
 }
 
-bool GAIA::checkVertexFeasibleRegion(const embree::Vec3fa& p, TriMeshFEM* pMesh, int32_t vId, float feasibleRegionEpsilon)
+bool GAIA::checkVertexFeasibleRegion(const embree::Vec3fa& p, const TriMeshFEM* pMesh, int32_t vId, float feasibleRegionEpsilon)
 {
     embree::Vec3fa A = loadVertexPos(pMesh, vId);;
 

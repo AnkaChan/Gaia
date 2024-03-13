@@ -253,7 +253,8 @@ void GAIA::BasePhysicFramework::recoverFromState(std::string& stateFile)
 	std::cout << "----------------------------------------------------\n"
 		<< "Recovering state from:" << stateFile << "\n"
 		<< "----------------------------------------------------\n";
-	state.loadFromJsonFile(stateFile, *this, frameId);
+	state.loadFromJsonFile(stateFile, &stateFile);
+	state.initializePhysics(*this);
 
 	if (baseCollisionParams->allowDCD)
 	{
@@ -295,6 +296,8 @@ void GAIA::BasePhysicFramework::simulate()
 		enableModels();
 		runStep();
 
+		++frameId;
+
 		TICK(timeCsmpSaveOutputs);
 		writeOutputs(outputFolder, frameId + 1);
 		TOCK_STRUCT((*baseTimeStatistics), timeCsmpSaveOutputs);
@@ -308,10 +311,8 @@ void GAIA::BasePhysicFramework::simulate()
 				<< "----------------------------------------------------\n";
 			});
 
-		++frameId;
 		baseTimeStatistics->setToZero();
 	}
-
 }
 
 std::string GAIA::BasePhysicFramework::getDebugFolder()
@@ -433,7 +434,9 @@ void GAIA::BasePhysicFramework::writeOutputs(std::string outFolder, int frameId)
 		PhysicsState state;
 
 		std::string outFileState = stateOutOutPath + "/A" + outNumber + ".json";
-		state.writeToJsonFile(outFileState, *this, frameId, basePhysicsParams->outputRecoveryStateBinary);
+		state.binary = basePhysicsParams->outputRecoveryStateBinary;
+		state.fromPhysics(*this);
+		state.writeToJsonFile(outFileState, 2, &outFileState);
 
 	}
 }
@@ -474,7 +477,9 @@ void GAIA::BasePhysicFramework::saveDebugState(const std::string customName, boo
 
 	PhysicsState state;
 
-	state.writeToJsonFile(outNameJson, *this, frameId, false);
+	state.binary = basePhysicsParams->outputRecoveryStateBinary;
+	state.fromPhysics(*this);
+	state.writeToJsonFile(outNameJson, 2, &outNameJson);
 
 	if (saveMesh)
 	{

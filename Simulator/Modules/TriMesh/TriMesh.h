@@ -27,6 +27,8 @@ namespace GAIA {
 		typedef std::shared_ptr<TriMeshParams> SharedPtr;
 		typedef TriMeshParams* Ptr;
 
+		std::string triangleColoringCategoriesPath;
+
 		bool use3DRestpose = true;
 
 		FloatingType UVScale = 150.f;
@@ -52,9 +54,6 @@ namespace GAIA {
 		typedef std::shared_ptr<TriMeshTopology> SharedPtr;
 		typedef TriMeshTopology* Ptr;
 
-		std::vector<CPArray<int, 8>> vertexNeiFaces;
-		// records the vertix i is which vertex of the ajacent face (refered from facePos)
-		std::vector<CPArray<int, 8>> vertexNeiFaceNeiVId;
 		size_t numEdges = 0;
 		std::vector<EdgeInfo> edgeInfos;
 
@@ -64,11 +63,21 @@ namespace GAIA {
 		FaceVIdsMat faces3NeighborEdges;
 		FaceVIdsMat faces3NeighborFaces;
 
-		// all vertice's neighbor surface faces are stacked together
+		// all vertice's neighbor faces are stacked together
 		VecDynamicI vertexNeighborFaces;
+		// size is numVertices(), range [0,2], stores the vertex's order in the face's vertex list 
+		VecDynamicI vertexNeighborFaces_vertexOrder;
 		// size is 2 x numVertices(), (2xiV)-th element stores where the neighbor faces of the info starts at  faces3NeighborFaces
 		// and (2xiV+1)-th element stores how many neighbor faces the iV-th vertex has
 		VecDynamicI vertexNeighborFaces_infos;
+
+		// all vertice's neighbor edges are stacked together
+		VecDynamicI vertexNeighborEdges;
+		// size is numVertices(), range[0, 1], stores the vertex's order in the face's vertex list
+		VecDynamicI vertexNeighborEdges_vertexOrder;
+		// size is 2 x numVertices(), (2xiV)-th element stores where the neighbor edges of the info starts at  faces3NeighborEdges
+		// and (2xiV+1)-th element stores how many neighbor faces the iV-th vertex has
+		VecDynamicI vertexNeighborEdges_infos;
 
 		// all vertice's neighbor surface vertices are stacked together
 		VecDynamicI vertexNeighborVertices;
@@ -93,14 +102,14 @@ namespace GAIA {
 		int numFaces();
 		int numEdges();
 		int numVertices();
-		int facePosVId(int tId, int vId);
+		int facePosVId(int tId, int vId) const;
 		void computeDsFromPosition(int fId, Mat3x2& Ds);
 		void calculateDeformationGradient(int iF, Mat3x2& F);
 		void computeRestposeTrianglesFrom3D();
 		void computeRestposeTrianglesFrom2D();
 		Eigen::Map<Mat2> getDmInv(int fId);
 
-		Vec3 computeNormal(int fId, bool normalize = true);
+		Vec3 computeNormal(int fId, bool normalize = true) const;
 
 		void evaluateFaceNormals(bool normalize = true);
 
@@ -110,12 +119,18 @@ namespace GAIA {
 		ConstVec3Block vertex(size_t i) const;
 		ConstVec3Block vertexPrevPos(size_t i) const;
 
-		size_t numNeiVertices(IdType iV);
-		size_t neiVerticesStart(IdType iV);
-		IdType getVertexIthNeiVertex(IdType iV, IdType neiId);
+		size_t numNeiVertices(IdType iV) const;
+		size_t neiVerticesStart(IdType iV) const;
+		IdType getVertexIthNeiVertex(IdType iV, IdType neiId) const;
 
-		size_t numNeiFaces(IdType iV);
-		IdType getVertexIthNeiFace(IdType iV, IdType neiId);
+		size_t numNeiFaces(IdType iV) const;
+		IdType getVertexIthNeiFace(IdType iV, IdType neiId) const;
+		IdType getVertexIthNeiFaceOrder(IdType iV, IdType neiId) const;
+
+		size_t numNeiEdges(IdType iV) const;
+		IdType getVertexIthNeiEdge(IdType iV, IdType neiId) const;
+		IdType getVertexIthNeiEdgeOrder(IdType iV, IdType neiId) const;
+
 		std::vector<std::vector<int32_t>>& verticesColoringCategories() { return pTopology->verticesColoringCategories; }
 		std::vector<int32_t> globalColors{};
 		virtual int tearMesh(IdType v1, IdType v2);
@@ -155,6 +170,8 @@ namespace GAIA {
 
 	private:
 		int numVertices_;
+		// do not access this directly, use positions() instead
+		// because it's padded with an extra column for embree
 		TVerticesMat positions_;
 	};
 
@@ -175,12 +192,12 @@ namespace GAIA {
 		return numVertices_;
 	}
 
-	inline int TriMeshFEM::facePosVId(int tId, int vId)
+	inline int TriMeshFEM::facePosVId(int tId, int vId) const 
 	{
 		return facePos(vId, tId);
 	}
 
-	inline Vec3Block TriMeshFEM::vertex(size_t i)
+	inline Vec3Block TriMeshFEM::vertex(size_t i) 
 	{
 		return positions_.block<3, 1>(0, i);
 	}
@@ -195,24 +212,44 @@ namespace GAIA {
 		return positionsPrev.block<3, 1>(0, i);
 	}
 
-	inline size_t TriMeshFEM::neiVerticesStart(IdType iV)
+	inline size_t TriMeshFEM::neiVerticesStart(IdType iV) const
 	{
 		return pTopology->vertexNeighborVertices_infos(iV * 2);
 	}
 
-	inline IdType TriMeshFEM::getVertexIthNeiVertex(IdType iV, IdType neiId)
+	inline IdType TriMeshFEM::getVertexIthNeiVertex(IdType iV, IdType neiId) const
 	{
 		return pTopology->vertexNeighborVertices(pTopology->vertexNeighborVertices_infos(iV * 2) + neiId);
 	}
 
-	inline size_t TriMeshFEM::numNeiFaces(IdType iV)
+	inline size_t TriMeshFEM::numNeiFaces(IdType iV) const
 	{
 		return pTopology->vertexNeighborFaces_infos(iV * 2 + 1);
 	}
 
-	inline IdType TriMeshFEM::getVertexIthNeiFace(IdType iV, IdType neiId)
+	inline IdType TriMeshFEM::getVertexIthNeiFace(IdType iV, IdType neiId) const
 	{
 		return pTopology->vertexNeighborFaces(pTopology->vertexNeighborFaces_infos(iV * 2) + neiId);
+	}
+
+	inline IdType TriMeshFEM::getVertexIthNeiFaceOrder(IdType iV, IdType neiId) const
+	{
+		return pTopology->vertexNeighborFaces_vertexOrder(pTopology->vertexNeighborFaces_infos(iV * 2) + neiId);
+	}
+
+	inline size_t TriMeshFEM::numNeiEdges(IdType iV) const
+	{
+		return pTopology->vertexNeighborEdges_infos(iV*2+1);
+	}
+
+	inline IdType TriMeshFEM::getVertexIthNeiEdge(IdType iV, IdType neiId) const
+	{
+		return pTopology->vertexNeighborEdges(pTopology->vertexNeighborEdges_infos(iV * 2) + neiId);
+	}
+
+	inline IdType TriMeshFEM::getVertexIthNeiEdgeOrder(IdType iV, IdType neiId) const
+	{
+		return pTopology->vertexNeighborEdges_vertexOrder(pTopology->vertexNeighborEdges_infos(iV * 2) + neiId);
 	}
 
 	inline int TriMeshFEM::tearMesh(IdType v1, IdType v2)
@@ -460,12 +497,12 @@ namespace GAIA {
 		return ret;
 	}
 
-	inline size_t TriMeshFEM::numNeiVertices(IdType iV)
+	inline size_t TriMeshFEM::numNeiVertices(IdType iV) const 
 	{
 		return pTopology->vertexNeighborVertices_infos(iV * 2 + 1);
 	}
-
-	inline Vec3 TriMeshFEM::computeNormal(int fId, bool normalize)
+	 
+	inline Vec3 TriMeshFEM::computeNormal(int fId, bool normalize) const
 	{
 		Vec3 v1 = positions_.col(facePosVId(fId, 1)) - positions_.col(facePosVId(fId, 0));
 		Vec3 v2 = positions_.col(facePosVId(fId, 2)) - positions_.col(facePosVId(fId, 0));

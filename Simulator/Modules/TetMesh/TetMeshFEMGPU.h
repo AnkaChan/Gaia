@@ -22,8 +22,6 @@ namespace GAIA {
 		int32_t* vertexNeighborTets_vertexOrder;
 		int32_t* vertexNeighborTets_infos;
 
-
-
 		int32_t nVerts;
 		int32_t nTets;
 	};
@@ -35,15 +33,17 @@ namespace GAIA {
 		// topology
 		TetMeshTopologyGPU* pTopology;
 
-		// non-variant data
-		FloatingTypeGPU* tetRestVolume;
-		FloatingTypeGPU* tetInvRestVolume;
+		//* non-variant data
+		// data arranged per vertex
 		FloatingTypeGPU* vertexMass;
 
-		//   tet's mats, 9 x nTets
-		FloatingTypeGPU* DmInvs;
+		// data arranged per tet
+		FloatingTypeGPU* DmInvs;            // tet's mats, 9 x nTets
+		FloatingTypeGPU* tetRestVolume;
+		FloatingTypeGPU* tetInvRestVolume;
+		//* non-variant data
 
-		// flatten vertex data: 3 nVerts
+		// flatten vertex data: 3*nVerts
 		FloatingTypeGPU* vertPos;
 		FloatingTypeGPU* vertPrevPos;
 		FloatingTypeGPU* velocity;

@@ -120,8 +120,8 @@ namespace GAIA {
 
 	struct PhysicsStateMesh : MF::BaseJsonConfig
 	{
-		std::vector<std::array<double, 3>> velocities;
-		std::vector<std::array<double, 3>> position;
+		std::vector<std::array<FloatingType, 3>> velocities;
+		std::vector<std::array<FloatingType, 3>> position;
 		bool fromJson(nlohmann::json& j) {
 			EXTRACT_FROM_JSON(j, velocities);
 			EXTRACT_FROM_JSON(j, position);
@@ -136,14 +136,15 @@ namespace GAIA {
 
 	};
 
-	struct PhysicsState : MF::BaseJsonConfig
+	struct PhysicsState : public MF::BaseJsonConfig
 	{
 		std::vector<PhysicsStateMesh> meshesState;
 		int frameId = -1;
 		double curTime = 0;
+		bool binary = false;
 
-		void fromPhysics(const BasePhysicFramework& physics, int inFrameId) {
-			frameId = inFrameId;
+		void fromPhysics(const BasePhysicFramework& physics) {
+			frameId = physics.frameId;
 			curTime = physics.curTime;
 			meshesState.clear();
 			for (size_t iMesh = 0; iMesh < physics.basetetMeshes.size(); iMesh++)
@@ -153,12 +154,12 @@ namespace GAIA {
 
                 for (size_t iP = 0; iP < pTM->numVertices(); iP++)
                 {
-                    std::array<double, 3> velArr = {
+                    std::array<FloatingType, 3> velArr = {
                         pTM->mVelocity(0, iP),  pTM->mVelocity(1, iP), pTM->mVelocity(2, iP)
                     };
                     meshesState.back().velocities.push_back(velArr);
 
-					std::array<double, 3> ptArr = {
+					std::array<FloatingType, 3> ptArr = {
 						pTM->mVertPos(0, iP),  pTM->mVertPos(1, iP), pTM->mVertPos(2, iP)
 					};
 					meshesState.back().position.push_back(ptArr);
@@ -166,8 +167,8 @@ namespace GAIA {
 			}
 		}
 
-		void initializePhysics(BasePhysicFramework& physics, int& inFrameId) {
-			inFrameId = frameId;
+		void initializePhysics(BasePhysicFramework& physics) {
+			physics.frameId = frameId;
 			physics.curTime = curTime;
 			for (size_t iMesh = 0; iMesh < physics.basetetMeshes.size(); iMesh++)
 			{
@@ -194,90 +195,15 @@ namespace GAIA {
 			EXTRACT_FROM_JSON(j, frameId);
 			EXTRACT_FROM_JSON(j, curTime);
 
-			for (nlohmann::json& mesh : MF::tryGetJson(j, "meshesState"))
-			{
-				meshesState.emplace_back();
-				meshesState.back().fromJson(mesh);
-			}
-
-			return true;
-		}
-
-		bool toJson(nlohmann::json& j) {
-
-			nlohmann::json meshesStateJson;
-			for (PhysicsStateMesh& mesh : meshesState)
-			{
-				meshesStateJson.emplace_back();
-				mesh.toJson(meshesStateJson.back());
-			}
-
-			j["meshesState"] = meshesStateJson;
-			j["frameId"] = frameId;
-			j["curTime"] = curTime;
-			j["format"] = "text"; // ["text", "binary"]
-
-			return true;
-		}
-
-		bool writeToJsonFile(std::string filePath, BasePhysicFramework& physics, int& inFrameId, bool binary = true) {
-			if (!binary) {
-				fromPhysics(physics, inFrameId);
-				return BaseJsonConfig::writeToJsonFile(filePath);
-			}
-			nlohmann::json j;
-			j["frameId"] = inFrameId;
-			j["curTime"] = physics.curTime;
-			j["format"] = "binary"; // ["text", "binary"]
-			int nMeshes = physics.basetetMeshes.size();
-			j["nMeshes"] = nMeshes;
-			nlohmann::json meshesStateJson;
-			std::vector<int> nVerts;
-			auto filePart = MF::IO::FileParts(filePath);
-			std::string basename = filePart.name;
-			std::string dirPath = filePart.path;
-			std::string velocities_file = basename + ".vel";
-			std::string position_file = basename + ".pos";
-			meshesStateJson["velocities_file"] = velocities_file;
-			meshesStateJson["position_file"] = position_file;
-			try {
-				// create the file and use binary and append mode
-				std::ofstream velFile(dirPath + "/" + velocities_file, std::ios::binary);
-				std::ofstream posFile(dirPath + "/" + position_file, std::ios::binary);
-				for (int iMesh = 0; iMesh < nMeshes; iMesh++)
-				{
-					TetMeshFEM::SharedPtr pTM = physics.basetetMeshes[iMesh];
-					nVerts.push_back(pTM->numVertices());
-					// append to the binary files
-
-					velFile.write((char*)pTM->velocities().data(), sizeof(FloatingType) * pTM->velocities().size());
-					posFile.write((char*)pTM->vertices().data(), sizeof(FloatingType) * pTM->vertices().size());
-				}
-			}
-			catch (std::exception& e) {
-				std::cout << "Error writing to file: " << e.what() << std::endl;
-				return false;
-			}
-			meshesStateJson["nVerts"] = nVerts;
-			j["meshesState"] = meshesStateJson;
-			bool retVal = MF::saveJson(filePath, j, 4);
-			return retVal;
-		}
-
-		bool loadFromJsonFile(std::string filePath, BasePhysicFramework& physics, int& inFrameId) {
-			nlohmann::json j;
-			MF::loadJson(filePath, j);
 			std::string format = "text";
 			EXTRACT_FROM_JSON(j, format);
 
 			if (format == "binary") {
-				EXTRACT_FROM_JSON(j, frameId);
-				EXTRACT_FROM_JSON(j, curTime);
-				inFrameId = frameId;
-				physics.curTime = curTime;
+				assert(userData != nullptr);
+				const std::string & filePath = *(std::string *)(userData);
+
 				int nMeshes{};
 				EXTRACT_FROM_JSON(j, nMeshes);
-				nMeshes = std::min(nMeshes, (int)physics.basetetMeshes.size());
 
 				nlohmann::json meshesStateJson = MF::tryGetJson(j, "meshesState");
 				std::vector<int> nVerts{};
@@ -295,16 +221,15 @@ namespace GAIA {
 					std::ifstream velFile(dir_path + "/" + velocities_file, std::ios::binary);
 					std::ifstream posFile(dir_path + "/" + position_file, std::ios::binary);
 					for (int iMesh = 0; iMesh < nMeshes; iMesh++) {
-						TetMeshFEM::SharedPtr pTM = physics.basetetMeshes[iMesh];
 						int nVert = nVerts[iMesh];
-						if (nVert !=pTM->numVertices())
-						{
-							std::cout << "Error! Number of vertices from recovery state doesn't match! "<< std::endl;
-							assert(false);
-							getchar();
-						}
-						velFile.read((char*)pTM->velocities().data(), sizeof(FloatingType) * pTM->velocities().size());
-						posFile.read((char*)pTM->vertices().data(), sizeof(FloatingType) * pTM->vertices().size());
+						meshesState.emplace_back();
+
+						PhysicsStateMesh & meshState = meshesState.back();
+						meshState.velocities.resize(nVert);
+						meshState.position.resize(nVert);
+
+						velFile.read((char*)meshState.velocities.data(), sizeof(FloatingType) * nVert * 3);
+						posFile.read((char*)meshState.position.data(), sizeof(FloatingType) * nVert * 3);
 					}
 				}
 				catch (std::exception& e) {
@@ -314,14 +239,76 @@ namespace GAIA {
 				return true;
 			}
 			else if (format == "text") {
-				bool retVal = BaseJsonConfig::loadFromJsonFile(filePath);
-				if (retVal) {
-					initializePhysics(physics, inFrameId);
+				for (nlohmann::json& mesh : MF::tryGetJson(j, "meshesState"))
+				{
+					meshesState.emplace_back();
+					meshesState.back().fromJson(mesh);
 				}
-				return retVal;
+				
+				return true;
 
 			}
 
+			return true;
 		}
+
+		bool toJson(nlohmann::json& j) {
+			j["frameId"] = frameId;
+			j["curTime"] = curTime;
+
+			if (binary)
+			{
+				assert(userData != nullptr);
+				const std::string& filePath = *(std::string*)(userData);
+
+				j["format"] = "binary"; // ["text", "binary"]
+				size_t nMeshes = meshesState.size();
+				j["nMeshes"] = meshesState.size();
+				nlohmann::json meshesStateJson;
+				std::vector<int> nVerts;
+				auto filePart = MF::IO::FileParts(filePath);
+				std::string basename = filePart.name;
+				std::string dirPath = filePart.path;
+				std::string velocities_file = basename + ".vel";
+				std::string position_file = basename + ".pos";
+				meshesStateJson["velocities_file"] = velocities_file;
+				meshesStateJson["position_file"] = position_file;
+				try {
+					// create the file and use binary and append mode
+					std::ofstream velFile(dirPath + "/" + velocities_file, std::ios::binary);
+					std::ofstream posFile(dirPath + "/" + position_file, std::ios::binary);
+					for (int iMesh = 0; iMesh < nMeshes; iMesh++)
+					{
+						int nVert = meshesState[iMesh].velocities.size();
+						nVerts.push_back(nVert);
+						const auto& meshState = meshesState[iMesh];
+						velFile.write((char*)meshState.velocities.data(), sizeof(FloatingType) * nVert * 3);
+						posFile.write((char*)meshState.position.data(), sizeof(FloatingType) * nVert * 3);
+					}
+				}
+				catch (std::exception& e) {
+					std::cout << "Error writing to file: " << e.what() << std::endl;
+					return false;
+				}
+				meshesStateJson["nVerts"] = nVerts;
+				j["meshesState"] = meshesStateJson;
+				return true;
+			}
+			else
+			{
+				j["format"] = "text"; // ["text", "binary"]
+				nlohmann::json meshesStateJson;
+				for (PhysicsStateMesh& mesh : meshesState)
+				{
+					meshesStateJson.emplace_back();
+					mesh.toJson(meshesStateJson.back());
+					j["meshesState"] = meshesStateJson;
+				}
+			}
+
+
+			return true;
+		}
+
 	};
 }

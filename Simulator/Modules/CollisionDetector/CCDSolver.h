@@ -1,8 +1,9 @@
-#pragma once
+﻿#ifndef __CCD_SOLVER__
+#define __CCD_SOLVER__
 
-#include "../../3rdParty/CyCodeBase/cyCore.h"
-#include "../../3rdParty/CyCodeBase/cyVector.h"
-#include "../../3rdParty/CyCodeBase/cyPolynomial.h"
+#include "../CyCodeBase/cyCore.h"
+#include "../CyCodeBase/cyVector.h"
+#include "../CyCodeBase/cyPolynomial.h"
 #include <cmath>
 
 #if defined(__INTEL_COMPILER) || defined(__clang__) || defined(__GNUC__)
@@ -142,8 +143,8 @@ namespace cy {
 		case 0: y[0] = xx0.YZ(); y[1] = xx1.YZ(); y[2] = xx2.YZ(); y[3] = xx3.YZ(); break;
 		case 1: y[0] = xx0.XZ(); y[1] = xx1.XZ(); y[2] = xx2.XZ(); y[3] = xx3.XZ(); break;
 		case 2: y[0] = xx0.XY(); y[1] = xx1.XY(); y[2] = xx2.XY(); y[3] = xx3.XY(); break;
-			//default: break;
-			nodefault;
+		//default: break;
+		nodefault;
 		}
 	}
 
@@ -166,7 +167,7 @@ namespace cy {
 
 	// Moving triangle with vertices x and a moving point with position p
 	template<typename DType>
-	inline bool IntersectContinuousTriPoint(DType& tt, Vec3<DType> const x[2][3], Vec3<DType> const p[2], Vec3<DType>& intersectionBarys)
+	inline bool IntersectContinuousTriPoint(DType& tt, Vec3<DType> const x[2][3], Vec3<DType> const p[2], Vec3<DType> &intersectionBarys)
 	{
 		Vec3<DType> xx0[4] = { x[0][0], x[0][1], x[0][2], p[0] };
 		Vec3<DType> xx1[4] = { x[1][0], x[1][1], x[1][2], p[1] };
@@ -228,3 +229,4 @@ namespace cy {
 	}
 };
 
+#endif

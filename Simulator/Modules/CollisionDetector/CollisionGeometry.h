@@ -239,10 +239,27 @@ namespace GAIA {
 		TetMeshFEM* pCurTM = tMeshPtrs[curMeshID].get();
 		TetMeshFEM* pIntersectedTM = tMeshPtrs[collidedMeshID].get();
 
-		int32_t surfaceVIdTMeshIndex = -1;
-		int32_t surfaceVIdSurfaceIndex = -1;
+		Vec3 faceNormal;
+		pIntersectedTM->computeFaceNormal(closestFaceId, faceNormal);
+		if (pointType == GAIA::ClosestPointOnTriangleType::AtInterior)
+		{
+			normal = faceNormal;
+		}
+		// all other cases
+		else if (pointType != GAIA::ClosestPointOnTriangleType::NotFound)
+		{
+			Vec3 closestP_to_p;
+			closestP_to_p = collidingPt.closestSurfacePt - pCurTM->vertex(curVertID);
+			normal  = closestP_to_p.normalized();
 
-		switch (pointType)
+			// the normal should point to the outside of the intersected mesh
+			if (normal.dot(faceNormal) < 0)
+			{
+				normal = -normal;;
+			}
+		}
+
+		/*switch (pointType)
 		{
 		case GAIA::ClosestPointOnTriangleType::AtA:
 			surfaceVIdTMeshIndex = pIntersectedTM->surfaceFacesTetMeshVIds()(0, closestFaceId);
@@ -278,7 +295,59 @@ namespace GAIA {
 		default:
 			return;
 			break;
+		}*/
+	}
+
+	inline void computeVFContactNormalTriMesh(IdType meshIdVertexSide, IdType vertexId, IdType meshIdFaceSide, IdType faceId, const Vec3& closestPt,
+		std::vector<std::shared_ptr<TriMeshFEM>>& meshPtrs, ClosestPointOnTriangleType pointType, Vec3& normal)
+	{
+		const TriMeshFEM* pMeshVertexSide = meshPtrs[meshIdVertexSide].get();
+		const TriMeshFEM* pMeshFaceSide = meshPtrs[meshIdFaceSide].get();
+
+		Vec3 faceNormal = pMeshFaceSide->computeNormal(faceId);
+		
+		Vec3 closestP_to_p = pMeshVertexSide->vertex(vertexId) - closestPt;
+
+		if (pointType == GAIA::ClosestPointOnTriangleType::AtInterior)
+		{
+			normal = faceNormal;
+
+			// the contact normal should always points to the contact point, because it's not supposed to penetrate the mesh
+			// if faceNormal.dot(closestP_to_) < 0 means the vertex is contacting the back face
+			if (faceNormal.dot(closestP_to_p) < 0)
+			{
+				normal = -normal;
+			}
+		}
+		// all other cases
+		else if (pointType != GAIA::ClosestPointOnTriangleType::NotFound)
+		{
+			normal = closestP_to_p.normalized();
 		}
 	}
 
+	inline void computeVFContactNormalTriMesh(const embree::Vec3fa& a, const embree::Vec3fa& b, const embree::Vec3fa& c, 
+		const embree::Vec3fa& vertex, const embree::Vec3fa& closestPt, ClosestPointOnTriangleType pointType, Vec3& normal)
+	{
+		const embree::Vec3fa closestP_to_p = vertex - closestPt;
+		const embree::Vec3fa faceNormal = embree::normalize_safe(embree::cross(b-a, c-a));
+
+		if (pointType == GAIA::ClosestPointOnTriangleType::AtInterior)
+		{
+			normal << faceNormal.x, faceNormal.y, faceNormal.z;
+
+			// the contact normal should always points to the contact point, because it's not supposed to penetrate the mesh
+			// if faceNormal.dot(closestP_to_) < 0 means the vertex is contacting the back face
+			if (embree::dot(faceNormal, closestP_to_p) < 0)
+			{
+				normal = -normal;
+			}
+		}
+		// all other cases
+		else if (pointType != GAIA::ClosestPointOnTriangleType::NotFound)
+		{
+			const embree::Vec3fa closestP_to_p_n = embree::normalize_safe(closestP_to_p);
+			normal << closestP_to_p_n.x , closestP_to_p_n.y, closestP_to_p_n.z;
+		}
+	}
 }

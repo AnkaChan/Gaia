@@ -124,13 +124,13 @@ void GAIA::MeshClosestPointQuery::updateBVH(RTCBuildQuality sceneQuality)
         sceneQuality = RTC_BUILD_QUALITY_LOW;
     }
 
-    rtcSetSceneBuildQuality(targetMeshScene, sceneQuality);
+    rtcSetSceneBuildQuality(targetMeshFacesScene, sceneQuality);
 
     for (size_t iMesh = 0; iMesh < targetMeshes.size(); iMesh++)
     {
         // get the tet geom buffer
         unsigned int geoId = iMesh;
-        RTCGeometry geom = rtcGetGeometry(targetMeshScene, geoId);
+        RTCGeometry geom = rtcGetGeometry(targetMeshFacesScene, geoId);
 
         rtcSetGeometryBuildQuality(geom, geomQuality);
         //rtcUpdateGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, 0);
@@ -140,7 +140,7 @@ void GAIA::MeshClosestPointQuery::updateBVH(RTCBuildQuality sceneQuality)
         rtcCommitGeometry(geom);
     }
 
-    rtcCommitScene(targetMeshScene);
+    rtcCommitScene(targetMeshFacesScene);
 }
 
 void GAIA::MeshClosestPointQuery::initialize(std::vector<TriMeshFEM::SharedPtr> in_pTargetMesh)
@@ -149,14 +149,14 @@ void GAIA::MeshClosestPointQuery::initialize(std::vector<TriMeshFEM::SharedPtr> 
 
     device = rtcNewDevice(NULL);
 
-    targetMeshScene = rtcNewScene(device);
-    rtcSetSceneFlags(targetMeshScene, RTC_SCENE_FLAG_ROBUST);
+    targetMeshFacesScene = rtcNewScene(device);
+    rtcSetSceneFlags(targetMeshFacesScene, RTC_SCENE_FLAG_ROBUST);
 
     for (size_t iMesh = 0; iMesh < targetMeshes.size(); iMesh++)
     {
         RTCGeometry geomRTC = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
 
-        rtcSetSceneBuildQuality(targetMeshScene, RTC_BUILD_QUALITY_MEDIUM);
+        rtcSetSceneBuildQuality(targetMeshFacesScene, RTC_BUILD_QUALITY_MEDIUM);
 
         rtcSetSharedGeometryBuffer(geomRTC,
             RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, targetMeshes[iMesh]->positions().data(), 0, 3 * sizeof(float),
@@ -176,11 +176,11 @@ void GAIA::MeshClosestPointQuery::initialize(std::vector<TriMeshFEM::SharedPtr> 
         }
 
         rtcCommitGeometry(geomRTC);
-        rtcAttachGeometryByID(targetMeshScene, geomRTC, iMesh);
+        rtcAttachGeometryByID(targetMeshFacesScene, geomRTC, iMesh);
         rtcReleaseGeometry(geomRTC);
     }
 
-    rtcCommitScene(targetMeshScene);
+    rtcCommitScene(targetMeshFacesScene);
 }
 
 bool GAIA::MeshClosestPointQuery::closestPointQuery(const Vec3 p, TriMeshClosestPointQueryResult* pClosestPtResult, bool computeNormal)
@@ -199,7 +199,7 @@ bool GAIA::MeshClosestPointQuery::closestPointQuery(const Vec3 p, TriMeshClosest
 
     RTCPointQueryContext context;
     rtcInitPointQueryContext(&context);
-    rtcPointQuery(targetMeshScene, &query, &context, nullptr, (void*)pClosestPtResult);
+    rtcPointQuery(targetMeshFacesScene, &query, &context, nullptr, (void*)pClosestPtResult);
 
     return pClosestPtResult->found;
 }

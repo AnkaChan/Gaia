@@ -182,17 +182,6 @@ namespace GAIA {
 
 	struct DiscreteCollisionDetector;
 
-	struct CollisionInfoVF {
-		Vec3 closestSurfacePt;
-		Vec3 closestSurfacePtBarycentric;
-		Vec3 closestPointNormal;
-		ClosestPointOnTriangleType closestPointType;
-		int intersectedTets = -1;
-		int intersectedTMeshIds = -1;
-		int closestSurfaceFaceId = -1;
-		bool shortestPathFound = false;
-	};
-
 	struct CollidingPointInfo {
 		// for DCD only
 		Vec3 closestSurfacePt;

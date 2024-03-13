@@ -1,6 +1,7 @@
 #pragma once
 
 #include <embree3/rtcore.h>
+
 #include "../TriMesh/TriMesh.h"
 #include "../CollisionDetector/CollisionDetertionParameters.h"
 
@@ -11,6 +12,7 @@ namespace GAIA {
 
 	struct ClosestPointInfo
 	{
+		int queryPointId = -1;
 		int closestFaceId = -1;
 		int closestMeshId = -1;
 		ClosestPointOnTriangleType closestPtType;
@@ -63,7 +65,7 @@ namespace GAIA {
 
 		~MeshClosestPointQuery()
 		{
-			rtcReleaseScene(targetMeshScene);
+			rtcReleaseScene(targetMeshFacesScene);
 		}
 
 		void updateBVH(RTCBuildQuality tetMeshSceneQuality = RTC_BUILD_QUALITY_REFIT);
@@ -75,7 +77,7 @@ namespace GAIA {
 		const MeshClosestPointQueryParameters::SharedPtr pParams;
 		std::vector<TriMeshFEM::SharedPtr> targetMeshes;
 
-		RTCScene targetMeshScene;
+		RTCScene targetMeshFacesScene;
 		RTCDevice device;
 	};
 }

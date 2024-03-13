@@ -389,6 +389,7 @@ bool GAIA::TriMeshParams::fromJson(nlohmann::json& objectParam)
 {
 	ObjectParams::fromJson(objectParam);
 	EXTRACT_FROM_JSON(objectParam, use3DRestpose);
+	EXTRACT_FROM_JSON(objectParam, triangleColoringCategoriesPath);
 
 	return true;
 }
@@ -397,6 +398,7 @@ bool GAIA::TriMeshParams::toJson(nlohmann::json& objectParam)
 {
 	ObjectParams::toJson(objectParam);
 	PUT_TO_JSON(objectParam, use3DRestpose);
+	PUT_TO_JSON(objectParam, triangleColoringCategoriesPath);
 
 	return true;
 }
@@ -413,17 +415,9 @@ void GAIA::TriMeshTopology::initialize(TriMeshFEM* pTriMesh, TriMeshParams* pObj
 		verts.push_back({ pTriMesh->vertex(iVert)(0), pTriMesh->vertex(iVert)(1), pTriMesh->vertex(iVert)(2) });
 	}
 
-	vertexNeiFaces.resize(pTriMesh->numVertices());
-	vertexNeiFaceNeiVId.resize(pTriMesh->numVertices());
-
 	for (size_t iFace = 0; iFace < pTriMesh->numFaces(); iFace++)
 	{
 		faces.push_back({ pTriMesh->facePos(0, iFace), pTriMesh->facePos(1, iFace), pTriMesh->facePos(2, iFace), });
-		for (size_t iNeiV = 0; iNeiV < 3; ++iNeiV) {
-			size_t vId = pTriMesh->facePosVId(iFace, iNeiV);
-			vertexNeiFaces[vId].push_back(iFace);
-			vertexNeiFaceNeiVId[vId].push_back(iNeiV);
-		}
 	}
 
 	// initialize MeshFrame::Trimesh
@@ -503,36 +497,72 @@ void GAIA::TriMeshTopology::initialize(TriMeshFEM* pTriMesh, TriMeshParams* pObj
 
 	// vertex neighbors
 	int iV = 0;
-	std::vector<IdType> vertexNeighborSurfaceFaces_;
-	std::vector<IdType> vertexNeighborSurfaceVertices_;
+	std::vector<IdType> vertexNeighborFaces_;
+	std::vector<IdType> vertexNeighborVertices_;
+	std::vector<IdType> vertexNeighborEdges_;
+	std::vector<IdType> vertexNeighborFaces_vertexOrder_;
+	std::vector<IdType> vertexNeighborEdges_vertexOrder_;
+
 	vertexNeighborFaces_infos.resize(pTriMesh->numVertices() * 2);
 	vertexNeighborVertices_infos.resize(pTriMesh->numVertices() * 2);
+	vertexNeighborEdges_infos.resize(pTriMesh->numVertices() * 2);
 
-	for (MF::TriMesh::TriMeshStaticF::VPtr pSurfV : MF::TriMesh::TriMeshStaticIteratorF::MVIterator(pMeshMF.get()))
+	for (MF::TriMesh::TriMeshStaticF::VPtr pV : MF::TriMesh::TriMeshStaticIteratorF::MVIterator(pMeshMF.get()))
 	{
-		size_t numNeiVerteices = 0, numNeiFaces = 0;
-		vertexNeighborVertices_infos(iV * 2) = vertexNeighborSurfaceVertices_.size();
-		for (MF::TriMesh::TriMeshStaticF::VPtr pSurfVNei : MF::TriMesh::TriMeshStaticIteratorF::VVIterator(pSurfV)) {
+		size_t numNeiVerteices = 0, numNeiFaces = 0, numNeiEdges = 0;
+		vertexNeighborVertices_infos(iV * 2) = vertexNeighborVertices_.size();
+		for (MF::TriMesh::TriMeshStaticF::VPtr pVNei : MF::TriMesh::TriMeshStaticIteratorF::VVIterator(pV)) {
 			++numNeiVerteices;
-			vertexNeighborSurfaceVertices_.push_back(pSurfVNei->id());
+			vertexNeighborVertices_.push_back(pVNei->id());
 		}
 		vertexNeighborVertices_infos(iV * 2 + 1) = numNeiVerteices;
 
-		vertexNeighborFaces_infos(iV * 2) = vertexNeighborSurfaceFaces_.size();
-		for (MF::TriMesh::TriMeshStaticF::FPtr pSurfFNei : MF::TriMesh::TriMeshStaticIteratorF::VFIterator(pSurfV)) {
+		vertexNeighborFaces_infos(iV * 2) = vertexNeighborFaces_.size();
+		for (MF::TriMesh::TriMeshStaticF::FPtr pNeiF : MF::TriMesh::TriMeshStaticIteratorF::VFIterator(pV)) {
 			numNeiFaces++;
-			vertexNeighborSurfaceFaces_.push_back(pSurfFNei->id());
+			vertexNeighborFaces_.push_back(pNeiF->id());
+
+			// find the order of the vertex in the face
+			IdType iVInF = -1;
+			IdType iFV = 0;
+			for (MF::TriMesh::TriMeshStaticF::VPtr pFV : MF::TriMesh::TriMeshStaticIteratorF::FVIterator(pNeiF))
+			{
+				if (pFV->id() == iV) { iVInF = iFV;	break; }
+				++iFV;
+			}
+			assert(iVInF != -1);
+			vertexNeighborFaces_vertexOrder_.push_back(iVInF);
 		}
 		vertexNeighborFaces_infos(iV * 2 + 1) = numNeiFaces;
+
+		vertexNeighborEdges_infos(iV * 2) = vertexNeighborEdges_.size();
+		for (MF::TriMesh::TriMeshStaticF::EPtr pNeiE : MF::TriMesh::TriMeshStaticIteratorF::VEIterator(pV))
+		{
+			numNeiEdges++;
+			vertexNeighborEdges_.push_back(pNeiE->id());
+
+			if (edgeInfos[pNeiE->id()].eV1 == pV->id())
+			{
+				vertexNeighborEdges_vertexOrder_.push_back(0);
+			}
+			else
+			{
+				vertexNeighborEdges_vertexOrder_.push_back(1);
+			}
+		}
+		vertexNeighborEdges_infos(iV * 2 + 1) = numNeiEdges;
+
 		iV++;
 	}
 
 	//std::cout << "vertexNeighborFaces_infos:\n" << vertexNeighborFaces_infos;
 	//std::cout << "vertexNeighborVertices_infos:\n" << vertexNeighborVertices_infos;
 
-	vertexNeighborFaces = VecDynamicI::Map(&vertexNeighborSurfaceFaces_[0], vertexNeighborSurfaceFaces_.size());
-
-	vertexNeighborVertices = VecDynamicI::Map(&vertexNeighborSurfaceVertices_[0], vertexNeighborSurfaceVertices_.size());
+	vertexNeighborFaces = VecDynamicI::Map(&vertexNeighborFaces_[0], vertexNeighborFaces_.size());
+	vertexNeighborFaces_vertexOrder = VecDynamicI::Map(&vertexNeighborFaces_vertexOrder_[0], vertexNeighborFaces_vertexOrder_.size());
+	vertexNeighborVertices = VecDynamicI::Map(&vertexNeighborVertices_[0], vertexNeighborVertices_.size());
+	vertexNeighborEdges = VecDynamicI::Map(&vertexNeighborEdges_[0], vertexNeighborEdges_.size());
+	vertexNeighborEdges_vertexOrder = VecDynamicI::Map(&vertexNeighborEdges_vertexOrder_[0], vertexNeighborEdges_vertexOrder_.size());
 
 	// load vertices coloring information
 	if (pObjectParams->verticesColoringCategoriesPath != "")
