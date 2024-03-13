@@ -8,66 +8,80 @@ find_package(MeshFrame2 REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../3rdParty/Mes
 find_package(embree 3.0 REQUIRED)
 find_package(CuMatrix REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../3rdParty/CuMatrix/cmake)
 
-add_subdirectory ("../3rdParty/cmake-git-version-tracking" ${CMAKE_CURRENT_BINARY_DIR}/cmake-git-version-tracking)
-
 set (GAIA_ROOT ${CMAKE_CURRENT_LIST_DIR}/..)
+	
+add_subdirectory ("${CMAKE_CURRENT_LIST_DIR}/../3rdParty/cmake-git-version-tracking" ${CMAKE_CURRENT_BINARY_DIR}/cmake-git-version-tracking)
 
 	   
 option (BUILD_PBD
        "Build PBD volumetric simulation modules." OFF)
-
+	   
+option (BUILD_Collision_Detector
+       "Build Collision Detectors Modules." ON)
 	   
 
 set(THIRD_PARTY_INCLUDE_DIRS
         ${EIGEN3_INCLUDE_DIR}
 		${MESHFRAME_INCLUDE_DIR}
-		${EMBREE_INCLUDE_DIRS}
 		${CU_MATRIX_INCLUDE_DIR}
-		"../3rdParty/oneTBB/include"
+		"${CMAKE_CURRENT_LIST_DIR}/../3rdParty/oneTBB/include"
         )
+		
+if (BUILD_Collision_Detector)
+	message("GAIA: Build with Collision Detectors!\n")
+	SET (THIRD_PARTY_INCLUDE_DIRS 
+		${THIRD_PARTY_INCLUDE_DIRS}
+		${EMBREE_INCLUDE_DIRS}
+	)
+endif (BUILD_Collision_Detector)
 
 
 set(GAIA_INCLUDE_DIRS
-	"../Modules"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules"
 	${THIRD_PARTY_INCLUDE_DIRS}
 	)
 	
-
 file(GLOB GAIA_PBD_SRCS
-	"../Modules/PBD/*.h"
-	"../Modules/PBD/*.cpp"
-	"../Modules/PBD/*.cu"
-	"../Modules/PBD/*.cuh"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/PBD/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/PBD/*.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/PBD/*.cu"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/PBD/*.cuh"
+)
+
+file (GLOB GAIA_COLLISION_SRCS
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/*.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/BVH/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/BVH/*.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/BVH/*.cu"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/SpatialQuery/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/SpatialQuery/*.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/SpatialQuery/*.cu"
 )
 
 file(GLOB GAIA_SRCS
-	"../Modules/TetMesh/**.h"
-	"../Modules/TetMesh/**.cpp"
-	"../Modules/TriMesh/**.h"
-	"../Modules/TriMesh/**.cpp"
-	"../Modules/Parallelization/*.h"
-	"../Modules/Parallelization/*.cpp"
-	"../Modules/Parameters/*.h"
-	"../Modules/Parameters/*.cpp"
-	"../Modules/Parser/*.h"
-	"../Modules/Parser/*.cpp"
-	"../Modules/VersionTracker/*.h"
-	"../Modules/VersionTracker/*.cpp"
-	"../Modules/IO/*.h"
-	"../Modules/IO/*.cpp"
-	"../Modules/CollisionDetector/*.h"
-	"../Modules/CollisionDetector/*.cpp"
-	"../Modules/SpatialQuery/*.h"
-	"../Modules/SpatialQuery/*.cpp"
-	"../Modules/Framework/*.h"
-	"../Modules/Framework/*.cpp"
-	"../Modules/common/math/constants.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TetMesh/**.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TetMesh/**.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TriMesh/**.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TriMesh/**.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Parallelization/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Parallelization/*.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Parameters/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Parameters/*.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Parser/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Parser/*.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/VersionTracker/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/VersionTracker/*.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/IO/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/IO/*.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Framework/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Framework/*.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/common/math/constants.cpp"
 
 	${MESHFRAME_SOURCE_CPP_UTILITY}
 )
 
-list(REMOVE_ITEM GAIA_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/../Modules/CollisionDetector/TetMeshContactDetector.h" "${CMAKE_CURRENT_SOURCE_DIR}/../Modules/CollisionDetector/TetMeshContactDetector.cpp")
-
+list(REMOVE_ITEM GAIA_COLLISION_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/TetMeshContactDetector.h" "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/TetMeshContactDetector.cpp")
 
 if (BUILD_PBD)
 message("GAIA: Build with PBD volumetric object simulation components!\n")
@@ -76,6 +90,16 @@ SET (GAIA_SRCS
 	${GAIA_PBD_SRCS}
 )
 endif (BUILD_PBD)
+
+
+if (BUILD_Collision_Detector)
+message("GAIA: Build with Collision Detector components!\n")
+SET (GAIA_SRCS 
+	${GAIA_SRCS}
+	${GAIA_COLLISION_SRCS}
+)
+endif (BUILD_Collision_Detector)
+
 
 set (GAIA_LIBRARY
 	${CU_MATRIX_LIBS}
