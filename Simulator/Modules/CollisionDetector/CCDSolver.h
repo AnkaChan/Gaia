@@ -1,9 +1,9 @@
 ﻿#ifndef __CCD_SOLVER__
 #define __CCD_SOLVER__
 
-#include "../CyCodeBase/cyCore.h"
-#include "../CyCodeBase/cyVector.h"
-#include "../CyCodeBase/cyPolynomial.h"
+#include "../../3rdParty/CyCodeBase/cyCore.h"
+#include "../../3rdParty/CyCodeBase/cyVector.h"
+#include "../../3rdParty/CyCodeBase/cyPolynomial.h"
 #include <cmath>
 
 #if defined(__INTEL_COMPILER) || defined(__clang__) || defined(__GNUC__)
