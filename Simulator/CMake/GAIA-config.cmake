@@ -12,6 +12,9 @@ set (GAIA_ROOT ${CMAKE_CURRENT_LIST_DIR}/..)
 	
 add_subdirectory ("${CMAKE_CURRENT_LIST_DIR}/../3rdParty/cmake-git-version-tracking" ${CMAKE_CURRENT_BINARY_DIR}/cmake-git-version-tracking)
 
+
+option (BUILD_VBD
+       "Build VBD modules." ON)
 	   
 option (BUILD_PBD
        "Build PBD volumetric simulation modules." OFF)
@@ -48,6 +51,14 @@ file(GLOB GAIA_PBD_SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/PBD/*.cuh"
 )
 
+file(GLOB GAIA_VBD_SRCS
+	"../Modules/VBD/*.h"
+	"../Modules/VBD/*.cpp"
+	"../Modules/VBD/*.cu"
+	"../Modules/VBD/*.cuh"
+)
+
+
 file (GLOB GAIA_COLLISION_SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/*.h"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/*.cpp"
@@ -82,6 +93,14 @@ file(GLOB GAIA_SRCS
 )
 
 list(REMOVE_ITEM GAIA_COLLISION_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/TetMeshContactDetector.h" "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/TetMeshContactDetector.cpp")
+
+if (BUILD_VBD)
+message("GAIA: Build with VBD components!\n")
+SET (GAIA_SRCS 
+	${GAIA_SRCS}
+	${GAIA_VBD_SRCS}
+)
+endif (BUILD_VBD)
 
 if (BUILD_PBD)
 message("GAIA: Build with PBD volumetric object simulation components!\n")
