@@ -49,7 +49,7 @@ namespace GAIA {
 	struct TriMeshTopology
 	{
 
-		void initialize(TriMeshFEM* pTriMesh, TriMeshParams* pObjectParams);
+		virtual void initialize(TriMeshFEM* pTriMesh, TriMeshParams* pObjectParams);
 
 		typedef std::shared_ptr<TriMeshTopology> SharedPtr;
 		typedef TriMeshTopology* Ptr;
@@ -75,9 +75,19 @@ namespace GAIA {
 		VecDynamicI vertexNeighborEdges;
 		// size is numVertices(), range[0, 1], stores the vertex's order in the face's vertex list
 		VecDynamicI vertexNeighborEdges_vertexOrder;
-		// size is 2 x numVertices(), (2xiV)-th element stores where the neighbor edges of the info starts at  faces3NeighborEdges
+		// size is 2 x numVertices(), (2xiV)-th element stores where the neighbor edges of the info starts at vertexNeighborEdges
 		// and (2xiV+1)-th element stores how many neighbor faces the iV-th vertex has
 		VecDynamicI vertexNeighborEdges_infos;
+
+		// all vertice's relavant bending are stacked together
+		// each bending energy relates to 4 vertices, as opposite to 2 vertices on the edge
+		VecDynamicI vertexRelevantBendings;
+		// size is numVertices(), range [0,3], stores the vertex's order in the bending energy, the number corresponds to
+		// 0: eV1, 1: eV2, 2: eV12Next, 3: eV21Next
+		VecDynamicI vertexRelevantBendings_vertexOrder;
+		// size is 2 x numVertices(), (2xiV)-th element stores where the relavant bending energy of the info starts at vertexRelavantBendings
+		// and (2xiV+1)-th element stores how many neighbor faces the iV-th vertex has
+		VecDynamicI vertexRelevantBendings_infos;
 
 		// all vertice's neighbor surface vertices are stacked together
 		VecDynamicI vertexNeighborVertices;
@@ -93,6 +103,9 @@ namespace GAIA {
 
 		void initialize(TriMeshParams::SharedPtr inObjectParams, bool precomputeToplogy);
 		void computeTopology();
+		// if you need to use customized topology information, inherit TriMeshTopology create your own topology class
+		// then override this function to return the pointer to your own topology class
+		virtual TriMeshTopology::SharedPtr createTopology();
 
 		void loadObj(std::string objFile);
 		void saveAsPLY(std::string objFile);
@@ -130,6 +143,11 @@ namespace GAIA {
 		size_t numNeiEdges(IdType iV) const;
 		IdType getVertexIthNeiEdge(IdType iV, IdType neiId) const;
 		IdType getVertexIthNeiEdgeOrder(IdType iV, IdType neiId) const;
+
+		size_t numRelevantBendings(IdType iV) const;
+		IdType getVertexIthRelevantBending(IdType iV, IdType bendingId) const;
+		IdType getVertexIthRelevantBendingOrder(IdType iV, IdType bendingId) const;
+
 
 		std::vector<std::vector<int32_t>>& verticesColoringCategories() { return pTopology->verticesColoringCategories; }
 		std::vector<int32_t> globalColors{};
@@ -250,6 +268,21 @@ namespace GAIA {
 	inline IdType TriMeshFEM::getVertexIthNeiEdgeOrder(IdType iV, IdType neiId) const
 	{
 		return pTopology->vertexNeighborEdges_vertexOrder(pTopology->vertexNeighborEdges_infos(iV * 2) + neiId);
+	}
+
+	inline size_t TriMeshFEM::numRelevantBendings(IdType iV) const
+	{
+		return pTopology->vertexRelevantBendings_infos(iV*2+1);
+	}
+
+	inline IdType TriMeshFEM::getVertexIthRelevantBendingOrder(IdType iV, IdType bendingId) const
+	{
+		return pTopology->vertexRelevantBendings_vertexOrder(pTopology->vertexRelevantBendings_infos(iV * 2));
+	}
+
+	inline IdType TriMeshFEM::getVertexIthRelevantBending(IdType iV, IdType bendingId) const
+	{
+		return pTopology->vertexRelevantBendings(pTopology->vertexRelevantBendings_infos(iV * 2) + bendingId);
 	}
 
 	inline int TriMeshFEM::tearMesh(IdType v1, IdType v2)

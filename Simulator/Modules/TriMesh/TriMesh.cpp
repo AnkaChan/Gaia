@@ -93,7 +93,7 @@ void GAIA::TriMeshFEM::computeTopology()
 		auto pTopoItem = topologies.find(modelPath);
 		if (pTopoItem == topologies.end())
 		{
-			pTopology = std::make_shared<TriMeshTopology>();
+			pTopology = createTopology();
 			topologies.insert({ modelPath, pTopology });
 			alreadyComputed = false;
 		}
@@ -214,6 +214,11 @@ void GAIA::TriMeshFEM::computeRestposeTrianglesFrom2D()
 	}
 	vertexInvMass = vertexMass.cwiseInverse();
 
+}
+
+TriMeshTopology::SharedPtr GAIA::TriMeshFEM::createTopology()
+{
+	return std::make_shared<TriMeshTopology>();
 }
 
 void GAIA::TriMeshFEM::loadObj(std::string objFile)
@@ -507,9 +512,13 @@ void GAIA::TriMeshTopology::initialize(TriMeshFEM* pTriMesh, TriMeshParams* pObj
 	vertexNeighborVertices_infos.resize(pTriMesh->numVertices() * 2);
 	vertexNeighborEdges_infos.resize(pTriMesh->numVertices() * 2);
 
+	std::vector<IdType> vertexRelevantBendings_;
+	std::vector<IdType> vertexRelevantBendings_vertexOrder_;
+	vertexRelevantBendings_infos.resize(pTriMesh->numVertices() * 2);
+
 	for (MF::TriMesh::TriMeshStaticF::VPtr pV : MF::TriMesh::TriMeshStaticIteratorF::MVIterator(pMeshMF.get()))
 	{
-		size_t numNeiVerteices = 0, numNeiFaces = 0, numNeiEdges = 0;
+		size_t numNeiVerteices = 0, numNeiFaces = 0, numNeiEdges = 0, numRelevantBendings = 0;
 		vertexNeighborVertices_infos(iV * 2) = vertexNeighborVertices_.size();
 		for (MF::TriMesh::TriMeshStaticF::VPtr pVNei : MF::TriMesh::TriMeshStaticIteratorF::VVIterator(pV)) {
 			++numNeiVerteices;
@@ -536,6 +545,7 @@ void GAIA::TriMeshTopology::initialize(TriMeshFEM* pTriMesh, TriMeshParams* pObj
 		vertexNeighborFaces_infos(iV * 2 + 1) = numNeiFaces;
 
 		vertexNeighborEdges_infos(iV * 2) = vertexNeighborEdges_.size();
+		vertexRelevantBendings_infos(iV * 2) = vertexRelevantBendings_.size();
 		for (MF::TriMesh::TriMeshStaticF::EPtr pNeiE : MF::TriMesh::TriMeshStaticIteratorF::VEIterator(pV))
 		{
 			numNeiEdges++;
@@ -549,8 +559,63 @@ void GAIA::TriMeshTopology::initialize(TriMeshFEM* pTriMesh, TriMeshParams* pObj
 			{
 				vertexNeighborEdges_vertexOrder_.push_back(1);
 			}
+
+			if (!pNeiE->boundary())
+			{
+				numRelevantBendings++;
+				// relevant bendings where vertex is on the edge
+				vertexRelevantBendings_.push_back(pNeiE->id());
+
+				if (edgeInfos[pNeiE->id()].eV1 == pV->id())
+				{
+					vertexRelevantBendings_vertexOrder_.push_back(0);
+				}
+				else
+				{
+					vertexRelevantBendings_vertexOrder_.push_back(1);
+				}
+			}
 		}
+		// relevant bendings where vertex is not on the edge, but cross it
+		for (MF::TriMesh::TriMeshStaticF::FPtr pNeiF : MF::TriMesh::TriMeshStaticIteratorF::VFIterator(pV))
+		{
+			bool crossEdgeFound = false;
+			for (MF::TriMesh::TriMeshStaticF::EPtr pFE : MF::TriMesh::TriMeshStaticIteratorF::FEIterator(pNeiF))
+			{
+				if (pFE->boundary())
+				{
+					crossEdgeFound = true;
+					continue;
+				}
+				// find the edge that cross vertex
+				// order of edge is corresponds to its 1st halfedge
+				// eInfo.eV1 = pE->halfedge()->source()->id();
+				// eInfo.eV2 = pE->halfedge()->target()->id();
+				MF::TriMesh::TriMeshStaticF::HEPtr pHE = MF::TriMesh::TriMeshStaticF::edgeHalfedge(pFE);
+
+				if ( pHE->source()->id() != pV->id() && pHE->target()->id() != pV->id())
+				{
+					crossEdgeFound = true;
+					numRelevantBendings++;
+					vertexRelevantBendings_.push_back(pFE->id());
+					if (pHE->face() == pNeiF)
+						// eV12Next
+					{
+						vertexRelevantBendings_vertexOrder_.push_back(2);
+					}
+					else
+						// eV21Next
+					{
+						vertexRelevantBendings_vertexOrder_.push_back(3);
+					}
+					break;
+				}
+			}
+			assert(crossEdgeFound);
+		}
+
 		vertexNeighborEdges_infos(iV * 2 + 1) = numNeiEdges;
+		vertexRelevantBendings_infos(iV * 2 + 1) = numRelevantBendings;
 
 		iV++;
 	}
@@ -563,6 +628,13 @@ void GAIA::TriMeshTopology::initialize(TriMeshFEM* pTriMesh, TriMeshParams* pObj
 	vertexNeighborVertices = VecDynamicI::Map(&vertexNeighborVertices_[0], vertexNeighborVertices_.size());
 	vertexNeighborEdges = VecDynamicI::Map(&vertexNeighborEdges_[0], vertexNeighborEdges_.size());
 	vertexNeighborEdges_vertexOrder = VecDynamicI::Map(&vertexNeighborEdges_vertexOrder_[0], vertexNeighborEdges_vertexOrder_.size());
+
+	vertexRelevantBendings = VecDynamicI::Map(&vertexRelevantBendings_[0], vertexRelevantBendings_.size());
+	vertexRelevantBendings_vertexOrder = VecDynamicI::Map(&vertexRelevantBendings_vertexOrder_[0], vertexRelevantBendings_vertexOrder_.size());
+
+	//std::cout << "vertexRelevantBendings:\n" << vertexRelevantBendings;
+	//std::cout << "vertexRelevantBendings_infos:\n" << vertexRelevantBendings_infos;
+	//std::cout << "vertexRelevantBendings_vertexOrder:\n" << vertexRelevantBendings_vertexOrder;
 
 	// load vertices coloring information
 	if (pObjectParams->verticesColoringCategoriesPath != "")
