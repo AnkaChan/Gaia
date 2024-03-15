@@ -5,8 +5,6 @@
 #include "VBD_BaseMaterial.h"
 #include <memory>
 
-#include "../ImplicitEuler/HessianAssebler.h"
-
 #include "../TetMesh/TetMeshFEMShared.h"
 #include "VBD_NeoHookeanGPU.h"
 
