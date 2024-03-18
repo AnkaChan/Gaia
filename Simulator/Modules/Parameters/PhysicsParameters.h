@@ -83,7 +83,8 @@ namespace GAIA {
 		int ccdBVHRebuildSteps = 7;
 
 		// input/ouptut
-
+		// master switch
+		bool saveOutputs = true;
 		bool saveAllModelsTogether = true;
 		// output the vertex coordinates (pos only)
 		std::string outputExt = "ply";
@@ -96,7 +97,6 @@ namespace GAIA {
 		bool saveSimulationParameters = true;
 		int outputRecoveryStateStep = 10;
 		bool outputRecoveryStateBinary = true;
-
 
 		// rendering
 		std::string shaderFolderPath;
@@ -155,6 +155,8 @@ namespace GAIA {
 			EXTRACT_FROM_JSON(physicsParam, ccdBVHRebuildSteps);
 
 			EXTRACT_FROM_JSON(physicsParam, checkAndUpdateWorldBounds);
+
+			EXTRACT_FROM_JSON(physicsParam, saveOutputs);
 			EXTRACT_FROM_JSON(physicsParam, saveAllModelsTogether);
 			EXTRACT_FROM_JSON(physicsParam, outputExt);
 			EXTRACT_FROM_JSON(physicsParam, shaderFolderPath);
@@ -217,8 +219,9 @@ namespace GAIA {
 			PUT_TO_JSON(physicsParam, ccdBVHRebuildSteps);
 
 			PUT_TO_JSON(physicsParam, evaluateConvergence);
-
 			PUT_TO_JSON(physicsParam, checkAndUpdateWorldBounds);
+
+			PUT_TO_JSON(physicsParam, saveOutputs);
 			PUT_TO_JSON(physicsParam, saveAllModelsTogether);
 			PUT_TO_JSON(physicsParam, outputExt);
 			PUT_TO_JSON(physicsParam, shaderFolderPath);

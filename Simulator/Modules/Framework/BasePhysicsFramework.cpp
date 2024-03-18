@@ -13,6 +13,8 @@
 
 #include "../Parallelization/CPUParallelization.h"
 
+#include "../Viewer/Viewer.h"
+
 using namespace GAIA;
 
 size_t GAIA::ObjectParamsList::size()
@@ -192,6 +194,18 @@ void GAIA::BasePhysicFramework::initialize()
 	}
 
 	disableModelsLatterToAppear();
+
+	if (pViewerParams->enableViewer)
+	{
+		initializeViewer();
+	}
+}
+
+void GAIA::BasePhysicFramework::initializeViewer()
+{
+	pViewer = std::make_shared<Viewer>(pViewerParams);
+	pViewer->init();
+	pViewer->registerTetmeshes(basetetMeshes);
 }
 
 void GAIA::BasePhysicFramework::disableModelsLatterToAppear()
@@ -298,9 +312,18 @@ void GAIA::BasePhysicFramework::simulate()
 
 		++frameId;
 
-		TICK(timeCsmpSaveOutputs);
-		writeOutputs(outputFolder, frameId + 1);
-		TOCK_STRUCT((*baseTimeStatistics), timeCsmpSaveOutputs);
+		if (basePhysicsParams->saveOutputs)
+		{
+			TICK(timeCsmpSaveOutputs);
+			writeOutputs(outputFolder, frameId + 1);
+			TOCK_STRUCT((*baseTimeStatistics), timeCsmpSaveOutputs);
+		}
+
+		if (pViewerParams->enableViewer)
+		{
+			pViewer->update();
+			pViewer->frameTick();
+		}
 
 		TOCK_STRUCT((*baseTimeStatistics), timeCsmpFrame);
 
@@ -445,7 +468,7 @@ bool GAIA::BasePhysicFramework::writeSimulationParameters(nlohmann::json& outPhy
 {
 	basePhysicsParams->toJson(outPhysicsParams["PhysicsParams"]);
 	baseCollisionParams->toJson(outPhysicsParams["CollisionParams"]);
-
+	pViewerParams->toJson(physicsJsonParams["ViewerParams"]);
 	return true;
 
 }
@@ -539,4 +562,6 @@ void GAIA::BasePhysicFramework::parseRunningParameters(nlohmann::json& inModelPa
 
 	baseTimeStatistics = createRunningTimeStatistics();
 
+	pViewerParams = std::make_shared<ViewerParams>();
+	pViewerParams->fromJson(physicsJsonParams["ViewerParams"]);
 }

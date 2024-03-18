@@ -5,6 +5,7 @@
 #include "../Types/Types.h"
 #include "../Materials/Materials.h"
 #include "../TetMesh/TetMeshFEM.h"
+#include "../Viewer/Viewer.h"
 
 #include "../Utility/Logger.h"
 #include <MeshFrame/Utility/Str.h>
@@ -46,9 +47,12 @@ namespace GAIA {
 		std::shared_ptr<BasePhysicsParams> basePhysicsParams;
 		std::shared_ptr<CollisionDetectionParamters> baseCollisionParams;
 		std::shared_ptr<RunningTimeStatistics> baseTimeStatistics;
+		std::shared_ptr<ViewerParams> pViewerParams;
 
 		std::shared_ptr<DiscreteCollisionDetector> pDCD;
 		std::shared_ptr<ContinuousCollisionDetector> pCCD;
+
+		std::shared_ptr<Viewer> pViewer;
 
 		void updateWorldBox();
 		virtual void loadRunningparameters(std::string inModelInputFile, std::string inParameterFile, std::string outFolder);
@@ -56,6 +60,7 @@ namespace GAIA {
 
 		virtual void timeStepEqualize();
 		virtual void initialize();
+		virtual void initializeViewer();
 		virtual void initializeCollisionDetector();
 		virtual void disableModelsLatterToAppear();
 		virtual void enableModels();

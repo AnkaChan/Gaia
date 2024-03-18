@@ -7,7 +7,6 @@ find_package(Eigen3 REQUIRED)
 find_package(MeshFrame2 REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../3rdParty/MeshFrame2/MeshFrame/cmake)
 find_package(embree 3.0 REQUIRED)
 find_package(CuMatrix REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../3rdParty/CuMatrix/cmake)
-
 set (GAIA_ROOT ${CMAKE_CURRENT_LIST_DIR}/..)
 	
 add_subdirectory ("${CMAKE_CURRENT_LIST_DIR}/../3rdParty/cmake-git-version-tracking" ${CMAKE_CURRENT_BINARY_DIR}/cmake-git-version-tracking)
@@ -52,10 +51,10 @@ file(GLOB GAIA_PBD_SRCS
 )
 
 file(GLOB GAIA_VBD_SRCS
-	"../Modules/VBD/*.h"
-	"../Modules/VBD/*.cpp"
-	"../Modules/VBD/*.cu"
-	"../Modules/VBD/*.cuh"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/VBD/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/VBD/*.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/VBD/*.cu"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/VBD/*.cuh"
 )
 
 

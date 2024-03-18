@@ -167,6 +167,10 @@ struct InputHandlerEBD {
 			physics.physicsParams().shaderFolderPath = MF::STR::replace(physics.physicsParams().shaderFolderPath, "${REPO_ROOT}",
 				configs.repoRoot);
 
+			if (configs.gui)
+			{
+				physics.pViewerParams->enableViewer = true;
+			}
 		}
 	}
 };

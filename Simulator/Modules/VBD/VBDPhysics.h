@@ -20,7 +20,7 @@
 #include <Eigen/PardisoSupport>
 #endif
 
-#define TURN_ON_SINGLE_THREAD_DEBUG
+//#define TURN_ON_SINGLE_THREAD_DEBUG
 #include "../Parallelization/CPUParallelization.h"
 
 

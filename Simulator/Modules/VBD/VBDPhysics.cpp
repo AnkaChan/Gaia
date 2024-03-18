@@ -209,7 +209,6 @@ void GAIA::VBDPhysics::initialize()
 {
 	BasePhysicFramework::initialize();
 
-
 	for (size_t iMesh = 0; iMesh < basetetMeshes.size(); iMesh++)
 	{
 		tMeshes.push_back(getTetMeshSharedPtrAs<VBDBaseTetMesh>(iMesh));
