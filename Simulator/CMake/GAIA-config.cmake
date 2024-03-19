@@ -18,9 +18,15 @@ option (BUILD_VBD
 option (BUILD_PBD
        "Build PBD volumetric simulation modules." OFF)
 	   
+option (BUILD_GUI
+       "Build Gui." ON)
+	   
 option (BUILD_Collision_Detector
        "Build Collision Detectors Modules." ON)
 	   
+set(GAIA_DEFINITIONS)
+
+
 
 set(THIRD_PARTY_INCLUDE_DIRS
         ${EIGEN3_INCLUDE_DIR}
@@ -29,6 +35,19 @@ set(THIRD_PARTY_INCLUDE_DIRS
 		"${CMAKE_CURRENT_LIST_DIR}/../3rdParty/oneTBB/include"
         )
 		
+if (BUILD_GUI)
+	add_subdirectory ("${CMAKE_CURRENT_LIST_DIR}/../3rdParty/polyscope" ${CMAKE_CURRENT_BINARY_DIR}/polyscope)
+	# set(THIRD_PARTY_INCLUDE_DIRS
+		# ${THIRD_PARTY_INCLUDE_DIRS}
+		# "${CMAKE_CURRENT_LIST_DIR}/../3rdParty/polyscope/include"
+	# )
+else()
+	set(GAIA_DEFINITIONS
+		${GAIA_DEFINITIONS}
+		GAIA_NO_GUI
+	)
+endif (BUILD_GUI)
+
 if (BUILD_Collision_Detector)
 	message("GAIA: Build with Collision Detectors!\n")
 	SET (THIRD_PARTY_INCLUDE_DIRS 
@@ -87,7 +106,7 @@ file(GLOB GAIA_SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Framework/*.h"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Framework/*.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/common/math/constants.cpp"
-
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Viewer/*.cpp"
 	${MESHFRAME_SOURCE_CPP_UTILITY}
 )
 
@@ -125,3 +144,10 @@ set (GAIA_LIBRARY
 	${embree_DIR}/../../tbb12.lib
 	cmake_git_version_tracking
 	)
+
+if (BUILD_GUI)
+	set (GAIA_LIBRARY
+		${GAIA_LIBRARY}
+		polyscope
+	)
+endif(BUILD_GUI)

@@ -11,8 +11,6 @@ set (CMAKE_CUDA_STANDARD 11)
 set(BUILD_EBD OFF)
 set(BUILD_VBD ON)
 set(BUILD_PBD OFF)
-set(BUILD_APAP_Cloth OFF)
-set(BUILD_VBD_Cloth OFF)
 include(../cmake/GAIA-config.cmake)
 
 include_directories(
@@ -43,7 +41,7 @@ target_link_libraries(VBDDynamics ${GAIA_LIBRARY})
 
 option(USE_MKL "whether to use intel mkl to solve linear systems, if not use eigen" OFF)
 option(USE_DOUBLE "whether to use double to solve linear system" OFF)
-option(PSD_FILTERING "whether to use psd projection" ON)
+option(PSD_FILTERING "whether to use psd projection" OFF)
 
 if(USE_MKL)
 	set(MKL_INTERFACE "lp64" CACHE STRING "" FORCE)
@@ -54,6 +52,8 @@ if(USE_MKL)
 	target_link_libraries(VBDDynamics MKL::MKL)
 	target_include_directories(VBDDynamics PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>)
 endif()
+
+target_compile_definitions(VBDDynamics PUBLIC ${GAIA_DEFINITIONS})
 
 if(USE_DOUBLE)
 	target_compile_definitions(VBDDynamics PUBLIC USE_DOUBLE)

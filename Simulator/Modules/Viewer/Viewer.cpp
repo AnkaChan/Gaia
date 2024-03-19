@@ -179,6 +179,8 @@ void GAIA::Viewer::init()
 {
 	polyscope::options::prepareImGuiFontsCallback = pImpl->setFontcallBack;
 	polyscope::options::groundPlaneEnabled = pViewerParams->enableGround;
+	polyscope::options::programName = "Gaia Viewer";
+	polyscope::options::printPrefix = "[Gaia Viewer]";
 	polyscope::init();
 
 }
