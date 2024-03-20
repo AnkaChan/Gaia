@@ -84,7 +84,7 @@ struct InputHandlerPBDCloth {
 };
 
 template<typename PhysicsFramework>
-struct InputHandlerAPAPCloth {
+struct InputHandlerVBDCloth {
 	template<typename PhysicsCommandParser>
 	void handleInput(std::string& inModelInputFile, std::string& inParameterFile, std::string& outFolder,
 		PhysicsCommandParser& configs, PhysicsFramework& physics) {
@@ -118,6 +118,10 @@ struct InputHandlerAPAPCloth {
 		physics.physicsParams().shaderFolderPath = MF::STR::replace(physics.physicsParams().shaderFolderPath, "${REPO_ROOT}",
 			configs.repoRoot);
 
+		if (configs.gui)
+		{
+			physics.pViewerParams->enableViewer = true;
+		}
 	}
 };
 

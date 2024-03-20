@@ -3,6 +3,7 @@
 #include "BaseClothSimPhsicsFramework.h"
 #include "../CollisionDetector/CollisionDetertionParameters.h"
 #include "../IO/FileIO.h"
+#include "../SpatialQuery/ColiiderTriMeshSequence.h"
 
 using namespace GAIA;
 
@@ -11,6 +12,11 @@ TetMeshFEM::SharedPtr BaseClothPhsicsFramework::initializeMaterial(ObjectParams:
 	std::cout << "Error! initializeMaterial for TetMeshFEM shouldn't be called for cloth simulation!\n";
 	std::exit(-1);
 	return TetMeshFEM::SharedPtr();
+}
+
+void GAIA::BaseClothPhsicsFramework::parseRunningParameters()
+{
+	BasePhysicFramework::parseRunningParameters();
 }
 
 void BaseClothPhsicsFramework::initialize()
@@ -46,6 +52,53 @@ void BaseClothPhsicsFramework::initialize()
 		<< "\n----------------------------------------------------" << std::endl;
 
 	// initializeCollisionDetector();
+}
+
+void GAIA::BaseClothPhsicsFramework::initializeCollider()
+{
+	pDynamicColliderParameter = std::make_shared<DynamicColliderParameters>();
+	colliderJsonParams = physicsJsonParams["ColliderParams"];
+	pDynamicColliderParameter->fromJson(colliderJsonParams);
+
+	pDynamicCollider = std::make_shared<DynamicCollider>(pDynamicColliderParameter);
+	
+	nlohmann::json colliderMeshsJson = colliderJsonParams["ColliderMeshes"];
+	for (size_t i = 0; i < colliderMeshsJson.size(); i++)
+	{
+		colliderMeshes.push_back(createColliderMesh(colliderMeshsJson[i]));
+	}
+
+	pDynamicCollider->initialize(colliderMeshes);
+}
+
+
+
+ColliderTrimeshBase::SharedPtr GAIA::BaseClothPhsicsFramework::createColliderMesh(nlohmann::json& colliderMeshJsonParams)
+{
+	ColliderTrimeshBase::SharedPtr pColliderMesh = nullptr;
+	ColliderTrimeshBaseParams::SharedPtr pColliderMeshParams = nullptr;
+
+	if (colliderMeshJsonParams["colliderType"] == "TriMeshSequence")
+	{
+		pColliderMeshParams = std::make_shared<ColliderTrimeshSequenceParams>();
+		pColliderMeshParams->fromJson(colliderMeshJsonParams);
+		pColliderMesh = std::make_shared<ColliderTrimeshSequence>();
+	}
+	else 
+	{
+		std::cerr << "Error! Unrecognized collider type: " << pColliderMeshParams->colliderType << std::endl;
+		exit(-1);
+	}
+
+	pColliderMesh->initialize(pColliderMeshParams);
+	return pColliderMesh;
+}
+
+void GAIA::BaseClothPhsicsFramework::initializeViewer()
+{
+	BasePhysicFramework::initializeViewer();
+	pViewer->registerTrimeshes(baseTriMeshes);
+
 }
 
 void BaseClothPhsicsFramework::writeOutputs(std::string outFolder, int frameId)

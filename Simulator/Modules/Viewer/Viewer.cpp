@@ -63,10 +63,20 @@ namespace GAIA {
 
 	struct PolyScopeSurfaceMesh
 	{
+		PolyScopeSurfaceMesh()
+			: updated(false)
+		{}
+		PolyScopeSurfaceMesh(const PolyScopeSurfaceMesh& other) 
+			: updated(true)
+			, meshType(other.meshType)
+			, meshId(other.meshId)
+			, pPolyScopeSurfaceMesh(other.pPolyScopeSurfaceMesh)
+			, meshName(other.meshName)
+		{}
 		int meshType = -1; // 0: tetmesh, 1: triMesh
 		int meshId = -1;
 		polyscope::SurfaceMesh* pPolyScopeSurfaceMesh = nullptr;
-		bool updated = true;
+		std::atomic<bool> updated ;
 		std::string meshName;
 	};
 
@@ -78,6 +88,14 @@ namespace GAIA {
 		void update();
 		void registerTrimeshes(const std::vector<TriMeshFEM::SharedPtr>& inTrimeshes);
 		void registerTetmeshes(const std::vector<TetMeshFEM::SharedPtr>& inTetmeshes);
+		void setAllMeshesToUpdated()
+		{
+			for (size_t iPSMesh = 0; iPSMesh < polyscopeMeshes.size(); iPSMesh++)
+			{
+				PolyScopeSurfaceMesh& polyScopeSurfaceMesh = polyscopeMeshes[iPSMesh];
+				polyScopeSurfaceMesh.updated = true;
+			}
+		}
 
 		std::vector<TriMeshFEM::SharedPtr> trimeshes;
 		std::vector<TetMeshFEM::SharedPtr> tetmeshes;
@@ -92,27 +110,27 @@ namespace GAIA {
 		for (size_t iPSMesh = 0; iPSMesh < polyscopeMeshes.size(); iPSMesh++)
 		{
 			PolyScopeSurfaceMesh& polyScopeSurfaceMesh = polyscopeMeshes[iPSMesh];
-			if (!polyScopeSurfaceMesh.updated)
+			if (polyScopeSurfaceMesh.updated)
 			{
-				continue;
-			}
-			GAIA::TriMeshFEM::SharedPtr pTriMesh = nullptr;
-			GAIA::TetMeshFEM::SharedPtr pTetMesh = nullptr;
+				polyScopeSurfaceMesh.updated = false;
+				GAIA::TriMeshFEM::SharedPtr pTriMesh = nullptr;
+				GAIA::TetMeshFEM::SharedPtr pTetMesh = nullptr;
 
-			switch (polyScopeSurfaceMesh.meshType)
-			{
-			case 0:
-				pTetMesh = tetmeshes[polyScopeSurfaceMesh.meshId];
-				polyScopeSurfaceMesh.pPolyScopeSurfaceMesh->updateVertexPositions(pTetMesh->positions().transpose());
-				break;
+				switch (polyScopeSurfaceMesh.meshType)
+				{
+				case 0:
+					pTetMesh = tetmeshes[polyScopeSurfaceMesh.meshId];
+					polyScopeSurfaceMesh.pPolyScopeSurfaceMesh->updateVertexPositions(pTetMesh->positions().transpose());
+					break;
 
-			case 1:
-				pTriMesh = trimeshes[polyScopeSurfaceMesh.meshId];
-				polyScopeSurfaceMesh.pPolyScopeSurfaceMesh->updateVertexPositions(pTriMesh->positions().transpose());
-				break;
+				case 1:
+					pTriMesh = trimeshes[polyScopeSurfaceMesh.meshId];
+					polyScopeSurfaceMesh.pPolyScopeSurfaceMesh->updateVertexPositions(pTriMesh->positions().transpose());
+					break;
 
-			default:
-				break;
+				default:
+					break;
+				}
 			}
 		}
 	}
@@ -182,11 +200,23 @@ void GAIA::Viewer::init()
 	polyscope::options::programName = "Gaia Viewer";
 	polyscope::options::printPrefix = "[Gaia Viewer]";
 	polyscope::init();
-
+	polyscope::state::userCallback = [this]() {
+		//std::cout << "Viewer callback invoked." << std::endl;
+		this->update(); 
+		};
 }
 void GAIA::Viewer::update()
 {
 	pImpl->update();
+}
+void GAIA::Viewer::setAllMeshesToUpdated()
+{
+	pImpl->setAllMeshesToUpdated();
+}
+void GAIA::Viewer::show()
+{
+	std::cout << "Viewer starting." << std::endl;
+	polyscope::show();
 }
 void GAIA::Viewer::registerTrimeshes(const std::vector<TriMeshFEM::SharedPtr>& inTrimeshes)
 {
@@ -224,6 +254,14 @@ void GAIA::Viewer::registerTrimeshes(const std::vector<TriMeshFEM::SharedPtr>& i
 	GUINoCompliationError();
 }
 void GAIA::Viewer::registerTetmeshes(const std::vector<TetMeshFEM::SharedPtr>& inTetmeshes)
+{
+	GUINoCompliationError();
+}
+void GAIA::Viewer::setAllMeshesToUpdated()
+{
+	GUINoCompliationError();
+}
+void GAIA::Viewer::show()
 {
 	GUINoCompliationError();
 }

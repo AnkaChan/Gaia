@@ -298,44 +298,93 @@ void GAIA::BasePhysicFramework::simulate()
 
 	baseTimeStatistics->setToZero();
 
-	while (frameId < basePhysicsParams->numFrames) {
-		TICK(timeCsmpFrame);
-		debugOperation(DEBUG_LVL_INFO, [&]() {
-			std::cout
-				<< "----------------------------------------------------\n"
-				<< "Frame " << frameId + 1 << " begin.\n"
-				;
-			});
+	//std::thread visThread;
+	if (pViewerParams->enableViewer)
+	{
+		// viewer must run in the main thread, therefore we need to open a thread to do the compute
+		std::thread t([this]() {
+			while (frameId < basePhysicsParams->numFrames) {
+				TICK(timeCsmpFrame);
+				debugOperation(DEBUG_LVL_INFO, [&]() {
+					std::cout
+						<< "----------------------------------------------------\n"
+						<< "Frame " << frameId + 1 << " begin.\n"
+						;
+					});
 
-		enableModels();
-		runStep();
+				enableModels();
+				runStep();
 
-		++frameId;
+				++frameId;
 
-		if (basePhysicsParams->saveOutputs)
+				if (basePhysicsParams->saveOutputs)
+				{
+					TICK(timeCsmpSaveOutputs);
+					writeOutputs(outputFolder, frameId + 1);
+					TOCK_STRUCT((*baseTimeStatistics), timeCsmpSaveOutputs);
+				}
+
+				pViewer->setAllMeshesToUpdated();
+
+				TOCK_STRUCT((*baseTimeStatistics), timeCsmpFrame);
+
+				debugPrint(DEBUG_LVL_INFO, baseTimeStatistics->getString());
+				debugOperation(DEBUG_LVL_INFO, [&]() {
+					std::cout
+						<< "Frame " << frameId + 1 << " completed, Time consumption: " << baseTimeStatistics->timeCsmpFrame << "\n"
+						<< "----------------------------------------------------\n";
+					});
+
+				baseTimeStatistics->setToZero();
+			}
+		});
+		while (frameId < basePhysicsParams->numFrames)
 		{
-			TICK(timeCsmpSaveOutputs);
-			writeOutputs(outputFolder, frameId + 1);
-			TOCK_STRUCT((*baseTimeStatistics), timeCsmpSaveOutputs);
+			pViewer->show();
 		}
-
-		if (pViewerParams->enableViewer)
-		{
-			pViewer->update();
-			pViewer->frameTick();
-		}
-
-		TOCK_STRUCT((*baseTimeStatistics), timeCsmpFrame);
-
-		debugPrint(DEBUG_LVL_INFO, baseTimeStatistics->getString());
-		debugOperation(DEBUG_LVL_INFO, [&]() {
-			std::cout
-				<< "Frame " << frameId + 1 << " completed, Time consumption: " << baseTimeStatistics->timeCsmpFrame << "\n"
-				<< "----------------------------------------------------\n";
-			});
-
-		baseTimeStatistics->setToZero();
+		t.join();
 	}
+	else
+	{
+		while (frameId < basePhysicsParams->numFrames) {
+			TICK(timeCsmpFrame);
+			debugOperation(DEBUG_LVL_INFO, [&]() {
+				std::cout
+					<< "----------------------------------------------------\n"
+					<< "Frame " << frameId + 1 << " begin.\n"
+					;
+				});
+
+			enableModels();
+			runStep();
+
+			++frameId;
+
+			if (basePhysicsParams->saveOutputs)
+			{
+				TICK(timeCsmpSaveOutputs);
+				writeOutputs(outputFolder, frameId + 1);
+				TOCK_STRUCT((*baseTimeStatistics), timeCsmpSaveOutputs);
+			}
+
+			if (pViewerParams->enableViewer)
+			{
+				pViewer->setAllMeshesToUpdated();
+			}
+
+			TOCK_STRUCT((*baseTimeStatistics), timeCsmpFrame);
+
+			debugPrint(DEBUG_LVL_INFO, baseTimeStatistics->getString());
+			debugOperation(DEBUG_LVL_INFO, [&]() {
+				std::cout
+					<< "Frame " << frameId + 1 << " completed, Time consumption: " << baseTimeStatistics->timeCsmpFrame << "\n"
+					<< "----------------------------------------------------\n";
+				});
+
+			baseTimeStatistics->setToZero();
+		}
+	}
+	
 }
 
 std::string GAIA::BasePhysicFramework::getDebugFolder()
@@ -545,20 +594,19 @@ void BasePhysicFramework::loadRunningparameters(std::string inModelInputFile, st
 	MF::loadJson(inModelInputFile, modelJsonParams);
 	MF::loadJson(inParameterFile, physicsJsonParams);
 
-	parseRunningParameters(modelJsonParams, physicsJsonParams);
+	parseRunningParameters();
 
 }
 
-void GAIA::BasePhysicFramework::parseRunningParameters(nlohmann::json& inModelParams, nlohmann::json& inPhysicsParams)
+void GAIA::BasePhysicFramework::parseRunningParameters()
 {
 	basePhysicsParams = createPhysicsParams();
 	baseCollisionParams = createCollisionParams();
-
-	basePhysicsParams->fromJson(inPhysicsParams["PhysicsParams"]);
-	baseCollisionParams->fromJson(inPhysicsParams["CollisionParams"]);
+	basePhysicsParams->fromJson(physicsJsonParams["PhysicsParams"]);
+	baseCollisionParams->fromJson(physicsJsonParams["CollisionParams"]);
 
 	objectParamsList = createObjectParamsList();
-	objectParamsList->fromJson(inModelParams);
+	objectParamsList->fromJson(modelJsonParams);
 
 	baseTimeStatistics = createRunningTimeStatistics();
 

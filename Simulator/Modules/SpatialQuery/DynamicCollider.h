@@ -1,8 +1,6 @@
 #pragma once
 #include "MeshClosestPointQuery.h"
-
-
-
+#include "ColiiderTriMeshBase.h"
 namespace GAIA {
 	struct DynamicColliderParameters : public MeshClosestPointQueryParameters
 	{
@@ -13,6 +11,8 @@ namespace GAIA {
 		{
 			maxQueryDis = 0.5f;
 		}
+
+
 	};
 
 
@@ -32,9 +32,14 @@ namespace GAIA {
 			return mQuery->closestPointQuery(p, pClosestPtResult, computeNormal);
 		}
 
-		void initialize(std::vector<TriMeshFEM::SharedPtr> meshes)
+		void initialize(std::vector<ColliderTrimeshBase::SharedPtr>& meshes_in)
 		{
-			return mQuery->initialize(meshes);
+			std::vector<TriMeshFEM::SharedPtr> baseMeshes;
+			for (auto mesh : meshes_in)
+			{
+				baseMeshes.push_back(mesh);
+			}
+			return mQuery->initialize(baseMeshes);
 		}
 
 		void updateBVH()
@@ -44,6 +49,7 @@ namespace GAIA {
 
 		const DynamicColliderParameters::SharedPtr pQueryParams;
 		MeshClosestPointQuery::SharedPtr mQuery;
+		std::vector<ColliderTrimeshBase::SharedPtr> colliderMeshes;
 	};
 
 }

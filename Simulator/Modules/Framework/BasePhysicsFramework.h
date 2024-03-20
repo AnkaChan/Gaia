@@ -56,7 +56,7 @@ namespace GAIA {
 
 		void updateWorldBox();
 		virtual void loadRunningparameters(std::string inModelInputFile, std::string inParameterFile, std::string outFolder);
-		virtual void parseRunningParameters(nlohmann::json& inModelParams, nlohmann::json& inPhysicsParams);
+		virtual void parseRunningParameters();
 
 		virtual void timeStepEqualize();
 		virtual void initialize();

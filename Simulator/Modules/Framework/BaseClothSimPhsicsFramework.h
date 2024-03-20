@@ -2,6 +2,8 @@
 
 #include "BasePhysicsFramework.h"
 #include "../TriMesh/TriMesh.h"
+#include "../SpatialQuery/DynamicCollider.h"
+#include "../SpatialQuery/ColiiderTriMeshBase.h"
 
 namespace GAIA {
 	struct BaseClothPhsicsFramework : public BasePhysicFramework
@@ -11,15 +13,28 @@ namespace GAIA {
 
 		virtual TriMeshFEM::SharedPtr initializeMaterial(ObjectParams::SharedPtr objParam, BasePhysicsParams::SharedPtr physicsParaemters, BaseClothPhsicsFramework* pPhysics) = 0;
 		// deprecate the volumetric simulation framework
-		virtual TetMeshFEM::SharedPtr initializeMaterial(ObjectParams::SharedPtr objParam, TetMeshMF::SharedPtr pTMeshMF, BasePhysicsParams::SharedPtr physicsParaemters) ;
+		virtual TetMeshFEM::SharedPtr initializeMaterial(ObjectParams::SharedPtr objParam, TetMeshMF::SharedPtr pTMeshMF, BasePhysicsParams::SharedPtr physicsParaemters);
+
+        virtual void parseRunningParameters() override;
 
 		virtual void initialize();
+        // collider includes meshes not from simulation, such as  
+        virtual void initializeCollider();
+        // return a pointer to the base class of the collider mesh
+        ColliderTrimeshBase::SharedPtr createColliderMesh(nlohmann::json& colliderMeshJsonParams);
+        virtual void initializeViewer();
+
 		virtual void writeOutputs(std::string outFolder, int frameId);
 		virtual void runStep()=0;
         virtual void recoverFromState(std::string& stateFile);
 
 
-		std::vector<std::shared_ptr<TriMeshFEM>> baseTriMeshes;
+		std::vector<TriMeshFEM::SharedPtr> baseTriMeshes;
+        std::vector<ColliderTrimeshBase::SharedPtr> colliderMeshes;
+
+        DynamicColliderParameters::SharedPtr pDynamicColliderParameter;
+        DynamicCollider::SharedPtr pDynamicCollider;
+        nlohmann::json colliderJsonParams;
 
 
 	};
