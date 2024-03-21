@@ -1,10 +1,21 @@
 #include "Viewer.h"
-
+#include <stdexcept>
 
 void GUINoCompliationError() {
-	std::cout << "Error! Trying to call GUI while GUI is not complied!\n\
-	You should either remote the \"--gui\" command or turn off the GAIA_NO_GUI option." << std::endl;
+	std::cout << "Error! Trying to call GUI while GUI is not complied!\n"
+		<< "You should either remove the \"--gui\" command or turn off the GAIA_NO_GUI compilation option." << std::endl;
+	throw std::exception("Trying to call uncompiled GUI components.");
 	std::exit(-1);
+}
+
+
+bool GAIA::ViewerParams::fromJson(nlohmann::json& physicsParam)
+{
+	return false;
+}
+bool GAIA::ViewerParams::toJson(nlohmann::json& physicsParam)
+{
+	return false;
 }
 
 #ifndef GAIA_NO_GUI
@@ -176,14 +187,7 @@ namespace GAIA {
 			polyScopeSurfaceMesh.pPolyScopeSurfaceMesh = pPolyScopeSurfaceMesh;
 		}
 	}
-	bool ViewerParams::fromJson(nlohmann::json& physicsParam)
-	{
-		return false;
-	}
-	bool ViewerParams::toJson(nlohmann::json& physicsParam)
-	{
-		return false;
-	}
+
 }
 GAIA::Viewer::Viewer(ViewerParams::SharedPtr pViewerParams_in)
 	: pViewerParams(pViewerParams_in)
@@ -262,6 +266,10 @@ void GAIA::Viewer::setAllMeshesToUpdated()
 	GUINoCompliationError();
 }
 void GAIA::Viewer::show()
+{
+	GUINoCompliationError();
+}
+void GAIA::Viewer::init()
 {
 	GUINoCompliationError();
 }
