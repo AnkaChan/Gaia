@@ -334,8 +334,8 @@ bool triMeshEdgeContactQueryFunc(RTCPointQueryFunctionArguments* args)
 
         result->contactPts.back().contactEdgeId2 = primID;
         result->contactPts.back().contactMeshId2 = geomID;
-        result->contactPts.back().mu_this = mua;
-        result->contactPts.back().mu_opposite = mub;
+        result->contactPts.back().mu1 = mua;
+        result->contactPts.back().mu2 = mub;
         result->contactPts.back().c1 << c1.x, c1.y, c1.z;
         result->contactPts.back().c2 << c2.x, c2.y, c2.z;
         result->contactPts.back().d = d;
@@ -605,3 +605,26 @@ void GAIA::updateVFContactPointInfo(std::vector<std::shared_ptr<TriMeshFEM>>& me
     computeVFContactNormalTriMesh(a, b, c, p, closestP, pointType, contactPointInfo.contactPointNormal);
 
 };
+
+void  GAIA::updateEEContactPointInfo(std::vector<std::shared_ptr<TriMeshFEM>>& meshPtrs, EEContactPointInfo& contactPointInfo)
+{
+    const TriMeshFEM* pMesh1 = meshPtrs[contactPointInfo.contactMeshId1].get();
+    const TriMeshFEM* pMesh2 = meshPtrs[contactPointInfo.contactMeshId2].get();
+
+    const EdgeInfo edgeInfo1 = pMesh1->pTopology->edgeInfos[contactPointInfo.contactEdgeId1];
+    const EdgeInfo edgeInfo2 = pMesh2->pTopology->edgeInfos[contactPointInfo.contactEdgeId2];
+
+    const embree::Vec3fa p1 = embree::Vec3fa::loadu(pMesh1->vertex(edgeInfo1.eV1).data());
+    const embree::Vec3fa p2 = embree::Vec3fa::loadu(pMesh1->vertex(edgeInfo1.eV2).data());
+
+    const embree::Vec3fa q1 = embree::Vec3fa::loadu(pMesh2->vertex(edgeInfo2.eV1).data());
+    const embree::Vec3fa q2 = embree::Vec3fa::loadu(pMesh2->vertex(edgeInfo2.eV2).data());
+    embree::Vec3fa c1, c2;
+    FloatingType mua, mub;
+    get_closest_points_between_segments(p1, p2, q1, q2, c1, c2, mua, mub);
+
+    contactPointInfo.mu1 = mua;
+    contactPointInfo.mu2 = mub;
+    contactPointInfo.c1 << c1.x, c1.y, c1.z;
+    contactPointInfo.c2 << c2.x, c2.y, c2.z;
+}

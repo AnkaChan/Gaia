@@ -70,9 +70,11 @@ namespace GAIA {
 		int contactEdgeId2 = -1;
 		int contactMeshId2 = -1;
 
-		FloatingType mu_this = 0.f;
-		FloatingType mu_opposite = 0.f;
+		FloatingType mu1 = 0.f;
+		FloatingType mu2 = 0.f;
 
+		// c1 = lerp(p1, p2, mu1); c2 = lerp(q1, q2, mu2); p1,p2 from edge 1 and q1,q2 from edge 2
+		// lerp: 1.0f-t*v0 + t*v1
 		Vec3 c1, c2; // c1 is from the current edge and c2 is from the opposite edge
 
 		FloatingType d = 0.f;
@@ -91,6 +93,10 @@ namespace GAIA {
 		void reset() {
 			found = false;
 			contactPts.clear();
+		}
+
+		size_t numContactPoints() const {
+			return contactPts.size();
 		}
 	};
 
@@ -120,4 +126,5 @@ namespace GAIA {
 	};
 
 	void updateVFContactPointInfo(std::vector<std::shared_ptr<TriMeshFEM>>& meshPtrs, VFContactPointInfo& contactPointInfo);
+	void updateEEContactPointInfo(std::vector<std::shared_ptr<TriMeshFEM>>& meshPtrs, EEContactPointInfo& contactPointInfo);
 }

@@ -33,6 +33,7 @@ namespace GAIA {
 	typedef Eigen::Matrix<FloatingType, 2, 1> Vec2;
 	typedef Eigen::Matrix<IdType, 2, 1> Vec2I;
 	typedef Eigen::Matrix<FloatingType, 3, 1> Vec3;
+	typedef const Eigen::Matrix<FloatingType, 3, 1> CVec3;
 	typedef Eigen::Matrix<FloatingType, 4, 1> Vec4;
 	typedef Eigen::Matrix<double, 3, 1> Vec3d;
 	typedef Eigen::Matrix<IdType, 3, 1> Vec3I;
