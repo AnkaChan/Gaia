@@ -277,7 +277,7 @@ namespace GAIA {
 
 	inline IdType TriMeshFEM::getVertexIthRelevantBendingOrder(IdType iV, IdType bendingId) const
 	{
-		return pTopology->vertexRelevantBendings_vertexOrder(pTopology->vertexRelevantBendings_infos(iV * 2));
+		return pTopology->vertexRelevantBendings_vertexOrder(pTopology->vertexRelevantBendings_infos(iV * 2) + bendingId);
 	}
 
 	inline IdType TriMeshFEM::getVertexIthRelevantBending(IdType iV, IdType bendingId) const

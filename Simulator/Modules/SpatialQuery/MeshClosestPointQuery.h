@@ -5,7 +5,7 @@
 #include "../TriMesh/TriMesh.h"
 #include "../CollisionDetector/CollisionDetertionParameters.h"
 
-#define NUM_QUERY_PRE_ALLOC 2
+#define NUM_QUERY_PRE_ALLOC 8
 
 namespace GAIA {
 	struct MeshClosestPointQuery;

@@ -611,8 +611,8 @@ void  GAIA::updateEEContactPointInfo(std::vector<std::shared_ptr<TriMeshFEM>>& m
     const TriMeshFEM* pMesh1 = meshPtrs[contactPointInfo.contactMeshId1].get();
     const TriMeshFEM* pMesh2 = meshPtrs[contactPointInfo.contactMeshId2].get();
 
-    const EdgeInfo edgeInfo1 = pMesh1->pTopology->edgeInfos[contactPointInfo.contactEdgeId1];
-    const EdgeInfo edgeInfo2 = pMesh2->pTopology->edgeInfos[contactPointInfo.contactEdgeId2];
+    const EdgeInfo& edgeInfo1 = pMesh1->pTopology->edgeInfos[contactPointInfo.contactEdgeId1];
+    const EdgeInfo& edgeInfo2 = pMesh2->pTopology->edgeInfos[contactPointInfo.contactEdgeId2];
 
     const embree::Vec3fa p1 = embree::Vec3fa::loadu(pMesh1->vertex(edgeInfo1.eV1).data());
     const embree::Vec3fa p2 = embree::Vec3fa::loadu(pMesh1->vertex(edgeInfo1.eV2).data());
