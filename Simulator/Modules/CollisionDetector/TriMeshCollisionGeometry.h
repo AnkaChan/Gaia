@@ -19,8 +19,11 @@ namespace GAIA {
     bool checkFeasibleRegion(const embree::Vec3fa& p, const TriMeshFEM* pMesh, int32_t faceId,
         ClosestPointOnTriangleType pointType, float feasibleRegionEpsilon);
 
+    //bool checkEdgeFeasibleRegion(const embree::Vec3fa& p, const TriMeshFEM* pMesh, int32_t faceId,
+    //    int32_t edgeId, int32_t edgeVId1, int32_t edgeVId2, float feasibleRegionEpsilon);
+
     bool checkEdgeFeasibleRegion(const embree::Vec3fa& p, const TriMeshFEM* pMesh, int32_t faceId,
-        int32_t edgeId, int32_t edgeVId1, int32_t edgeVId2, float feasibleRegionEpsilon);
+        int32_t edgeOrderInFace, float feasibleRegionEpsilon);
 
     bool checkVertexFeasibleRegion(const embree::Vec3fa& p, const TriMeshFEM* pTM, int32_t vId, float feasibleRegionEpsilon);
 

@@ -706,7 +706,8 @@ void GAIA::DiscreteCollisionDetector::computeNormal(CollisionDetectionResult& co
 
 
 
-bool GAIA::checkEdgeFeasibleRegion(embree::Vec3fa& p, TetMeshFEM* pTM, int32_t faceId, int32_t edgeId, int32_t edgeVId1, int32_t edgeVId2, float feasibleRegionEpsilon)
+bool GAIA::checkEdgeFeasibleRegion(embree::Vec3fa& p, TetMeshFEM* pTM, int32_t faceId, int32_t edgeId, int32_t edgeVId1, 
+    int32_t edgeVId2, float feasibleRegionEpsilon)
 {
     //M::HEPtr pHE1 = M::edgeHalfedge(pE);
     //M::HEPtr pHE2 = M::halfedgeSym(M::edgeHalfedge(pE));

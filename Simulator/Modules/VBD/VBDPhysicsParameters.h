@@ -35,7 +35,7 @@ namespace GAIA {
 		bool handleCollision = false;
 		FloatingType collisionStiffness = 1e5f;
 		FloatingType collisionAirDistance = 0.0f;
-		int collisionDetectionIters = 1;
+		int contactDetectionIters = 1;
 		int collisionEnergyType = 1; // 0: point-point, 1: point-plane
 		int collisionSolutionType = 0; // 0: serial, 1: hybrid
 		int intermediateCollisionIterations = -1;
@@ -125,7 +125,7 @@ namespace GAIA {
 		// collision detecion
 		EXTRACT_FROM_JSON(physicsParams, handleCollision);
 		EXTRACT_FROM_JSON(physicsParams, collisionStiffness);
-		EXTRACT_FROM_JSON(physicsParams, collisionDetectionIters);
+		EXTRACT_FROM_JSON(physicsParams, contactDetectionIters);
 		EXTRACT_FROM_JSON(physicsParams, collisionEnergyType);
 		EXTRACT_FROM_JSON(physicsParams, collisionSolutionType);
 		EXTRACT_FROM_JSON(physicsParams, collisionAirDistance);
@@ -189,7 +189,7 @@ namespace GAIA {
 		// collision detecion
 		PUT_TO_JSON(physicsParams, handleCollision);
 		PUT_TO_JSON(physicsParams, collisionStiffness);
-		PUT_TO_JSON(physicsParams, collisionDetectionIters);
+		PUT_TO_JSON(physicsParams, contactDetectionIters);
 		PUT_TO_JSON(physicsParams, collisionEnergyType);
 		PUT_TO_JSON(physicsParams, collisionAirDistance);
 		PUT_TO_JSON(physicsParams, boundaryCollisionStiffness);

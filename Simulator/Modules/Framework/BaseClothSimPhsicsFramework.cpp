@@ -17,6 +17,14 @@ TetMeshFEM::SharedPtr BaseClothPhsicsFramework::initializeMaterial(ObjectParams:
 void GAIA::BaseClothPhsicsFramework::parseRunningParameters()
 {
 	BasePhysicFramework::parseRunningParameters();
+
+	contactDetectorParams = physicsJsonParams["ContactDetectorParams"];
+	pClothContactDetectorParameters = std::make_shared<ClothContactDetectorParameters>();
+	pClothContactDetectorParameters->fromJson(contactDetectorParams);
+
+	colliderJsonParams = physicsJsonParams["ColliderParams"];
+	pDynamicColliderParameter = std::make_shared<DynamicColliderParameters>();
+	pDynamicColliderParameter->fromJson(colliderJsonParams);
 }
 
 void BaseClothPhsicsFramework::initialize()
@@ -52,14 +60,21 @@ void BaseClothPhsicsFramework::initialize()
 		<< "\n----------------------------------------------------" << std::endl;
 
 	// initializeCollisionDetector();
+	initializeCollider();
+
+	pClothContactDetector = std::make_shared<ClothContactDetector>(pClothContactDetectorParameters);
+	triMeshesForContactDetection = baseTriMeshes;
+
+	for (int i = 0; i < colliderMeshes.size(); i++)
+	{
+		triMeshesForContactDetection.push_back(colliderMeshes[i]);
+	}
+
+	pClothContactDetector->initialize(triMeshesForContactDetection);
 }
 
 void GAIA::BaseClothPhsicsFramework::initializeCollider()
 {
-	pDynamicColliderParameter = std::make_shared<DynamicColliderParameters>();
-	colliderJsonParams = physicsJsonParams["ColliderParams"];
-	pDynamicColliderParameter->fromJson(colliderJsonParams);
-
 	pDynamicCollider = std::make_shared<DynamicCollider>(pDynamicColliderParameter);
 	
 	nlohmann::json colliderMeshsJson = colliderJsonParams["ColliderMeshes"];
@@ -97,7 +112,7 @@ ColliderTrimeshBase::SharedPtr GAIA::BaseClothPhsicsFramework::createColliderMes
 void GAIA::BaseClothPhsicsFramework::initializeViewer()
 {
 	BasePhysicFramework::initializeViewer();
-	pViewer->registerTrimeshes(baseTriMeshes);
+	pViewer->registerTrimeshes(triMeshesForContactDetection);
 
 }
 

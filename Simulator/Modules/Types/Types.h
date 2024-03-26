@@ -23,11 +23,52 @@
 #define CMP_NORMALIZE_TOLERANCE 0.000001f
 #define CMP_POINT_IN_PLANE_EPSILON 0.00001f
 
+struct AbstractAsserter
+{
+	virtual void doAssert(const char* expr, const char* file, int line, const char* function) const
+	{
+		std::cout << "Asserting now at " << expr << ", " << file << ", " << line << ", " << function << std::endl;
+	}
+};
+
+struct Local
+{
+	const char* function_;
+	const char* expr_;
+	const char* file_;
+	int line_;
+	Local(const char* f, const char* ex, const char* file, int line)
+		: function_(f), expr_(ex), file_(file), line_(line)
+	{ }
+	Local operator << (const AbstractAsserter& impl)
+	{
+		impl.doAssert(expr_, file_, line_, function_);
+		return *this;
+	}
+};
+
+// More to be added as required...
+#if defined( __GNUC__ )
+# define WE_FUNCTION __PRETTY_FUNCTION__
+#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901)
+# define WE_FUNCTION __func__
+#else
+# define WE_FUNCTION "null_func()"
+#endif
+
+
+#define RELEASE_ASSERT( expr )\
+  if( expr );\
+  else Local( WE_FUNCTION, #expr, __FILE__, __LINE__ )\
+    << AbstractAsserter();
+
+
 namespace GAIA {
 	typedef float FloatingType;
 	typedef const float CFloatingType;
 	//typedef double FloatingType;
 	typedef int32_t IdType;
+	typedef const int32_t CIdType;
 
 	// deformation gradient computation
 	typedef Eigen::Matrix<FloatingType, 2, 1> Vec2;

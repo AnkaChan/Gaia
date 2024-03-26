@@ -9,13 +9,21 @@ void GUINoCompliationError() {
 }
 
 
-bool GAIA::ViewerParams::fromJson(nlohmann::json& physicsParam)
+bool GAIA::ViewerParams::fromJson(nlohmann::json& viewerParams)
 {
-	return false;
+	EXTRACT_FROM_JSON(viewerParams, enableViewer);
+	EXTRACT_FROM_JSON(viewerParams, enableGround);
+	EXTRACT_FROM_JSON(viewerParams, GUIRegularFontSize);
+	EXTRACT_FROM_JSON(viewerParams, GUIMonoFontSize);
+	return true;
 }
-bool GAIA::ViewerParams::toJson(nlohmann::json& physicsParam)
+bool GAIA::ViewerParams::toJson(nlohmann::json& viewerParams)
 {
-	return false;
+	PUT_TO_JSON(viewerParams, enableViewer);
+	PUT_TO_JSON(viewerParams, enableGround);
+	PUT_TO_JSON(viewerParams, GUIRegularFontSize);
+	PUT_TO_JSON(viewerParams, GUIMonoFontSize);
+	return true;
 }
 
 #ifndef GAIA_NO_GUI

@@ -8,7 +8,7 @@
 
 #include "TriMeshCollisionGeometry.h"
 
-//#define SKIP_FEASIBLE_REGION_CHECK
+// #define SKIP_FEASIBLE_REGION_CHECK
 
 using namespace GAIA;
 
@@ -61,6 +61,7 @@ bool triMeshVFRadiusQueryWithTopologyFilteringFunc(RTCPointQueryFunctionArgument
 
     if (d < args->query->radius)
     {
+        result->minDisToPrimitives = std::min(d, result->minDisToPrimitives);
         // evalute whether this closest has been added 
         int primitiveId = -1;
         switch (pointType)
@@ -186,8 +187,10 @@ bool triMeshFVRadiusQueryWithTopologyFilteringFunc(RTCPointQueryFunctionArgument
     
     float contactRadius = pContactDetector->parameters().maxQueryDis;
 
+
     if (d < contactRadius)
     {
+        result->minDisToPrimitives = std::min(d, result->minDisToPrimitives);
         // evalute whether this closest has been added 
         int primitiveId = -1;
         switch (pointType)
@@ -313,8 +316,8 @@ bool triMeshEdgeContactQueryFunc(RTCPointQueryFunctionArguments* args)
     const embree::Vec3fa p1 = embree::Vec3fa::loadu(pMeshQuery->vertex(edgeInfoQuery.eV1).data());
     const embree::Vec3fa p2 = embree::Vec3fa::loadu(pMeshQuery->vertex(edgeInfoQuery.eV2).data());
 
-    const embree::Vec3fa q1 = embree::Vec3fa::loadu(pMeshQuery->vertex(edgeInfoTarget.eV1).data());
-    const embree::Vec3fa q2 = embree::Vec3fa::loadu(pMeshQuery->vertex(edgeInfoTarget.eV2).data());
+    const embree::Vec3fa q1 = embree::Vec3fa::loadu(pTargetMesh->vertex(edgeInfoTarget.eV1).data());
+    const embree::Vec3fa q2 = embree::Vec3fa::loadu(pTargetMesh->vertex(edgeInfoTarget.eV2).data());
     embree::Vec3fa c1, c2;
     FloatingType mua, mub;
     get_closest_points_between_segments(p1, p2, q1, q2, c1, c2, mua, mub);
@@ -326,6 +329,7 @@ bool triMeshEdgeContactQueryFunc(RTCPointQueryFunctionArguments* args)
         && mub > 0.f && mub < 1.f
         ) // otherwise it degenerates to a v-f contact case
     {
+        result->minDisToPrimitives = std::min(d, result->minDisToPrimitives);
         result->found = true;
 
         result->contactPts.emplace_back();

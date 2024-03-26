@@ -36,6 +36,7 @@ namespace GAIA {
 		Vec3 contactPoint;
 		Vec3 contactPointNormal;
 		Vec3 barycentrics;
+
 	};
 
 	struct ClothVFContactQueryResult {
@@ -43,6 +44,10 @@ namespace GAIA {
 		bool found = false;
 		bool computeNormal = false;
 		ClothContactDetector* pContactDetector = nullptr;
+
+		ClothVFContactQueryResult() {
+			minDisToPrimitives = std::numeric_limits<FloatingType>::max();
+		}
 
 		// VF contact can be detected from both VF and FV query
 		int queryPrimitiveId = -1; // face id for FV query and vertex id for VF query
@@ -52,6 +57,7 @@ namespace GAIA {
 		CPArray<VFContactPointInfo, NUM_QUERY_PRE_ALLOC> contactPts;
 
 		void reset() {
+			minDisToPrimitives = std::numeric_limits<FloatingType>::max();
 			found = false;
 			contactPts.clear();
 		}
@@ -59,6 +65,7 @@ namespace GAIA {
 		size_t numContactPoints() const {
 			return contactPts.size();
 		}
+		FloatingType minDisToPrimitives;
 
 	};
 
@@ -90,7 +97,12 @@ namespace GAIA {
 		int queryPrimitiveId = -1;
 		bool found = true;
 
+		ClothEEContactQueryResult() {
+			minDisToPrimitives = std::numeric_limits<FloatingType>::max();
+		}
+
 		void reset() {
+			minDisToPrimitives = std::numeric_limits<FloatingType>::max();
 			found = false;
 			contactPts.clear();
 		}
@@ -98,6 +110,8 @@ namespace GAIA {
 		size_t numContactPoints() const {
 			return contactPts.size();
 		}
+
+		FloatingType minDisToPrimitives;
 	};
 
 	struct ClothContactDetector : public MeshClosestPointQuery
@@ -112,7 +126,6 @@ namespace GAIA {
 		bool contactQueryEE(IdType meshId, IdType vId, ClothEEContactQueryResult* pResult);
 
 		void updateBVH(RTCBuildQuality sceneQuality = RTC_BUILD_QUALITY_REFIT);
-
 
 		const ClothContactDetectorParameters& parameters() const
 		{

@@ -10,6 +10,20 @@ namespace GAIA {
 		typedef ColliderTrimeshBaseParams* Ptr;
 
 		std::string colliderType;
+
+		inline bool fromJson(nlohmann::json& objectParam)
+		{
+			TriMeshParams::fromJson(objectParam);
+			EXTRACT_FROM_JSON(objectParam, colliderType);
+			return true;
+		}
+
+		inline bool toJson(nlohmann::json& objectParam)
+		{
+			TriMeshParams::toJson(objectParam);
+			PUT_TO_JSON(objectParam, colliderType);
+			return true;
+		}
 	};
 
 	struct ColliderTrimeshBase : public TriMeshFEM

@@ -4,6 +4,7 @@
 #include "../TriMesh/TriMesh.h"
 #include "../SpatialQuery/DynamicCollider.h"
 #include "../SpatialQuery/ColiiderTriMeshBase.h"
+#include <CollisionDetector/ClothContactDetector.h>
 
 namespace GAIA {
 	struct BaseClothPhsicsFramework : public BasePhysicFramework
@@ -28,13 +29,20 @@ namespace GAIA {
 		virtual void runStep()=0;
         virtual void recoverFromState(std::string& stateFile);
 
-
-		std::vector<TriMeshFEM::SharedPtr> baseTriMeshes;
+        std::vector<TriMeshFEM::SharedPtr> baseTriMeshes;
         std::vector<ColliderTrimeshBase::SharedPtr> colliderMeshes;
+
+        // baseTriMeshes + colliderMeshes
+        std::vector<TriMeshFEM::SharedPtr> triMeshesForContactDetection;
+        
+        ClothContactDetectorParameters::SharedPtr pClothContactDetectorParameters;
+        ClothContactDetector::SharedPtr pClothContactDetector;
 
         DynamicColliderParameters::SharedPtr pDynamicColliderParameter;
         DynamicCollider::SharedPtr pDynamicCollider;
+
         nlohmann::json colliderJsonParams;
+        nlohmann::json contactDetectorParams;
 
 
 	};

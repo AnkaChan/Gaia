@@ -395,7 +395,8 @@ bool GAIA::TriMeshParams::fromJson(nlohmann::json& objectParam)
 	ObjectParams::fromJson(objectParam);
 	EXTRACT_FROM_JSON(objectParam, use3DRestpose);
 	EXTRACT_FROM_JSON(objectParam, triangleColoringCategoriesPath);
-
+	EXTRACT_FROM_JSON(objectParam, frictionDynamic);
+	EXTRACT_FROM_JSON(objectParam, frictionEpsV);
 	return true;
 }
 
@@ -404,7 +405,8 @@ bool GAIA::TriMeshParams::toJson(nlohmann::json& objectParam)
 	ObjectParams::toJson(objectParam);
 	PUT_TO_JSON(objectParam, use3DRestpose);
 	PUT_TO_JSON(objectParam, triangleColoringCategoriesPath);
-
+	PUT_TO_JSON(objectParam, frictionDynamic);
+	PUT_TO_JSON(objectParam, frictionEpsV);
 	return true;
 }
 

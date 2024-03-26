@@ -7,6 +7,20 @@ namespace GAIA {
 		typedef ColliderTrimeshSequenceParams* Ptr;
 		std::vector<std::string> meshFiles;
 
+		inline bool fromJson(nlohmann::json& objectParam)
+		{
+			ColliderTrimeshBaseParams::fromJson(objectParam);
+			EXTRACT_FROM_JSON(objectParam, meshFiles);
+			return true;
+		}
+
+		inline bool toJson(nlohmann::json& objectParam)
+		{
+			ColliderTrimeshBaseParams::toJson(objectParam);
+			PUT_TO_JSON(objectParam, meshFiles);
+			return true;
+		}
+
 	};
 
 	// the simpliest type of collider, which is a sequence of mesh files
@@ -20,13 +34,15 @@ namespace GAIA {
 				loadObj(colliderParameters().meshFiles[frameId]);
 			}
 		};
-		virtual void initialize(ColliderTrimeshBaseParams::SharedPtr inObjectParams, bool precomputeToplogy) 
+		virtual void initialize(ColliderTrimeshBaseParams::SharedPtr inObjectParams) 
 		{
+			ColliderTrimeshBase::initialize(inObjectParams);
 			pParams = inObjectParams;
 			// no need to call the base class' initialization function, because it's not used for simulation
 			if (colliderParameters().meshFiles.size())
 			{
-				loadObj(colliderParameters().meshFiles[0]);
+				inObjectParams->path = colliderParameters().meshFiles[0];
+				TriMeshFEM::initialize(inObjectParams, true);
 				curFrameId = 0;
 			}
 		};

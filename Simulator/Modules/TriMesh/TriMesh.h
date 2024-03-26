@@ -33,6 +33,9 @@ namespace GAIA {
 
 		FloatingType UVScale = 150.f;
 
+		FloatingType frictionDynamic = 0.1f;
+		FloatingType frictionEpsV = 0.01f;
+
 		virtual bool fromJson(nlohmann::json& objectParam);
 		virtual bool toJson(nlohmann::json& objectParam);
 	};
