@@ -320,7 +320,7 @@ void GAIA::BasePhysicFramework::simulate()
 				if (basePhysicsParams->saveOutputs)
 				{
 					TICK(timeCsmpSaveOutputs);
-					writeOutputs(outputFolder, frameId + 1);
+					writeOutputs(outputFolder, frameId);
 					TOCK_STRUCT((*baseTimeStatistics), timeCsmpSaveOutputs);
 				}
 
@@ -331,7 +331,7 @@ void GAIA::BasePhysicFramework::simulate()
 				debugPrint(DEBUG_LVL_INFO, baseTimeStatistics->getString());
 				debugOperation(DEBUG_LVL_INFO, [&]() {
 					std::cout
-						<< "Frame " << frameId + 1 << " completed, Time consumption: " << baseTimeStatistics->timeCsmpFrame << "\n"
+						<< "Frame " << frameId << " completed, Time consumption: " << baseTimeStatistics->timeCsmpFrame << "\n"
 						<< "----------------------------------------------------\n";
 					});
 
@@ -363,7 +363,7 @@ void GAIA::BasePhysicFramework::simulate()
 			if (basePhysicsParams->saveOutputs)
 			{
 				TICK(timeCsmpSaveOutputs);
-				writeOutputs(outputFolder, frameId + 1);
+				writeOutputs(outputFolder, frameId);
 				TOCK_STRUCT((*baseTimeStatistics), timeCsmpSaveOutputs);
 			}
 
@@ -377,7 +377,7 @@ void GAIA::BasePhysicFramework::simulate()
 			debugPrint(DEBUG_LVL_INFO, baseTimeStatistics->getString());
 			debugOperation(DEBUG_LVL_INFO, [&]() {
 				std::cout
-					<< "Frame " << frameId + 1 << " completed, Time consumption: " << baseTimeStatistics->timeCsmpFrame << "\n"
+					<< "Frame " << frameId << " completed, Time consumption: " << baseTimeStatistics->timeCsmpFrame << "\n"
 					<< "----------------------------------------------------\n";
 				});
 
