@@ -2,6 +2,7 @@
 #include "CuMatrix/Geometry/Geometry.h"
 #include <MeshFrame/Parser/strutil.h>
 #include <MeshFrame/Utility/IO.h>
+#include <MeshFrame/Utility/STR.h>
 #include "../Parallelization/CPUParallelization.h"
 
 #include <MeshFrame/TriMesh/MeshStatic.h>
@@ -25,22 +26,7 @@ void  GAIA::TriMeshFEM::initialize(TriMeshParams::SharedPtr inObjectParams, bool
 		std::exit(-1);
 	}
 
-	Eigen::AngleAxisf angleAxis;
-	FloatingType rot = pObjectParams->rotation.norm();
-	angleAxis.angle() = rot;
-	angleAxis.axis() = pObjectParams->rotation / rot;
-
-	if (rot > 0)
-	{
-		Eigen::Matrix3f R;
-		R = angleAxis.toRotationMatrix();
-		positions_ = R * positions_;
-	}
-
-	positions_.row(0) *= pObjectParams->scale(0);
-	positions_.row(1) *= pObjectParams->scale(1);
-	positions_.row(2) *= pObjectParams->scale(2);
-	positions_.colwise() += pObjectParams->translation;
+	applyRotationScalingTranslation();
 
 	positionsPrev.resize(3, numVertices());
 	positionsPrev.setZero();
@@ -60,6 +46,31 @@ void  GAIA::TriMeshFEM::initialize(TriMeshParams::SharedPtr inObjectParams, bool
 		computeRestposeTrianglesFrom2D();
 	}
 
+	if (pObjectParams->initialState != "")
+	{
+		MF::IO::FileParts fileParts(pObjectParams->initialState);
+		if (fileParts.ext == ".obj")
+		{
+			TriMeshFEM tempMesh;
+			tempMesh.loadObj(pObjectParams->initialState);
+
+			assert(tempMesh.positions_.cols() == positions_.cols());
+			positions_ = tempMesh.positions_;
+
+			applyRotationScalingTranslation();
+		}
+		else if (fileParts.ext == ".json")
+		{
+			std::cout << "Error!!! Json initial state has not been implemented yet!" << std::endl;
+			exit(-1);
+		}
+		else
+		{
+			std::cout << "Error!!! Unsupported file format: " << fileParts.ext << std::endl;
+			exit(-1);
+		}
+	}
+
 	if (precomputeToplogy)
 	{
 		computeTopology();
@@ -73,6 +84,27 @@ void  GAIA::TriMeshFEM::initialize(TriMeshParams::SharedPtr inObjectParams, bool
 	}
 
 	globalColors.resize(numVertices());
+}
+
+void GAIA::TriMeshFEM::applyRotationScalingTranslation()
+{
+	Eigen::AngleAxisf angleAxis;
+	FloatingType rot = pObjectParams->rotation.norm();
+	angleAxis.angle() = rot;
+	angleAxis.axis() = pObjectParams->rotation / rot;
+
+	// new intial state also need to be scaled & translated
+	if (rot > CMP_EPSILON)
+	{
+		Eigen::Matrix3f R;
+		R = angleAxis.toRotationMatrix();
+		positions_ = R * positions_;
+	}
+
+	positions_.row(0) *= pObjectParams->scale(0);
+	positions_.row(1) *= pObjectParams->scale(1);
+	positions_.row(2) *= pObjectParams->scale(2);
+	positions_.colwise() += pObjectParams->translation;
 }
 
 void GAIA::TriMeshFEM::evaluateFaceNormals(bool normalize)
@@ -395,6 +427,7 @@ bool GAIA::TriMeshParams::fromJson(nlohmann::json& objectParam)
 	ObjectParams::fromJson(objectParam);
 	EXTRACT_FROM_JSON(objectParam, use3DRestpose);
 	EXTRACT_FROM_JSON(objectParam, triangleColoringCategoriesPath);
+	EXTRACT_FROM_JSON(objectParam, initialState);
 	EXTRACT_FROM_JSON(objectParam, frictionDynamic);
 	EXTRACT_FROM_JSON(objectParam, frictionEpsV);
 	return true;
@@ -405,6 +438,7 @@ bool GAIA::TriMeshParams::toJson(nlohmann::json& objectParam)
 	ObjectParams::toJson(objectParam);
 	PUT_TO_JSON(objectParam, use3DRestpose);
 	PUT_TO_JSON(objectParam, triangleColoringCategoriesPath);
+	PUT_TO_JSON(objectParam, initialState);
 	PUT_TO_JSON(objectParam, frictionDynamic);
 	PUT_TO_JSON(objectParam, frictionEpsV);
 	return true;

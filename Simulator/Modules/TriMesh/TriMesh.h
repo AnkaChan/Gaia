@@ -28,6 +28,7 @@ namespace GAIA {
 		typedef TriMeshParams* Ptr;
 
 		std::string triangleColoringCategoriesPath;
+		std::string initialState;
 
 		bool use3DRestpose = true;
 
@@ -105,6 +106,7 @@ namespace GAIA {
 		typedef TriMeshFEM* Ptr;
 
 		void initialize(TriMeshParams::SharedPtr inObjectParams, bool precomputeToplogy);
+		void applyRotationScalingTranslation(); // in thus an order
 		void computeTopology();
 		// if you need to use customized topology information, inherit TriMeshTopology create your own topology class
 		// then override this function to return the pointer to your own topology class
