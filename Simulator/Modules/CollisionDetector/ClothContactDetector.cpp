@@ -203,6 +203,7 @@ bool triMeshFVRadiusQueryWithTopologyFilteringFunc(RTCPointQueryFunctionArgument
             // primitiveId = pMeshQuery_faceSide->facePosVId(queryPremitiveId_face, 1);
         case GAIA::ClosestPointOnTriangleType::AtC:
             // primitiveId = pMeshQuery_faceSide->facePosVId(queryPremitiveId_face, 2);
+            // this could be the reason why using min distance only from the feasible primitive would cause penetration?
             return false;
             break;
         case GAIA::ClosestPointOnTriangleType::AtAB:

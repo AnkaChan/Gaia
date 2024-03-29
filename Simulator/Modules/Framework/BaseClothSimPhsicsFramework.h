@@ -29,11 +29,13 @@ namespace GAIA {
 		virtual void runStep()=0;
         virtual void recoverFromState(std::string& stateFile);
 
-        std::vector<TriMeshFEM::SharedPtr> baseTriMeshes;
+        size_t numSimulationMeshes() { return baseTriMeshesForSimulation.size(); };
+
+        std::vector<TriMeshFEM::SharedPtr> baseTriMeshesForSimulation;
         std::vector<ColliderTrimeshBase::SharedPtr> colliderMeshes;
 
-        // baseTriMeshes + colliderMeshes
-        std::vector<TriMeshFEM::SharedPtr> triMeshesForContactDetection;
+        // baseTriMeshesForSimulation + colliderMeshes, in that order
+        std::vector<TriMeshFEM::SharedPtr> triMeshesAll;
         
         ClothContactDetectorParameters::SharedPtr pClothContactDetectorParameters;
         ClothContactDetector::SharedPtr pClothContactDetector;
@@ -43,6 +45,7 @@ namespace GAIA {
 
         nlohmann::json colliderJsonParams;
         nlohmann::json contactDetectorParams;
+
 
 
 	};
@@ -56,10 +59,10 @@ namespace GAIA {
             frameId = physics.frameId;
             curTime = physics.curTime;
             meshesState.clear();
-            for (size_t iMesh = 0; iMesh < physics.baseTriMeshes.size(); iMesh++)
+            for (size_t iMesh = 0; iMesh < physics.baseTriMeshesForSimulation.size(); iMesh++)
             {
                 meshesState.emplace_back();
-                TriMeshFEM::SharedPtr pMesh = physics.baseTriMeshes[iMesh];
+                TriMeshFEM::SharedPtr pMesh = physics.baseTriMeshesForSimulation[iMesh];
 
                 for (size_t iP = 0; iP < pMesh->velocities.cols(); iP++)
                 {
@@ -79,9 +82,9 @@ namespace GAIA {
         void initializePhysics(BaseClothPhsicsFramework& physics) {
             physics.frameId = frameId;
             physics.curTime = curTime;
-            for (size_t iMesh = 0; iMesh < physics.baseTriMeshes.size(); iMesh++)
+            for (size_t iMesh = 0; iMesh < physics.baseTriMeshesForSimulation.size(); iMesh++)
             {
-                TriMeshFEM::SharedPtr pMesh = physics.baseTriMeshes[iMesh];;
+                TriMeshFEM::SharedPtr pMesh = physics.baseTriMeshesForSimulation[iMesh];;
                 if (iMesh >= meshesState.size())
                 {
                     break;

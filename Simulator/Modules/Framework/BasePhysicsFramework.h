@@ -34,7 +34,7 @@ namespace GAIA {
 
 	struct BasePhysicFramework {
 		BasePhysicFramework() {
-			simulatorName = "BaseVolumetric";
+			simulatorName = "BaseCloth";
 		}
 		typedef std::shared_ptr<BasePhysicFramework> BaseSharedPtr;
 		typedef BasePhysicFramework* BasePtr;

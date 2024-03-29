@@ -153,7 +153,6 @@ namespace GAIA {
 		IdType getVertexIthRelevantBending(IdType iV, IdType bendingId) const;
 		IdType getVertexIthRelevantBendingOrder(IdType iV, IdType bendingId) const;
 
-
 		std::vector<std::vector<int32_t>>& verticesColoringCategories() { return pTopology->verticesColoringCategories; }
 		std::vector<int32_t> globalColors{};
 		virtual int tearMesh(IdType v1, IdType v2);

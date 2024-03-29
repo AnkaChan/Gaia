@@ -35,7 +35,7 @@ void BaseClothPhsicsFramework::initialize()
 		<< "Load input mesh files and precomputing topological information.\n"
 		<< "----------------------------------------------------\n";
 
-	baseTriMeshes.resize(objectParamsList->objectParams.size(), nullptr);
+	baseTriMeshesForSimulation.resize(objectParamsList->objectParams.size(), nullptr);
 	//GPUTMeshes.resize(objectParamsList.objectParams.size(), nullptr);
 	//#ifdef KEEP_MESHFRAME_MESHES
 	//	tMeshesMF.resize(objectParamsList.objectParams.size(), nullptr);
@@ -46,7 +46,7 @@ void BaseClothPhsicsFramework::initialize()
 
 
 		TriMeshFEM::SharedPtr pTriMesh = initializeMaterial(objectParamsList->objectParams[iMesh], basePhysicsParams, this);
-		baseTriMeshes[iMesh] = pTriMesh;
+		baseTriMeshesForSimulation[iMesh] = pTriMesh;
 
 		std::cout << "Added " << objectParamsList->objectParams[iMesh]->materialName
 			<< " trimesh: " << objectParamsList->objectParams[iMesh]->path << "\n"
@@ -63,14 +63,14 @@ void BaseClothPhsicsFramework::initialize()
 	initializeCollider();
 
 	pClothContactDetector = std::make_shared<ClothContactDetector>(pClothContactDetectorParameters);
-	triMeshesForContactDetection = baseTriMeshes;
+	triMeshesAll = baseTriMeshesForSimulation;
 
 	for (int i = 0; i < colliderMeshes.size(); i++)
 	{
-		triMeshesForContactDetection.push_back(colliderMeshes[i]);
+		triMeshesAll.push_back(colliderMeshes[i]);
 	}
 
-	pClothContactDetector->initialize(triMeshesForContactDetection);
+	pClothContactDetector->initialize(triMeshesAll);
 }
 
 void GAIA::BaseClothPhsicsFramework::initializeCollider()
@@ -112,7 +112,7 @@ ColliderTrimeshBase::SharedPtr GAIA::BaseClothPhsicsFramework::createColliderMes
 void GAIA::BaseClothPhsicsFramework::initializeViewer()
 {
 	BasePhysicFramework::initializeViewer();
-	pViewer->registerTrimeshes(triMeshesForContactDetection);
+	pViewer->registerTrimeshes(triMeshesAll);
 
 }
 
@@ -127,7 +127,7 @@ void BaseClothPhsicsFramework::writeOutputs(std::string outFolder, int frameId)
 
 	if (basePhysicsParams->outputExt == "ply")
 	{
-		writeAllToPLY(outFile.c_str(), baseTriMeshes, basePhysicsParams->saveAllModelsTogether);
+		writeAllToPLY(outFile.c_str(), baseTriMeshesForSimulation, basePhysicsParams->saveAllModelsTogether);
 	}
 	else if (basePhysicsParams->outputExt == "obj") {
 		// writeAllToObj(outFile.c_str(), getSoftBodies(), physicsAllParams.pPhysicsParams.saveAllModelsTogether);
