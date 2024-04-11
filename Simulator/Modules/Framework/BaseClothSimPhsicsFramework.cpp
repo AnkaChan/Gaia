@@ -116,6 +116,11 @@ void GAIA::BaseClothPhsicsFramework::initializeViewer()
 
 }
 
+void GAIA::BaseClothPhsicsFramework::updateCollider()
+{
+	pDynamicCollider->updateColliderMeshes(frameId, substep, iIter);
+}
+
 void BaseClothPhsicsFramework::writeOutputs(std::string outFolder, int frameId)
 {
 	std::ostringstream aSs;
@@ -168,4 +173,16 @@ void GAIA::BaseClothPhsicsFramework::recoverFromState(std::string& stateFile)
 	//	pCCD->updateBVH(RTC_BUILD_QUALITY_LOW);
 	//}
 }
+
+void GAIA::BaseClothPhsicsFramework::setSimulatedMeshToUpToDateStatus(bool updated)
+{
+	for (IdType iMesh = 0; iMesh < baseTriMeshesForSimulation.size(); iMesh++)
+	{
+		if (baseTriMeshesForSimulation[iMesh]->activeForSim) {
+			baseTriMeshesForSimulation[iMesh]->updated = updated;
+		}
+	}
+}
+
+
 

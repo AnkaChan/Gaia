@@ -129,15 +129,18 @@ void GAIA::MeshClosestPointQuery::updateBVH(RTCBuildQuality sceneQuality)
     for (size_t iMesh = 0; iMesh < targetMeshes.size(); iMesh++)
     {
         // get the tet geom buffer
-        unsigned int geoId = iMesh;
-        RTCGeometry geom = rtcGetGeometry(targetMeshFacesScene, geoId);
+        if (targetMeshes[iMesh]->updated)
+        {
+            unsigned int geoId = iMesh;
+            RTCGeometry geom = rtcGetGeometry(targetMeshFacesScene, geoId);
 
-        rtcSetGeometryBuildQuality(geom, geomQuality);
-        //rtcUpdateGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, 0);
-        //rtcCommitGeometry(geom);
+            rtcSetGeometryBuildQuality(geom, geomQuality);
+            //rtcUpdateGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, 0);
+            //rtcCommitGeometry(geom);
 
-        rtcUpdateGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, 0);
-        rtcCommitGeometry(geom);
+            rtcUpdateGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, 0);
+            rtcCommitGeometry(geom);
+        }
     }
 
     rtcCommitScene(targetMeshFacesScene);

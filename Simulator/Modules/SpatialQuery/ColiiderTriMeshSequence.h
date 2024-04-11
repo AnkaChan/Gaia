@@ -32,6 +32,11 @@ namespace GAIA {
 			if (frameId != curFrameId && frameId >=0 && frameId < colliderParameters().meshFiles.size())
 			{
 				loadObj(colliderParameters().meshFiles[frameId]);
+				updated = true;
+			}
+			else
+			{
+				updated = false;
 			}
 		};
 		virtual void initialize(ColliderTrimeshBaseParams::SharedPtr inObjectParams) 

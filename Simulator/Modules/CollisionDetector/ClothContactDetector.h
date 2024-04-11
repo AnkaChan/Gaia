@@ -1,6 +1,9 @@
 #pragma once
 #include "../SpatialQuery/MeshClosestPointQuery.h"
 
+#define FV_CONTACT_PREALLOCATE 16
+
+
 namespace GAIA {
 	struct ClothContactDetector;
 	struct ClothContactDetectorParameters : public MeshClosestPointQueryParameters
@@ -16,6 +19,7 @@ namespace GAIA {
 		// if true, the contact detector will construct a BVH for the vertices
 		// FV query is equivalent to VF query, but it can be more efficient in some cases
 		bool supportFVQuery = true;
+		// bool caculateFaceMinDis = false;
 
 		bool fromJson(nlohmann::json& j) override;
 		bool toJson(nlohmann::json& j) override;
@@ -67,6 +71,14 @@ namespace GAIA {
 		}
 		FloatingType minDisToPrimitives;
 
+	};
+
+	// link face to VF contact stored by vertex
+	struct FVContactInfo
+	{
+		IdType meshIdVSide = -1;
+		IdType vertexId = -1;
+		IdType contactId = -1;
 	};
 
 	struct EEContactPointInfo
@@ -127,6 +139,23 @@ namespace GAIA {
 
 		void updateBVH(RTCBuildQuality sceneQuality = RTC_BUILD_QUALITY_REFIT);
 
+		void resetFaceContactInfo() 
+		{
+			for (size_t i = 0; i < faceMinDisToVertices.size(); i++){
+				for (size_t j = 0; j < faceMinDisToVertices[i].size(); j++){
+					faceMinDisToVertices[i][j] = pParams->maxQueryDis;
+					faceContactInfos[i][j].clear();
+				}
+			}
+		}
+
+		CPArrayStaticAtomic<FVContactInfo, FV_CONTACT_PREALLOCATE>& getFaceContactInfo(IdType meshId, IdType faceId)
+		{
+			return faceContactInfos[meshId][faceId];
+		}
+
+		CFloatingType getFaceMinDis(IdType meshId, IdType faceId) { return faceMinDisToVertices[meshId][faceId]; }
+
 		const ClothContactDetectorParameters& parameters() const
 		{
 			return *(ClothContactDetectorParameters*)pParams.get();
@@ -135,6 +164,9 @@ namespace GAIA {
 		RTCScene targetMeshEdgesScene;
 		// only used when supportFVQuery is true
 		RTCScene targetMeshVerticesScene;
+		// numMesh x numFaces
+		std::vector<std::vector<std::atomic<FloatingType>>> faceMinDisToVertices;
+		std::vector<std::vector<CPArrayStaticAtomic<FVContactInfo, FV_CONTACT_PREALLOCATE>>> faceContactInfos;
 
 	};
 

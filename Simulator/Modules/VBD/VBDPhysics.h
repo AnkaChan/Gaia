@@ -92,7 +92,7 @@ namespace GAIA {
 		void solveCollisionsSequentially();
 
 		void VBDStep(TetMeshFEM* pMesh, IdType vertexId);
-		void VBDStepWithCollision(TetMeshFEM* pMesh, IdType meshId, IdType vertexId, bool apply_friction = false);
+		void VBDStepWithCollisionDetection(TetMeshFEM* pMesh, IdType meshId, IdType vertexId, bool apply_friction = false);
 
 		void updateVelocities();
 		void updateVelocitiesGPU();

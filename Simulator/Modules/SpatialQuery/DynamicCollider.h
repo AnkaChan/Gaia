@@ -31,11 +31,16 @@ namespace GAIA {
 			colliderMeshes = meshes_in;
 		}
 
-		void updateColliderMeshes()
+		void updateColliderMeshes(IdType frameId, IdType substep, IdType iter)
 		{
+			for (int iColliderMesh = 0; iColliderMesh < colliderMeshes.size(); iColliderMesh++)
+			{
+				colliderMeshes[iColliderMesh]->update(frameId, substep, iter);
+			}
 		}
 
 		const DynamicColliderParameters::SharedPtr pQueryParams;
+		const BasePhysicsParams::SharedPtr pPhysicsParams;
 		std::vector<ColliderTrimeshBase::SharedPtr> colliderMeshes;
 	};
 

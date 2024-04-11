@@ -25,11 +25,15 @@ namespace GAIA {
         ColliderTrimeshBase::SharedPtr createColliderMesh(nlohmann::json& colliderMeshJsonParams);
         virtual void initializeViewer();
 
+        virtual void updateCollider();
+
 		virtual void writeOutputs(std::string outFolder, int frameId);
 		virtual void runStep()=0;
         virtual void recoverFromState(std::string& stateFile);
 
         size_t numSimulationMeshes() { return baseTriMeshesForSimulation.size(); };
+
+        virtual void setSimulatedMeshToUpToDateStatus(bool updated);
 
         std::vector<TriMeshFEM::SharedPtr> baseTriMeshesForSimulation;
         std::vector<ColliderTrimeshBase::SharedPtr> colliderMeshes;
