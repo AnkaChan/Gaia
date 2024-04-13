@@ -190,7 +190,7 @@ namespace GAIA {
 		static std::map<std::string, TriMeshTopology::SharedPtr> topologies;
 		static std::mutex topologies_lock;
 
-		bool updated = false;
+		bool updated = true;
 		bool activeForSim = true;
 	private:
 		int numVertices_;

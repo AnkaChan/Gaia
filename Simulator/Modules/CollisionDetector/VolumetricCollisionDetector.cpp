@@ -20,15 +20,15 @@ void countAllHits(const struct RTCFilterFunctionNArguments* args);
 
 void triangle_bounds_func(const struct RTCBoundsFunctionArguments* args)
 {
-    GAIA::TetMeshFEM* pMesh = (GAIA::TetMeshFEM*)args->geometryUserPtr;
+    GAIA::TriMeshForCollision* pMesh = (GAIA::TriMeshForCollision*)args->geometryUserPtr;
     embree::BBox3fa bounds = embree::empty;
 
-    const IdType* fVIds = pMesh->surfaceFacesTetMeshVIds().col(args->primID).data();
-    embree::Vec3fa a = embree::Vec3fa::loadu(pMesh->mVertPos.col(fVIds[0]).data());
+    const IdType* fVIds = pMesh->indexBuffer + 3 * args->primID;
+    embree::Vec3fa a = embree::Vec3fa::loadu(pMesh->posBuffer + 3 * fVIds[0]);
     bounds.extend(a);
-    a = embree::Vec3fa::loadu(pMesh->mVertPos.col(fVIds[1]).data());
+    a = embree::Vec3fa::loadu(pMesh->posBuffer + 3 * fVIds[1]);
     bounds.extend(a);
-    a = embree::Vec3fa::loadu(pMesh->mVertPos.col(fVIds[2]).data());
+    a = embree::Vec3fa::loadu(pMesh->posBuffer + 3 * fVIds[2]);
     bounds.extend(a);
    
     *(embree::BBox3fa*)args->bounds_o = bounds;
@@ -46,7 +46,7 @@ bool surfaceMeshClosestPointQueryFunc(RTCPointQueryFunctionArguments* args)
     SurfaceMeshCloestPointQueryResult* result = (SurfaceMeshCloestPointQueryResult*)args->userPtr;
     // TetMeshFEM* pTMQuery = result->pDCD->tMeshPtrs[result->idTMQuery].get();
 
-    VolumetricCollisionDetector* pColDet = result->pCollisionDetector;
+    TriMeshIntersectionDetector* pColDet = result->pCollisionDetector;
 
     assert(args->userPtr);
     const unsigned int geomID = args->geomID;
@@ -55,16 +55,15 @@ bool surfaceMeshClosestPointQueryFunc(RTCPointQueryFunctionArguments* args)
         return false;
     }
     const unsigned int primID = args->primID;
-    TetMeshFEM* pTMSearch = pColDet->tMeshPtrs[geomID].get();
+    const TriMeshForCollision& mesh = pColDet->meshes[geomID];
 
     embree::Vec3fa queryPt(args->query->x, args->query->y, args->query->z);
 
-    embree::Vec3ia face(pTMSearch->surfaceFacesTetMeshVIds()(0, primID),
-        pTMSearch->surfaceFacesTetMeshVIds()(1, primID), pTMSearch->surfaceFacesTetMeshVIds()(2, primID));
+    const IdType* fVIds = mesh.indexBuffer + 3 * args->primID;
 
-    embree::Vec3fa a = embree::Vec3fa::loadu(pTMSearch->mVertPos.col(face[0]).data());
-    embree::Vec3fa b = embree::Vec3fa::loadu(pTMSearch->mVertPos.col(face[1]).data());
-    embree::Vec3fa c = embree::Vec3fa::loadu(pTMSearch->mVertPos.col(face[2]).data());
+    embree::Vec3fa a = embree::Vec3fa::loadu(mesh.posBuffer + 3 * fVIds[0]);
+    embree::Vec3fa b = embree::Vec3fa::loadu(mesh.posBuffer + 3 * fVIds[1]);
+    embree::Vec3fa c = embree::Vec3fa::loadu(mesh.posBuffer + 3 * fVIds[2]);
 
     ClosestPointOnTriangleType pointType;
     embree::Vec3fa closestPtBarycentrics;
@@ -76,7 +75,7 @@ bool surfaceMeshClosestPointQueryFunc(RTCPointQueryFunctionArguments* args)
     {
         args->query->radius = d;
         result->closestFaceId = primID;
-        result->faceVIds << face.x, face.y, face.z;
+        result->faceVIds << fVIds[0], fVIds[1], fVIds[2];
         result->closestFaceId = primID;
         // compute back to deformed configuration
         result->closestPt << closestP.x, closestP.y, closestP.z;
@@ -91,14 +90,14 @@ bool surfaceMeshClosestPointQueryFunc(RTCPointQueryFunctionArguments* args)
     return false;
 }
 
-GAIA::VolumetricCollisionDetector::VolumetricCollisionDetector(const VolumetricCollisionParameters& in_params)
+GAIA::TriMeshIntersectionDetector::TriMeshIntersectionDetector(const TriMeshIntersectionDetectorParameters& in_params)
 	: params(in_params)
 {
 }
 
 void tritriCollideFunc(void* userPtr, RTCCollision* collisions, unsigned int num_collisions)
 {
-    VolumetricCollisionDetector* pVolColDec = (VolumetricCollisionDetector*)userPtr;
+    TriMeshIntersectionDetector* pVolColDec = (TriMeshIntersectionDetector*)userPtr;
     if (pVolColDec->tritriIntersectionResults.overFlow)
     {
         return;
@@ -110,16 +109,16 @@ void tritriCollideFunc(void* userPtr, RTCCollision* collisions, unsigned int num
     int meshId2 = collisions->geomID1;
     
 
-    TetMeshFEM::SharedPtr pTM1 = pVolColDec->tMeshPtrs[meshId1];
-    TetMeshFEM::SharedPtr pTM2 = pVolColDec->tMeshPtrs[meshId2];
+    const TriMeshForCollision & mesh1 = pVolColDec->meshes[meshId1];
+    const TriMeshForCollision & mesh2 = pVolColDec->meshes[meshId2];
     
     GAIA::TriTriIntersection intersection;
     intersection.setMeshIds(meshId1, meshId2);
-    const IdType* f1VIds = pTM1->surfaceFacesTetMeshVIds().col(fId1).data();
-    const IdType* f2VIds = pTM2->surfaceFacesTetMeshVIds().col(fId2).data();
+    const IdType* f1VIds = mesh1.getFaceVIds(fId1);
+    const IdType* f2VIds = mesh2.getFaceVIds(fId2);
 
 
-    bool intersectionResult = intersection.Intersect(fId1, fId2, f1VIds, f2VIds, pTM1->mVertPos, pTM2->mVertPos);
+    bool intersectionResult = intersection.Intersect(fId1, fId2, f1VIds, f2VIds, mesh1.posBuffer, mesh2.posBuffer);
 
     if (intersectionResult)
     {
@@ -167,63 +166,73 @@ void tritriCollideFunc(void* userPtr, RTCCollision* collisions, unsigned int num
 }
 
 
-void GAIA::VolumetricCollisionDetector::initialize(std::vector<std::shared_ptr<TetMeshFEM>> tMeshes)
+void GAIA::TriMeshIntersectionDetector::initialize(std::vector<TriMeshForCollision> meshes)
 {
 	device = rtcNewDevice(NULL);
-    tMeshPtrs = tMeshes;
+    meshes = std::move(meshes);
 
-    surfaceMeshScene = rtcNewScene(device);
-    rtcSetSceneFlags(surfaceMeshScene, RTC_SCENE_FLAG_DYNAMIC | RTC_SCENE_FLAG_ROBUST);
-    rtcSetSceneBuildQuality(surfaceMeshScene, RTC_BUILD_QUALITY_LOW);
+    triMeshIntersectionScene = rtcNewScene(device);
+    rtcSetSceneFlags(triMeshIntersectionScene, RTC_SCENE_FLAG_DYNAMIC | RTC_SCENE_FLAG_ROBUST);
+    rtcSetSceneBuildQuality(triMeshIntersectionScene, RTC_BUILD_QUALITY_LOW);
 
-    surfaceMeshSceneRayTracing = rtcNewScene(device);
-    rtcSetSceneFlags(surfaceMeshSceneRayTracing, RTC_SCENE_FLAG_DYNAMIC | RTC_SCENE_FLAG_ROBUST | RTC_SCENE_FLAG_CONTEXT_FILTER_FUNCTION);
-    rtcSetSceneBuildQuality(surfaceMeshSceneRayTracing, RTC_BUILD_QUALITY_LOW);
+    size_t numAllFace = 0;
 
-    for (int meshId = 0; meshId < tMeshes.size(); meshId++)
+    for (int meshId = 0; meshId < meshes.size(); meshId++)
     {
-        RTCGeometry geomRTC = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
-
-        rtcSetSharedGeometryBuffer(geomRTC,
-            RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, tMeshes[meshId]->mVertPos.data(), 0, 3 * sizeof(float),
-            tMeshes[meshId]->numVertices());
-
-        rtcSetSharedGeometryBuffer(geomRTC,
-            RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, tMeshes[meshId]->surfaceFacesTetMeshVIds().data(), 0, 3 * sizeof(unsigned),
-            tMeshes[meshId]->numSurfaceFaces());
-        rtcSetGeometryPointQueryFunction(geomRTC, surfaceMeshClosestPointQueryFunc);
-
-        rtcCommitGeometry(geomRTC);
-        rtcAttachGeometryByID(surfaceMeshSceneRayTracing, geomRTC, meshId);
-        rtcReleaseGeometry(geomRTC);
-
+        numAllFace += meshes[meshId].numFaces;
 
         RTCGeometry geom = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_USER);
-        rtcSetGeometryUserPrimitiveCount(geom, tMeshes[meshId]->numSurfaceFaces());
-        rtcSetGeometryUserData(geom, (void*)tMeshPtrs[meshId].get());
+        rtcSetGeometryUserPrimitiveCount(geom, meshes[meshId].numFaces);
+        rtcSetGeometryUserData(geom, (void*)&meshes[meshId]);
         rtcSetGeometryBoundsFunction(geom, triangle_bounds_func, nullptr);
         // rtcSetGeometryIntersectFunction(geom, triTriIntersectionFunc);
 
         rtcCommitGeometry(geom);
-        rtcAttachGeometryByID(surfaceMeshScene, geom, meshId);
+        rtcAttachGeometryByID(triMeshIntersectionScene, geom, meshId);
         rtcReleaseGeometry(geom);
 
         triangleIntersections.push_back(new TriangleCollisionResults[numSurfaceFaces(meshId)]);
-        pointInclusionTestResults.emplace_back();
-        pointInclusionTestResults.back().resize(tMeshPtrs[meshId]->numSurfaceVerts());
-
-        for (size_t iSV = 0; iSV < tMeshPtrs[meshId]->numSurfaceVerts(); iSV++)
-        {
-            PointInclusionRTCContext& context = pointInclusionTestResults.back()[iSV];
-            context.pVolCol = this;
-            context.numRayIntersections.resize(tMeshPtrs.size());
-        }
     }
 
-    tritriIntersectionResults.maxNumTriTriIntersections = params.numPreallocatedTritriIntersections;
-    tritriIntersectionResults.intersections.resize(params.numPreallocatedTritriIntersections);
-    rtcCommitScene(surfaceMeshScene);
-    rtcCommitScene(surfaceMeshSceneRayTracing);
+    tritriIntersectionResults.maxNumTriTriIntersections = params.tritriIntersectionsPreallocatedRatio* numAllFace;
+    tritriIntersectionResults.intersections.resize(tritriIntersectionResults.maxNumTriTriIntersections);
+    rtcCommitScene(triMeshIntersectionScene);
+
+    if (params.enbalePointInclusionTest)
+    {
+        triMeshSceneRayTracing = rtcNewScene(device);
+        rtcSetSceneFlags(triMeshSceneRayTracing, RTC_SCENE_FLAG_DYNAMIC | RTC_SCENE_FLAG_ROBUST | RTC_SCENE_FLAG_CONTEXT_FILTER_FUNCTION);
+        rtcSetSceneBuildQuality(triMeshSceneRayTracing, RTC_BUILD_QUALITY_LOW);
+        for (int meshId = 0; meshId < meshes.size(); meshId++)
+        {
+            RTCGeometry geomRTC = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
+
+            rtcSetSharedGeometryBuffer(geomRTC,
+                RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, meshes[meshId].posBuffer, 0, 3 * sizeof(float),
+                meshes[meshId].numVertices);
+
+            rtcSetSharedGeometryBuffer(geomRTC,
+                RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, meshes[meshId].indexBuffer, 0, 3 * sizeof(unsigned),
+                meshes[meshId].numFaces);
+            rtcSetGeometryPointQueryFunction(geomRTC, surfaceMeshClosestPointQueryFunc);
+
+            rtcCommitGeometry(geomRTC);
+            rtcAttachGeometryByID(triMeshSceneRayTracing, geomRTC, meshId);
+            rtcReleaseGeometry(geomRTC);
+
+            pointInclusionTestResults.emplace_back();
+            pointInclusionTestResults.back().resize(meshes[meshId].numFaces);
+
+            for (size_t iSV = 0; iSV < meshes[meshId].numVertices; iSV++)
+            {
+                PointInclusionRTCContext& context = pointInclusionTestResults.back()[iSV];
+                context.pVolCol = this;
+                context.numRayIntersections.resize(meshes.size());
+            }
+        }
+
+        rtcCommitScene(triMeshSceneRayTracing);
+    }
 
 
     // initialize pointsForInclusionTest as all the points
@@ -234,9 +243,9 @@ void GAIA::VolumetricCollisionDetector::initialize(std::vector<std::shared_ptr<T
     // }
 }      
 
-GAIA::VolumetricCollisionDetector::~VolumetricCollisionDetector()
+GAIA::TriMeshIntersectionDetector::~TriMeshIntersectionDetector()
 {
-    for (size_t iMesh = 0; iMesh < tMeshPtrs.size(); iMesh++)
+    for (size_t iMesh = 0; iMesh < meshes.size(); iMesh++)
     {
         for (size_t iF = 0; iF < numSurfaceFaces(iMesh); iF++)
         {
@@ -246,48 +255,49 @@ GAIA::VolumetricCollisionDetector::~VolumetricCollisionDetector()
     }
 }
 
-void GAIA::VolumetricCollisionDetector::updateBVH(RTCBuildQuality sceneQuality)
+void GAIA::TriMeshIntersectionDetector::updateBVH(RTCBuildQuality sceneQuality)
 {
     RTCBuildQuality surfaceGeomQuality = sceneQuality;
     if (sceneQuality == RTC_BUILD_QUALITY_REFIT) {
         sceneQuality = RTC_BUILD_QUALITY_LOW;
     }
-    rtcSetSceneBuildQuality(surfaceMeshSceneRayTracing, sceneQuality);
-    rtcSetSceneBuildQuality(surfaceMeshScene, sceneQuality);
+    rtcSetSceneBuildQuality(triMeshIntersectionScene, sceneQuality);
 
-
-    for (size_t iMesh = 0; iMesh < tMeshPtrs.size(); iMesh++)
+    for (size_t iMesh = 0; iMesh < meshes.size(); iMesh++)
     {
-        RTCGeometry geomTRCSurface = rtcGetGeometry(surfaceMeshSceneRayTracing, iMesh);
-        rtcSetGeometryBuildQuality(geomTRCSurface, surfaceGeomQuality);
-        rtcUpdateGeometryBuffer(geomTRCSurface, RTC_BUFFER_TYPE_VERTEX, 0);
-        rtcCommitGeometry(geomTRCSurface);
-
-        /*****************************************************************/
-
-        // RTCScene surfaceMeshScene = surfaceMeshScenes[iMesh];
 
         // update surface Mesh
-        RTCGeometry geomSurface = rtcGetGeometry(surfaceMeshScene, iMesh);
+        RTCGeometry geomSurface = rtcGetGeometry(triMeshIntersectionScene, iMesh);
         rtcSetGeometryBuildQuality(geomSurface, surfaceGeomQuality);
 
         rtcUpdateGeometryBuffer(geomSurface, RTC_BUFFER_TYPE_VERTEX, 0);
         rtcCommitGeometry(geomSurface);
     }
-    rtcCommitScene(surfaceMeshScene);
-    rtcCommitScene(surfaceMeshSceneRayTracing);
+    rtcCommitScene(triMeshIntersectionScene);
 
+    if (params.enbalePointInclusionTest)
+    {
+        rtcSetSceneBuildQuality(triMeshSceneRayTracing, sceneQuality);
+        for (size_t iMesh = 0; iMesh < meshes.size(); iMesh++)
+        {
+            RTCGeometry geomTRCSurface = rtcGetGeometry(triMeshSceneRayTracing, iMesh);
+            rtcSetGeometryBuildQuality(geomTRCSurface, surfaceGeomQuality);
+            rtcUpdateGeometryBuffer(geomTRCSurface, RTC_BUFFER_TYPE_VERTEX, 0);
+            rtcCommitGeometry(geomTRCSurface);
+        }
+        rtcCommitScene(triMeshSceneRayTracing);
+    }
 }
 
-void GAIA::VolumetricCollisionDetector::triangleIntersectionTest()
+void GAIA::TriMeshIntersectionDetector::triangleIntersectionTest()
 {
-    rtcCollide(surfaceMeshScene, surfaceMeshScene, tritriCollideFunc, this);
+    rtcCollide(triMeshIntersectionScene, triMeshIntersectionScene, tritriCollideFunc, this);
 }
 
-void GAIA::VolumetricCollisionDetector::clearTriangleIntersections()
+void GAIA::TriMeshIntersectionDetector::clearTriangleIntersections()
 {
     tritriIntersectionResults.clear();
-    for (size_t iMesh = 0; iMesh < tMeshPtrs.size(); iMesh++)
+    for (size_t iMesh = 0; iMesh < meshes.size(); iMesh++)
     {
         for (size_t iF = 0; iF < numSurfaceFaces(iMesh); iF++)
         {
@@ -296,12 +306,12 @@ void GAIA::VolumetricCollisionDetector::clearTriangleIntersections()
     }
 }
 
-void GAIA::VolumetricCollisionDetector::findTriangleIntersectionPolygons()
+void GAIA::TriMeshIntersectionDetector::findTriangleIntersectionPolygons()
 {
     typedef std::pair<int, int> WorkPair;
 
     std::vector<WorkPair> & allWorks = tritriIntersectionResults.collidedTriangles;
-    for (size_t iMesh = 0; iMesh < tMeshPtrs.size(); iMesh++)
+    for (size_t iMesh = 0; iMesh < meshes.size(); iMesh++)
     {
         for (size_t iF = 0; iF < numSurfaceFaces(iMesh); iF++)
         {
@@ -317,7 +327,7 @@ void GAIA::VolumetricCollisionDetector::findTriangleIntersectionPolygons()
     });
 }
 
-void GAIA::VolumetricCollisionDetector::clusterIntersectionPoints(int meshId, int triId)
+void GAIA::TriMeshIntersectionDetector::clusterIntersectionPoints(int meshId, int triId)
 {
     TriangleCollisionResults& triColRt = triangleIntersections[meshId][triId];
     triColRt.includedVerts = 0;
@@ -361,10 +371,10 @@ void GAIA::VolumetricCollisionDetector::clusterIntersectionPoints(int meshId, in
     ptsBary.row(2).array() += 1.f;
 
     Eigen::Matrix<float, 3, 3> triVMat;
-    IdType* faceVIds = tMeshPtrs[meshId]->getSurfaceFVIdsInTetMeshVIds(triId);
-    triVMat.col(0) = tMeshPtrs[meshId]->mVertPos.col(faceVIds[0]);
-    triVMat.col(1) = tMeshPtrs[meshId]->mVertPos.col(faceVIds[1]);
-    triVMat.col(2) = tMeshPtrs[meshId]->mVertPos.col(faceVIds[2]);
+    IdType* faceVIds = meshes[meshId].getFaceVIds(triId);
+    triVMat.col(0) << meshes[meshId].getVertex(faceVIds[0])[0], meshes[meshId].getVertex(faceVIds[0])[1], meshes[meshId].getVertex(faceVIds[0])[2];
+    triVMat.col(1) << meshes[meshId].getVertex(faceVIds[1])[0], meshes[meshId].getVertex(faceVIds[1])[1], meshes[meshId].getVertex(faceVIds[1])[2];
+    triVMat.col(2) << meshes[meshId].getVertex(faceVIds[2])[0], meshes[meshId].getVertex(faceVIds[2])[1], meshes[meshId].getVertex(faceVIds[2])[2];
 
     ptsT.block(0, 0, numIntersections * 2, 3) = (triVMat * ptsBary.block(0, 0, 3, numIntersections * 2)).transpose();
 
@@ -438,7 +448,7 @@ void countAllHits(const struct RTCFilterFunctionNArguments* args)
     assert(*args->valid == -1);
     PointInclusionRTCContext* context = (PointInclusionRTCContext*)args->context;
 
-    VolumetricCollisionDetector* pVolCol = context->pVolCol;
+    TriMeshIntersectionDetector* pVolCol = context->pVolCol;
     RTCRay* ray = (RTCRay*)args->ray;
     RTCHit* hit = (RTCHit*)args->hit;
     assert(args->N == 1);
@@ -466,11 +476,11 @@ void countAllHits(const struct RTCFilterFunctionNArguments* args)
 
 }
 
-void GAIA::VolumetricCollisionDetector::clearpointInclusionResults()
+void GAIA::TriMeshIntersectionDetector::clearpointInclusionResults()
 {
-    for (size_t iMesh = 0; iMesh < tMeshPtrs.size(); iMesh++)
+    for (size_t iMesh = 0; iMesh < meshes.size(); iMesh++)
     {
-        for (size_t iSV = 0; iSV < tMeshPtrs[iMesh]->numSurfaceVerts(); iSV++)
+        for (size_t iSV = 0; iSV < meshes[iMesh].numVertices; iSV++)
         {
             PointInclusionRTCContext& context = pointInclusionTestResults[iMesh][iSV];
             context.sucess = true;
@@ -480,18 +490,16 @@ void GAIA::VolumetricCollisionDetector::clearpointInclusionResults()
     }
 }
 
-void GAIA::VolumetricCollisionDetector::closestSurfacePtQuery(int iMesh, int iSV, int intersectingMeshId, SurfaceMeshCloestPointQueryResult * pResult)
+void GAIA::TriMeshIntersectionDetector::closestSurfacePtQuery(int iMesh, int vId, int intersectingMeshId, SurfaceMeshCloestPointQueryResult * pResult)
 {
-    PointInclusionRTCContext& pointInclusionContext = pointInclusionTestResults[iMesh][iSV];
-    TetMeshFEM* pTM = tMeshPtrs[iMesh].get();
-    IdType vId = pTM->surfaceVIds()[iSV];
-    Vec3 p = pTM->vertex(iSV);
-    TetMeshFEM* pTMIntersecting = tMeshPtrs[intersectingMeshId].get();
+    PointInclusionRTCContext& pointInclusionContext = pointInclusionTestResults[iMesh][vId];
+    const TriMeshForCollision& mesh = meshes[iMesh];
+    Vec3 p = mesh.getVertexVec3(vId);
 
     RTCPointQuery query;
-    query.x = pTM->mVertPos(0, vId);
-    query.y = pTM->mVertPos(1, vId);
-    query.z = pTM->mVertPos(2, vId);
+    query.x = p(0);
+    query.y = p(1);
+    query.z = p(2);
     query.radius = embree::inf;
     query.time = 0.f;
 
@@ -499,7 +507,7 @@ void GAIA::VolumetricCollisionDetector::closestSurfacePtQuery(int iMesh, int iSV
     pResult->pCollisionDetector = this;
     RTCPointQueryContext context;
     rtcInitPointQueryContext(&context);
-    rtcPointQuery(surfaceMeshSceneRayTracing, &query, &context, nullptr, (void*)pResult);
+    rtcPointQuery(triMeshSceneRayTracing, &query, &context, nullptr, (void*)pResult);
     //float dis = 1e30f;
 
     //for (size_t iSF = 0; iSF < pTMIntersecting->numSurfaceFaces(); ++iSF) {
@@ -534,12 +542,12 @@ void GAIA::VolumetricCollisionDetector::closestSurfacePtQuery(int iMesh, int iSV
     //}
 }
 
-void GAIA::VolumetricCollisionDetector::pointInclusionTest()
+void GAIA::TriMeshIntersectionDetector::pointInclusionTest()
 {
     
-    for (size_t iMesh = 0; iMesh < tMeshPtrs.size(); iMesh++)
+    for (size_t iMesh = 0; iMesh < meshes.size(); iMesh++)
     {
-        cpu_parallel_for(0, tMeshPtrs[iMesh]->numSurfaceVerts(), [&](int iSV) {
+        cpu_parallel_for(0, meshes[iMesh].numVertices, [&](int iSV) {
             PointInclusionRTCContext& context = pointInclusionTestResults[iMesh][iSV];
             rtcInitIntersectContext(&context);
             context.filter = countAllHits;
@@ -552,48 +560,51 @@ void GAIA::VolumetricCollisionDetector::pointInclusionTest()
             RTCRayHit rayhit;
             // caculate normal
             Vec3 normal;
-            tMeshPtrs[iMesh]->computeVertexNormal(iSV, normal);
-            rayhit.ray.dir_x = normal(0);
-            rayhit.ray.dir_y = normal(1);
-            rayhit.ray.dir_z = normal(2);
 
-            int surfaceVId = tMeshPtrs[iMesh]->surfaceVIds()(iSV);
-            Vec3 surfaceVert = tMeshPtrs[iMesh]->mVertPos.col(surfaceVId);
-            rayhit.ray.org_x = surfaceVert(0);
-            rayhit.ray.org_y = surfaceVert(1);
-            rayhit.ray.org_z = surfaceVert(2);
+            std::cout << "Normal computation is not implemented!!!";
+            RELEASE_ASSERT(false);
 
-            rayhit.ray.tnear = RAY_TRACING_NEAR;
-            rayhit.ray.tfar = embree::inf;
+            //meshes[iMesh]->computeVertexNormal(iSV, normal);
+            //rayhit.ray.dir_x = normal(0);
+            //rayhit.ray.dir_y = normal(1);
+            //rayhit.ray.dir_z = normal(2);
 
-            rtcIntersect1(surfaceMeshSceneRayTracing, &context, &rayhit);
+            //int surfaceVId = tMeshPtrs[iMesh]->surfaceVIds()(iSV);
+            //Vec3 surfaceVert = tMeshPtrs[iMesh]->mVertPos.col(surfaceVId);
+            //rayhit.ray.org_x = surfaceVert(0);
+            //rayhit.ray.org_y = surfaceVert(1);
+            //rayhit.ray.org_z = surfaceVert(2);
 
-            while (!context.sucess)
-            // keep looping till success
-            {
-                context.sucess = true;
-                context.numHits = 0;
-                context.numRayIntersections = VecDynamicI::Zero(context.numRayIntersections.rows(), 1);
+            //rayhit.ray.tnear = RAY_TRACING_NEAR;
+            //rayhit.ray.tfar = embree::inf;
 
-                Vec3 pertubatedNormal = normal + params.rayPertubation * Vec3::Random();
-                pertubatedNormal /= pertubatedNormal.norm();
-                rayhit.ray.dir_x = pertubatedNormal(0);
-                rayhit.ray.dir_y = pertubatedNormal(1);
-                rayhit.ray.dir_z = pertubatedNormal(2);
+            //rtcIntersect1(triMeshSceneRayTracing, &context, &rayhit);
 
-                rtcIntersect1(surfaceMeshSceneRayTracing, &context, &rayhit);
-            }
+            //while (!context.sucess)
+            //// keep looping till success
+            //{
+            //    context.sucess = true;
+            //    context.numHits = 0;
+            //    context.numRayIntersections = VecDynamicI::Zero(context.numRayIntersections.rows(), 1);
 
+            //    Vec3 pertubatedNormal = normal + params.rayPertubation * Vec3::Random();
+            //    pertubatedNormal /= pertubatedNormal.norm();
+            //    rayhit.ray.dir_x = pertubatedNormal(0);
+            //    rayhit.ray.dir_y = pertubatedNormal(1);
+            //    rayhit.ray.dir_z = pertubatedNormal(2);
+
+            //    rtcIntersect1(triMeshSceneRayTracing, &context, &rayhit);
+            //}
             
         });
     }
 
 }
 
-int GAIA::VolumetricCollisionDetector::numSurfaceFaces(int meshId)
-{ return tMeshPtrs[meshId]->numSurfaceFaces(); }
+int GAIA::TriMeshIntersectionDetector::numSurfaceFaces(int meshId)
+{ return meshes[meshId].numFaces; }
 
-Vec3 GAIA::VolumetricCollisionDetector::getIntersectionPosition(int iIntersection, int triId, int meshId)
+Vec3 GAIA::TriMeshIntersectionDetector::getIntersectionPosition(int iIntersection, int triId, int meshId)
 {
     Vec3 p = Vec3::Zero();
 
@@ -603,10 +614,10 @@ Vec3 GAIA::VolumetricCollisionDetector::getIntersectionPosition(int iIntersectio
     }
 
     Eigen::Matrix<float, 3, 3> triVMat;
-    IdType* faceVIds = tMeshPtrs[meshId]->getSurfaceFVIdsInTetMeshVIds(triId);
-    triVMat.col(0) = tMeshPtrs[meshId]->mVertPos.col(faceVIds[0]);
-    triVMat.col(1) = tMeshPtrs[meshId]->mVertPos.col(faceVIds[1]);
-    triVMat.col(2) = tMeshPtrs[meshId]->mVertPos.col(faceVIds[2]);
+    IdType* faceVIds = meshes[meshId].getFaceVIds(triId);
+    triVMat.col(0) = meshes[meshId].getVertexVec3(faceVIds[0]);
+    triVMat.col(1) = meshes[meshId].getVertexVec3(faceVIds[1]);
+    triVMat.col(2) = meshes[meshId].getVertexVec3(faceVIds[2]);
 
     p = triVMat * triangleIntersections[meshId][triId].intersectionPoints[iIntersection];
      

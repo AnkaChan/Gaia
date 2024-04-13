@@ -11,6 +11,7 @@
 #include "../common/math/affinespace.h"
 #include "../common/math/constants.h"
 
+#include "CollisionGeometry.h"
 #include "CollisionDetertionParameters.h"
 #include "TriangleTriangleIntersection.h"
 
@@ -21,8 +22,31 @@
 #include <atomic>
 
 namespace GAIA {
-    struct TetMeshFEM;
-	struct VolumetricCollisionDetector;
+	struct TriMeshIntersectionDetector;
+
+	struct TriMeshIntersectionDetectorParameters : public MF::BaseJsonConfig {
+		bool enbalePointInclusionTest = false;
+		FloatingType tritriIntersectionsPreallocatedRatio = 0.05f;
+		float mergeTolerance = 1e-4f;
+		float rayPertubation = 2e-2f;
+
+		virtual bool fromJson(nlohmann::json& physicsJsonParams) {
+			EXTRACT_FROM_JSON(physicsJsonParams, tritriIntersectionsPreallocatedRatio);
+			EXTRACT_FROM_JSON(physicsJsonParams, mergeTolerance);
+			EXTRACT_FROM_JSON(physicsJsonParams, rayPertubation);
+			EXTRACT_FROM_JSON(physicsJsonParams, enbalePointInclusionTest);
+
+			return true;
+		};
+		virtual bool toJson(nlohmann::json& physicsJsonParams) {
+			PUT_TO_JSON(physicsJsonParams, tritriIntersectionsPreallocatedRatio);
+			PUT_TO_JSON(physicsJsonParams, mergeTolerance);
+			PUT_TO_JSON(physicsJsonParams, rayPertubation);
+			PUT_TO_JSON(physicsJsonParams, enbalePointInclusionTest);
+
+			return true;
+		}
+	};
 
 	struct TriTriIntersectionResults {
 		void clear() {
@@ -46,7 +70,7 @@ namespace GAIA {
 
 	struct PointInclusionRTCContext : public RTCIntersectContext
 	{
-		VolumetricCollisionDetector* pVolCol;
+		TriMeshIntersectionDetector* pVolCol;
 		int numHits = 0;
 		// size is the number of meshes, each element record the number of ray intersections 
 		VecDynamicI numRayIntersections;
@@ -60,7 +84,7 @@ namespace GAIA {
 		Vec3I faceVIds;
 		int intersectingMeshId = -1;
 		int closestFaceId;
-		VolumetricCollisionDetector* pCollisionDetector;
+		TriMeshIntersectionDetector* pCollisionDetector;
 		ClosestPointOnTriangleType closestPointType;
 	};
 
@@ -85,11 +109,11 @@ namespace GAIA {
 
 	};
 
-	struct VolumetricCollisionDetector
+	struct TriMeshIntersectionDetector
 	{
-		VolumetricCollisionDetector(const VolumetricCollisionParameters& in_params);
-		~VolumetricCollisionDetector();
-		void initialize(std::vector<std::shared_ptr<TetMeshFEM>> tMeshes);
+		TriMeshIntersectionDetector(const TriMeshIntersectionDetectorParameters& in_params);
+		~TriMeshIntersectionDetector();
+		void initialize(std::vector<TriMeshForCollision> meshes);
 		void updateBVH( RTCBuildQuality sceneQuality);
 		// Do not run this for multiple meshes in parallel, but it can be run in parallel for all the surface triangles* of a mesh
 		
@@ -99,11 +123,10 @@ namespace GAIA {
 		void findTriangleIntersectionPolygons();
 		void clusterIntersectionPoints(int meshId, int triId);
 
-		// point inclusion test
+		// point inclusion test, only used for closed meshes
 		void clearpointInclusionResults();
 		void closestSurfacePtQuery(int iMesh, int iV, int intersectingMeshId, SurfaceMeshCloestPointQueryResult* pResult);
 		void pointInclusionTest();
-
 
 		int numSurfaceFaces(int meshId);
 		Vec3 getIntersectionPosition(int iIntersection, int triId, int meshId);
@@ -115,13 +138,13 @@ namespace GAIA {
 		std::vector<std::vector<PointInclusionRTCContext>> pointInclusionTestResults;
 
 
-		const VolumetricCollisionParameters& params;
-		std::vector<std::shared_ptr<TetMeshFEM>> tMeshPtrs;
+		const TriMeshIntersectionDetectorParameters& params;
+		std::vector<TriMeshForCollision> meshes;
 		//std::vector<std::vector<int>> pointsForInclusionTest;
 
 		//std::vector<RTCScene> surfaceMeshScenes;
-		RTCScene surfaceMeshScene = nullptr;
-		RTCScene surfaceMeshSceneRayTracing = nullptr;
+		RTCScene triMeshIntersectionScene = nullptr;
+		RTCScene triMeshSceneRayTracing = nullptr;
 		RTCDevice device = nullptr;
 
 

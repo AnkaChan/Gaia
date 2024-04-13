@@ -38,10 +38,10 @@ namespace GAIA {
 			p = vs[0] * bary[0] + vs[1] * bary[1] + vs[2] * (1- bary[0]- bary[1]);
 		}
 		
-		TriData(const IdType* fVIds, const TVerticesMat& verts) {
-			vs[0] = verts.col(fVIds[0]);
-			vs[1] = verts.col(fVIds[1]);
-			vs[2] = verts.col(fVIds[2]);
+		TriData(const IdType* fVIds, const FloatingType* verts) {
+			vs[0] << verts[3 * fVIds[0]], verts[3 * fVIds[0] + 1], verts[3 * fVIds[0] + 2];
+			vs[1] << verts[3 * fVIds[1]], verts[3 * fVIds[1] + 1], verts[3 * fVIds[1] + 2];
+			vs[2] << verts[3 * fVIds[2]], verts[3 * fVIds[2] + 1], verts[3 * fVIds[2] + 2];
 		}
 		const Vec3& Normal() { return n; }
 		int OutVerts() { return outVerts; }
@@ -175,14 +175,15 @@ namespace GAIA {
 			return twoEndsMask;
 		}
 
-		bool Intersect(IdType fVId1, IdType fVId2, const IdType* fVIds1, const IdType* fVIds2, const TVerticesMat & verts1, const TVerticesMat& verts2);
+		bool Intersect(IdType fVId1, IdType fVId2, const IdType* fVIds1, const IdType* fVIds2, const FloatingType * verts1, const FloatingType* verts2);
 		IdType maxIndex(const Vec3& v) {
 			int maxId = v[0] > v[1] ? 0 : 1;
 			maxId = v[maxId] > v[2] ? maxId : 2;
 			return maxId;
 		}
 	};
-	inline bool GAIA::TriTriIntersection::Intersect(IdType fVId1, IdType fVId2, const IdType* fVIds1, const IdType* fVIds2, const TVerticesMat& verts1, const TVerticesMat& verts2)
+	inline bool GAIA::TriTriIntersection::Intersect(IdType fVId1, IdType fVId2, const IdType* fVIds1, const IdType* fVIds2,
+		const FloatingType* verts1, const FloatingType* verts2)
 	{
 		for (int iFV1 = 0; iFV1 < 3; iFV1++)
 		{
@@ -193,7 +194,6 @@ namespace GAIA {
 				}
 			}
 		}
-
 
 		TriData ta(fVIds1, verts1);
 		TriData tb(fVIds2, verts2);

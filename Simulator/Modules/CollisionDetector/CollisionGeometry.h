@@ -11,6 +11,46 @@
 
 namespace GAIA {
 
+	struct TriMeshForCollision
+	{
+		TriMeshForCollision(TetMeshFEM* PTetMesh)
+			: posBuffer(PTetMesh->vertices().data())
+			, indexBuffer(PTetMesh->surfaceFacesTetMeshVIds().data())
+			, numVertices(PTetMesh->numVertices())
+			, numFaces(PTetMesh->numSurfaceFaces())
+		{
+
+		}
+		TriMeshForCollision(TriMeshFEM* pTriMesh) 
+			: posBuffer(pTriMesh->positions().data())
+			, indexBuffer(pTriMesh->facePos.data())
+			, numVertices(pTriMesh->numVertices())
+			, numFaces(pTriMesh->numFaces())
+		{
+
+		}
+
+		IdType* getFaceVIds(IdType faceId) const
+		{
+			return (IdType*)(indexBuffer + 3 * faceId);
+		}
+
+		FloatingType* getVertex(IdType vertexId) const
+		{
+			return (FloatingType*)(posBuffer + 3 * vertexId);
+		}
+
+		Vec3 getVertexVec3(IdType vertexId) const
+		{
+			return Vec3(posBuffer[3 * vertexId], posBuffer[3 * vertexId + 1], posBuffer[3 * vertexId + 2]);
+		}
+
+		FloatingType* posBuffer;
+		const IdType* indexBuffer;
+		size_t numVertices;
+		size_t numFaces;
+	};
+
 	inline bool pointInTet(embree::Vec3fa const& p, embree::Vec3fa const& a, embree::Vec3fa const& b, embree::Vec3fa const& c, embree::Vec3fa const& d) {
 		const embree::Vec3fa AB = b - a;
 		const embree::Vec3fa AC = c - a;

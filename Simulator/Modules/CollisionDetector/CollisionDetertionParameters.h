@@ -40,24 +40,6 @@ namespace GAIA {
 		}
 	};
 
-	struct VolumetricCollisionParameters : public MF::BaseJsonConfig {
-		int numPreallocatedTritriIntersections = 262144 / 4;
-		float mergeTolerance = 1e-4f;
-		float rayPertubation = 2e-2f;
-
-		virtual bool fromJson(nlohmann::json& physicsJsonParams) {
-			EXTRACT_FROM_JSON(physicsJsonParams, numPreallocatedTritriIntersections);
-			EXTRACT_FROM_JSON(physicsJsonParams, mergeTolerance);
-
-			return true;
-		};
-		virtual bool toJson(nlohmann::json& physicsJsonParams) {
-			PUT_TO_JSON(physicsJsonParams, numPreallocatedTritriIntersections);
-			PUT_TO_JSON(physicsJsonParams, mergeTolerance);
-			return true;
-		}
-	};
-
 	struct CollisionDetectionParamters : public MF::BaseJsonConfig
 	{
 		// collision detection parameters
@@ -96,7 +78,6 @@ namespace GAIA {
 
 		// volumetric related collision
 		bool allowVolumetricCollision = false;
-		VolumetricCollisionParameters volCollisionParams;
 
 		virtual bool fromJson(nlohmann::json& collisionParam) {
 			EXTRACT_FROM_JSON(collisionParam, allowCCD);
