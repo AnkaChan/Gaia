@@ -1,24 +1,28 @@
 #pragma once
-#include "../SpatialQuery/MeshClosestPointQuery.h"
 
 #define FV_CONTACT_PREALLOCATE 16
+#define VF_CONTACT_PREALLOCATE 8
+#define EE_CONTACT_PREALLOCATE 8
+#include <embree3/rtcore.h>
 
+#include "../TriMesh/TriMesh.h"
+#include "../CollisionDetector/CollisionDetertionParameters.h"
 
 namespace GAIA {
 	struct ClothContactDetector;
-	struct ClothContactDetectorParameters : public MeshClosestPointQueryParameters
+	struct ClothContactDetectorParameters : public MF::BaseJsonConfig
 	{
 		typedef std::shared_ptr<ClothContactDetectorParameters> SharedPtr;
 		typedef ClothContactDetectorParameters* Ptr;
 		ClothContactDetectorParameters() {
 			// we need to record all the points inside the seach radius to caculate the contact force
-			onlyKeepClosest = false;
 			maxQueryDis = 0.4f;
 		}
 
 		// if true, the contact detector will construct a BVH for the vertices
 		// FV query is equivalent to VF query, but it can be more efficient in some cases
-		bool supportFVQuery = true;
+		bool supportFVQuery = false;
+		FloatingType maxQueryDis = 1.2;
 		// bool caculateFaceMinDis = false;
 
 		bool fromJson(nlohmann::json& j) override;
@@ -58,7 +62,7 @@ namespace GAIA {
 		int queryMeshId = -1;
 
 		// outputs
-		CPArray<VFContactPointInfo, NUM_QUERY_PRE_ALLOC> contactPts;
+		CPArray<VFContactPointInfo, VF_CONTACT_PREALLOCATE> contactPts;
 
 		void reset() {
 			minDisToPrimitives = std::numeric_limits<FloatingType>::max();
@@ -100,7 +104,7 @@ namespace GAIA {
 	};
 
 	struct ClothEEContactQueryResult {
-		CPArray<EEContactPointInfo, NUM_QUERY_PRE_ALLOC> contactPts;
+		CPArray<EEContactPointInfo, EE_CONTACT_PREALLOCATE> contactPts;
 
 		// query point info
 		ClothContactDetector* pContactDetector = nullptr;
@@ -126,7 +130,7 @@ namespace GAIA {
 		FloatingType minDisToPrimitives;
 	};
 
-	struct ClothContactDetector : public MeshClosestPointQuery
+	struct ClothContactDetector 
 	{
 		typedef std::shared_ptr<ClothContactDetector> SharedPtr;
 		typedef ClothContactDetector* Ptr;
@@ -161,13 +165,19 @@ namespace GAIA {
 			return *(ClothContactDetectorParameters*)pParams.get();
 		}
 
+	public:
+		ClothContactDetectorParameters::SharedPtr pParams;
+
 		RTCScene targetMeshEdgesScene;
 		// only used when supportFVQuery is true
 		RTCScene targetMeshVerticesScene;
 		// numMesh x numFaces
 		std::vector<std::vector<std::atomic<FloatingType>>> faceMinDisToVertices;
 		std::vector<std::vector<CPArrayStaticAtomic<FVContactInfo, FV_CONTACT_PREALLOCATE>>> faceContactInfos;
+		std::vector<TriMeshFEM::SharedPtr> targetMeshes;
 
+		RTCScene targetMeshFacesScene;
+		RTCDevice device;
 	};
 
 	void updateVFContactPointInfo(std::vector<std::shared_ptr<TriMeshFEM>>& meshPtrs, VFContactPointInfo& contactPointInfo);

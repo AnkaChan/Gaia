@@ -535,27 +535,45 @@ void verticesBoundsFunc(const struct RTCBoundsFunctionArguments* args)
 }
 
 GAIA::ClothContactDetector::ClothContactDetector(const ClothContactDetectorParameters::SharedPtr in_pParams)
-	: MeshClosestPointQuery(in_pParams)
+    : pParams(in_pParams)
 {
 
 }
 
 void GAIA::ClothContactDetector::initialize(std::vector<TriMeshFEM::SharedPtr> in_targetMeshes)
 {
-	MeshClosestPointQuery::initialize(in_targetMeshes);
+    targetMeshes = in_targetMeshes;
+
+    device = rtcNewDevice(NULL);
+
+    targetMeshFacesScene = rtcNewScene(device);
+    rtcSetSceneFlags(targetMeshFacesScene, RTC_SCENE_FLAG_ROBUST);
 
     for (size_t meshId = 0; meshId < targetMeshes.size(); meshId++)
     {
-        RTCGeometry geom = rtcGetGeometry(targetMeshFacesScene, meshId);
+        RTCGeometry geomRTC = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
 
-        //rtcSetGeometryPointQueryFunction(geom, triMeshVFRadiusQueryWithTopologyFilteringFunc);
-        rtcSetGeometryPointQueryFunction(geom, triMeshVFRadiusQueryWithTopologyFilteringAndFaceMinDisCaculatingFunc);
-        
-        rtcCommitGeometry(geom);
+        rtcSetSceneBuildQuality(targetMeshFacesScene, RTC_BUILD_QUALITY_MEDIUM);
+
+        rtcSetSharedGeometryBuffer(geomRTC,
+            RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, targetMeshes[meshId]->positions().data(), 0, 3 * sizeof(float),
+            targetMeshes[meshId]->numVertices());
+
+        rtcSetSharedGeometryBuffer(geomRTC,
+            RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, targetMeshes[meshId]->facePos.data(), 0, 3 * sizeof(unsigned),
+            targetMeshes[meshId]->numFaces());
+
+        rtcSetGeometryPointQueryFunction(geomRTC, triMeshVFRadiusQueryWithTopologyFilteringAndFaceMinDisCaculatingFunc);
+
+        rtcCommitGeometry(geomRTC);
+        rtcAttachGeometryByID(targetMeshFacesScene, geomRTC, meshId);
+        rtcReleaseGeometry(geomRTC);
 
         faceMinDisToVertices.emplace_back(targetMeshes[meshId]->numFaces());
         faceContactInfos.emplace_back(targetMeshes[meshId]->numFaces());
     }
+
+    rtcCommitScene(targetMeshFacesScene);
 
     // change the call back function for the targetMeshFacesScene to the VF query contact function
     rtcSetSceneFlags(targetMeshFacesScene, RTC_SCENE_FLAG_DYNAMIC | RTC_SCENE_FLAG_ROBUST);
@@ -697,8 +715,6 @@ bool GAIA::ClothContactDetector::contactQueryEE(IdType meshId, IdType eId, Cloth
 
 void GAIA::ClothContactDetector::updateBVH(RTCBuildQuality sceneQuality)
 {
-    MeshClosestPointQuery::updateBVH(sceneQuality);
-
     RTCBuildQuality geomQuality = sceneQuality;
     if (sceneQuality == RTC_BUILD_QUALITY_REFIT) {
         sceneQuality = RTC_BUILD_QUALITY_LOW;
@@ -710,14 +726,20 @@ void GAIA::ClothContactDetector::updateBVH(RTCBuildQuality sceneQuality)
 	{
         if (targetMeshes[meshId]->updated)
         {
-            RTCGeometry geom = rtcGetGeometry(targetMeshEdgesScene, meshId);
-            rtcSetGeometryBuildQuality(geom, geomQuality);
-            rtcUpdateGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, 0);
-            rtcCommitGeometry(geom);
+            RTCGeometry geomEdges = rtcGetGeometry(targetMeshEdgesScene, meshId);
+            rtcSetGeometryBuildQuality(geomEdges, geomQuality);
+            rtcUpdateGeometryBuffer(geomEdges, RTC_BUFFER_TYPE_VERTEX, 0);
+            rtcCommitGeometry(geomEdges);
+
+            RTCGeometry geomFaces = rtcGetGeometry(targetMeshFacesScene, meshId);
+            rtcSetGeometryBuildQuality(geomFaces, geomQuality);
+            rtcUpdateGeometryBuffer(geomFaces, RTC_BUFFER_TYPE_VERTEX, 0);
+            rtcCommitGeometry(geomFaces);
         }
 
 	}
     rtcCommitScene(targetMeshEdgesScene);
+    rtcCommitScene(targetMeshFacesScene);
 
     if (parameters().supportFVQuery)
     {
@@ -739,15 +761,15 @@ void GAIA::ClothContactDetector::updateBVH(RTCBuildQuality sceneQuality)
 
 bool GAIA::ClothContactDetectorParameters::fromJson(nlohmann::json& j)
 {
-    MeshClosestPointQueryParameters::fromJson(j);
     EXTRACT_FROM_JSON(j, supportFVQuery);
+    EXTRACT_FROM_JSON(j, maxQueryDis);
     return true;
 }
 
 bool GAIA::ClothContactDetectorParameters::toJson(nlohmann::json& j)
 {
-    MeshClosestPointQueryParameters::toJson(j);
     PUT_TO_JSON(j, supportFVQuery);
+    PUT_TO_JSON(j, maxQueryDis);
     return true;
 }
 

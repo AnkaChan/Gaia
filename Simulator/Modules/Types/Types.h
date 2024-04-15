@@ -25,9 +25,12 @@
 
 struct AbstractAsserter
 {
-	virtual void doAssert(const char* expr, const char* file, int line) const
+	virtual void doAssert(const char* expr, const char* file, int line, std::function<void()> debugFunc) const
 	{
 		std::cout << "Asserting now at " << expr << ", " << file << ", " << line << std::endl;
+
+		debugFunc();
+
 		char ignored = getchar();
 		exit(-1);
 	}
@@ -38,12 +41,13 @@ struct Local
 	const char* expr_;
 	const char* file_;
 	int line_;
-	Local(const char* ex, const char* file, int line)
-		: expr_(ex), file_(file), line_(line)
+	std::function<void()> debugFunc;
+	Local(const char* ex, const char* file, int line, std::function<void()> debugFunc_in = std::function<void()>())
+		: expr_(ex), file_(file), line_(line), debugFunc(debugFunc_in)
 	{ }
 	Local operator << (const AbstractAsserter& impl)
 	{
-		impl.doAssert(expr_, file_, line_);
+		impl.doAssert(expr_, file_, line_, debugFunc);
 		return *this;
 	}
 };
@@ -61,6 +65,11 @@ struct Local
 #define RELEASE_ASSERT( expr )\
   if( expr );\
   else Local(#expr, __FILE__, __LINE__ )\
+    << AbstractAsserter();
+
+#define RELEASE_ASSERT_WITH_FUNC( expr, debugFunc )\
+  if( expr );\
+  else Local(#expr, __FILE__, __LINE__, debugFunc)\
     << AbstractAsserter();
 
 
