@@ -210,7 +210,7 @@ void GAIA::BasePhysicFramework::initializeViewer()
 
 void GAIA::BasePhysicFramework::disableModelsLatterToAppear()
 {
-	for (int iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (int iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		TetMeshFEM* pTetMesh = basetetMeshes[iMesh].get();
 
@@ -224,7 +224,7 @@ void GAIA::BasePhysicFramework::disableModelsLatterToAppear()
 
 void GAIA::BasePhysicFramework::enableModels()
 {
-	for (int iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (int iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		TetMeshFEM* pTetMesh = basetetMeshes[iMesh].get();
 

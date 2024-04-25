@@ -20,6 +20,7 @@
 #include <Eigen/PardisoSupport>
 #endif
 
+
 //#define TURN_ON_SINGLE_THREAD_DEBUG
 #include "../Parallelization/CPUParallelization.h"
 
@@ -92,7 +93,7 @@ namespace GAIA {
 		void solveCollisionsSequentially();
 
 		void VBDStep(TetMeshFEM* pMesh, IdType vertexId);
-		void VBDStepWithCollisionDetection(TetMeshFEM* pMesh, IdType meshId, IdType vertexId, bool apply_friction = false);
+		void VBDStepWithCollision(TetMeshFEM* pMesh, IdType meshId, IdType vertexId, bool apply_friction = false);
 
 		void updateVelocities();
 		void updateVelocitiesGPU();
@@ -276,6 +277,7 @@ namespace GAIA {
 		NFloatingType evaluateMeritEnergy(NFloatingType& eInertia, NFloatingType& eElastic, bool elasticReady = false);
 		NFloatingType newtonLineSearch(const VecDynamic& dx, NFloatingType E0, FloatingType alpha,
 			FloatingType c, FloatingType tau, int maxNumIters, FloatingType& stepSizeOut);
+
 		//For GD solver
 		GD_SolverUtilities::SharedPtr pGDSolverUtilities;
 		void GDBackupPositions(bool sync, CFloatingType omega);

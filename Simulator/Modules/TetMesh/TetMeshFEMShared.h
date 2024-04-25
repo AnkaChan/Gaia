@@ -29,7 +29,6 @@ namespace GAIA {
 		typedef TetMeshFEMShared* Ptr;
 
 		// managed buffers for non-variant data
-
 		ManagedBuffer<FloatingTypeGPU>::SharedPtr tetRestVolumeBuffer;
 		ManagedBuffer<FloatingTypeGPU>::SharedPtr tetInvRestVolumeBuffer;
 		ManagedBuffer<FloatingTypeGPU>::SharedPtr vertexMassBuffer;

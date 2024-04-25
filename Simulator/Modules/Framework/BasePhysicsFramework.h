@@ -89,7 +89,7 @@ namespace GAIA {
 		virtual void debugPrint(int debugLvl, std::string info);
 		virtual void saveDebugState(const std::string customName, bool saveMesh=false, const std::string outfolder = "");
 
-		size_t numMeshes() { return basetetMeshes.size(); };
+		virtual size_t numTetMeshes() { return basetetMeshes.size(); };
 
 
 		// time and frames

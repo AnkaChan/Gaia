@@ -95,6 +95,8 @@ file(GLOB GAIA_SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TriMesh/**.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Parallelization/*.h"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Parallelization/*.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/SolverUtils/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/SolverUtils/*.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Parameters/*.h"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Parameters/*.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Parser/*.h"

@@ -88,6 +88,8 @@ namespace GAIA {
 	typedef Eigen::Matrix<FloatingType, 4, 1> Vec4;
 	typedef Eigen::Matrix<double, 3, 1> Vec3d;
 	typedef Eigen::Matrix<IdType, 3, 1> Vec3I;
+	typedef Eigen::Matrix<FloatingType, 6, 1> Vec6;
+	typedef Eigen::Matrix<FloatingType, 6, 6> Mat6;
 	typedef Eigen::Matrix<FloatingType, F_FLATTEN_DIMS, 1> Vec9;
 	typedef Eigen::Matrix<FloatingType, X_FLATTEN_DIMS, 1> Vec12;
 	typedef Eigen::Matrix<FloatingType, POINT_VEC_DIMS, POINT_VEC_DIMS> Mat3;

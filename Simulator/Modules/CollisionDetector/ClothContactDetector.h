@@ -1,6 +1,6 @@
 #pragma once
 
-#define FV_CONTACT_PREALLOCATE 16
+#define FV_CONTACT_PREALLOCATE 24
 #define VF_CONTACT_PREALLOCATE 8
 #define EE_CONTACT_PREALLOCATE 8
 #include <embree3/rtcore.h>

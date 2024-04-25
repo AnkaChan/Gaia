@@ -31,6 +31,8 @@ namespace GAIA {
 		virtual void runStep()=0;
         virtual void recoverFromState(std::string& stateFile);
 
+		virtual size_t numTriMeshes() { return baseTriMeshesForSimulation.size(); };
+
         size_t numSimulationMeshes() { return baseTriMeshesForSimulation.size(); };
 
         virtual void setSimulatedMeshToUpToDateStatus(bool updated);

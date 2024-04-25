@@ -48,6 +48,8 @@ namespace GAIA {
 
 		int fId1,  //  the nei triangle whose orientation matches (v1, v2)
 			fId2;  //  the nei triangle whose orientation matches (v2, v1)
+
+		int eV1FaceOrder[2], eV2FaceOrder[2]; // the order of the edge in the face's vertex list
 	};
 
 	struct TriMeshTopology
@@ -152,6 +154,22 @@ namespace GAIA {
 		size_t numRelevantBendings(IdType iV) const;
 		IdType getVertexIthRelevantBending(IdType iV, IdType bendingId) const;
 		IdType getVertexIthRelevantBendingOrder(IdType iV, IdType bendingId) const;
+		
+
+		void getEdgeVertexOrderInNeighborFace(int iE, int iNeighborFace, int& corner0, int& corner1) const {
+			const EdgeInfo& edgeInfo = pTopology->edgeInfos[iE];
+			if (0 != iNeighborFace && 1 != iNeighborFace) {
+				assert(false);
+			}
+
+			corner0 = edgeInfo.eV1FaceOrder[iNeighborFace];
+			corner1 = edgeInfo.eV2FaceOrder[iNeighborFace];
+		}
+
+		const EdgeInfo& getEdgeInfo(int eId) const
+		{
+			return pTopology->edgeInfos[eId];
+		}
 
 		std::vector<std::vector<int32_t>>& verticesColoringCategories() { return pTopology->verticesColoringCategories; }
 		std::vector<int32_t> globalColors{};

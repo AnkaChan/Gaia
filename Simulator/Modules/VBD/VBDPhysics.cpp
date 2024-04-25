@@ -224,7 +224,7 @@ void GAIA::VBDPhysics::initialize()
 	}
 
 	// initialize collision results
-	collisionResultsAll.resize(numMeshes());
+	collisionResultsAll.resize(numTetMeshes());
 	for (size_t iMesh = 0; iMesh < tMeshes.size(); iMesh++)
 	{
 		collisionResultsAll[iMesh].resize(basetetMeshes[iMesh]->surfaceVIds().size());
@@ -607,7 +607,7 @@ void GAIA::VBDPhysics::initializeGPU()
 	vertexAllParallelGroupsBuffer = std::make_shared<ManagedBuffer<int32_t>>(2 * numAllVertices, true);
 
 	size_t vertexAccumulate = 0;
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDBaseTetMesh::SharedPtr pMesh = tMeshes[iMesh];
 		for (size_t iV = 0; iV < pMesh->numVertices(); iV++)
@@ -640,7 +640,7 @@ void GAIA::VBDPhysics::initializeGPU()
 	vbdPhysicsDataGPUCPUBuffer.worldBounds[4] = physicsParams().worldBounds(1, 1);
 	vbdPhysicsDataGPUCPUBuffer.worldBounds[5] = physicsParams().worldBounds(2, 1);
 	vbdPhysicsDataGPUCPUBuffer.tetMeshes = tetMehesGPUBuffer->getGPUBuffer();
-	vbdPhysicsDataGPUCPUBuffer.numMeshes = numMeshes();
+	vbdPhysicsDataGPUCPUBuffer.numTetMeshes = numTetMeshes();
 	vbdPhysicsDataGPUCPUBuffer.useAccelerator = physicsParams().useAccelerator;
 	vbdPhysicsDataGPUCPUBuffer.useBlockJacobi = physicsParams().GDSolverUseBlockJacobi;
 
@@ -657,7 +657,7 @@ void GAIA::VBDPhysics::initializeGPU_cpuDebugData()
 		tetMehesGPUBuffer_forCPUDebug.push_back(pMesh->getGPUMesh_forCPUDebug());
 	}
 	vbdPhysicsDataGPU_forCPUDebug.tetMeshes = tetMehesGPUBuffer_forCPUDebug.data();
-	vbdPhysicsDataGPU_forCPUDebug.numMeshes = numMeshes();
+	vbdPhysicsDataGPU_forCPUDebug.numTetMeshes = numTetMeshes();
 
 	vbdPhysicsDataGPU_forCPUDebug.boundaryCollisionStiffness = physicsParams().boundaryCollisionStiffness;
 	vbdPhysicsDataGPU_forCPUDebug.boundaryFrictionDynamic = physicsParams().boundaryFrictionDynamic;
@@ -850,7 +850,7 @@ void GAIA::VBDPhysics::runStepGPU()
 		dcd();
 
 		TICK(timeCsmpInitialStep);
-		cpu_parallel_for(0, numMeshes(), [&](int iMesh) {
+		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
 			if (tMeshes[iMesh]->activeForMaterialSolve)
 			{
 				tMeshes[iMesh]->evaluateExternalForce();
@@ -930,7 +930,7 @@ void GAIA::VBDPhysics::runStepGPU()
 			//if (physicsParams().useAccelerator && acceleratorOmega != 1.f)
 			//{
 			//	// copy accelerated positions to vertPos
-			//	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+			//	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 			//	{
 			//		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 			//		CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->vertPosBuffer->getGPUBuffer(), pMesh->pTetMeshSharedBase->dxBuffer->getGPUBuffer(),
@@ -972,7 +972,7 @@ void GAIA::VBDPhysics::runStepGPU_allInOneSweep()
 		dcd();
 
 		TICK(timeCsmpInitialStep);
-		cpu_parallel_for(0, numMeshes(), [&](int iMesh) {
+		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
 			if (tMeshes[iMesh]->activeForMaterialSolve)
 			{
 				tMeshes[iMesh]->evaluateExternalForce();
@@ -1028,7 +1028,7 @@ void GAIA::VBDPhysics::runStepGPU_allInOneSweep()
 			if (physicsParams().useAccelerator && acceleratorOmega != 1.f)
 			{
 				// copy accelerated positions to vertPos
-				for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+				for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 				{
 					VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 					CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->vertPosBuffer->getGPUBuffer(), pMesh->pTetMeshSharedBase->dxBuffer->getGPUBuffer(),
@@ -1070,7 +1070,7 @@ void GAIA::VBDPhysics::runStepGPU_acceleratedGS()
 		dcd();
 
 		TICK(timeCsmpInitialStep);
-		cpu_parallel_for(0, numMeshes(), [&](int iMesh) {
+		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
 			if (tMeshes[iMesh]->activeForMaterialSolve)
 			{
 				tMeshes[iMesh]->evaluateExternalForce();
@@ -1176,7 +1176,7 @@ void GAIA::VBDPhysics::runStepGPU_GD()
 		//dcd();
 
 		TICK(timeCsmpInitialStep);
-		cpu_parallel_for(0, numMeshes(), [&](int iMesh) {
+		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
 			if (tMeshes[iMesh]->activeForMaterialSolve)
 			{
 				tMeshes[iMesh]->evaluateExternalForce();
@@ -1270,7 +1270,7 @@ void GAIA::VBDPhysics::runStepGPU_GD()
 				// //	<< " | e: " << e << " | eInertia: " << eInertia << " : eElastic: " << eElastic << std::endl;
 				// syncAllToCPUVertPosOnly(true);
 				// // compute line search
-				// cpu_parallel_for(0, numMeshes(), [&](int iMesh) {
+				// cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
 				// 	VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 				// 	pGDSolverUtilities->dxs[iMesh] = pMesh->vertices() - pGDSolverUtilities->previousPositionsForLineSearch[iMesh];
 				// });
@@ -1315,7 +1315,7 @@ void GAIA::VBDPhysics::runStepGPU_debugOnCPU()
 		dcd();
 
 		TICK(timeCsmpInitialStep);
-		cpu_parallel_for(0, numMeshes(), [&](int iMesh) {
+		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
 			if (tMeshes[iMesh]->activeForMaterialSolve)
 			{
 				tMeshes[iMesh]->evaluateExternalForce();
@@ -1379,7 +1379,7 @@ void GAIA::VBDPhysics::runStepGPUNoCollision()
 			});
 
 		TICK(timeCsmpInitialStep);
-		cpu_parallel_for(0, numMeshes(), [&](int iMesh) {
+		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
 			if (tMeshes[iMesh]->activeForMaterialSolve)
 			{
 				tMeshes[iMesh]->evaluateExternalForce();
@@ -1435,7 +1435,7 @@ void GAIA::VBDPhysics::runStepNewton()
 
 		// dcd();
 
-		cpu_parallel_for(0, numMeshes(), [&](int iMesh) {
+		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
 			if (tMeshes[iMesh]->activeForMaterialSolve)
 			{
 				tMeshes[iMesh]->evaluateExternalForce();
@@ -1578,7 +1578,7 @@ void GAIA::VBDPhysics::runStep_serialCollisionHandling()
 
 		dcd();
 
-		cpu_parallel_for(0, numMeshes(), [&](int iMesh) {
+		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
 			if (tMeshes[iMesh]->activeForMaterialSolve)
 			{
 				tMeshes[iMesh]->evaluateExternalForce();
@@ -1632,7 +1632,7 @@ void GAIA::VBDPhysics::runStep_hybridCollisionHandling()
 
 		dcd();
 
-		cpu_parallel_for(0, numMeshes(), [&](int iMesh) {
+		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
 			if (tMeshes[iMesh]->activeForMaterialSolve)
 			{
 				tMeshes[iMesh]->evaluateExternalForce();
@@ -2178,7 +2178,7 @@ void GAIA::VBDPhysics::updateCCDBVH(bool rebuildScene)
 
 void GAIA::VBDPhysics::updateAllCollisionInfos()
 {
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDBaseTetMesh* pTetMesh = tMeshes[iMesh].get();
 		cpu_parallel_for(0, pTetMesh->numVertices(), [&](int iV)
@@ -2463,7 +2463,7 @@ void GAIA::VBDPhysics::VBDStepWithCollision(TetMeshFEM* pMesh_, IdType meshId, I
 void GAIA::VBDPhysics::updateVelocities()
 {
 	// updateAllCollisionInfos();
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDBaseTetMesh* pMesh = tMeshes[iMesh].get();
 
@@ -3131,7 +3131,7 @@ void VBDPhysics::testGPUCollisionHandlingCode()
 	Vec3 forceCPU, forceGPU;
 	Mat3 hessianCPU, hessianGPU;
 
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDBaseTetMeshGPU* pTetMeshGPU = vbdPhysicsDataGPU_forCPUDebug.tetMeshes[iMesh];
 
@@ -3413,7 +3413,7 @@ void GAIA::VBDPhysics::outputPosVel()
 	std::string velFileName = prefix + ".vel";
 	std::ofstream posFile(posFileName, std::ios::binary);
 	std::ofstream velFile(velFileName, std::ios::binary);
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDBaseTetMesh* pTM = tMeshes[iMesh].get();
 		TVerticesMat velocity = (pTM->vertices() - pTM->positionsPrev()) / physicsParams().dt;
@@ -3442,7 +3442,7 @@ void GAIA::VBDPhysics::outputForces()
 	std::string collisionFileName = prefix + ".cf";
 	std::ofstream collisionFile(collisionFileName, std::ios::binary);
 
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		const auto& mf = MaterialForce[iMesh];
 		materialFile.write((char*)mf.data(), sizeof(FloatingType) * mf.size());
@@ -3461,7 +3461,7 @@ void GAIA::VBDPhysics::outputForces()
 
 void GAIA::VBDPhysics::clearForces()
 {
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		MaterialForce[iMesh].setZero();
 		InertiaForce[iMesh].setZero();
@@ -3480,7 +3480,7 @@ void GAIA::VBDPhysics::evaluateConvergence()
 
 	e = evaluateMeritEnergy(eInertia, eElastic);
 	FloatingType avgForceNorm = 0.f;
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 		cpu_parallel_for(0, pMesh->numVertices(), [&](int iVert) {
@@ -3514,7 +3514,7 @@ void GAIA::VBDPhysics::evaluateConvergence()
 		aSs << "ConvergenceEvaluation_Frame" << std::setfill('0') << std::setw(8) << frameId << "_iter" << std::setw(4) << iIter;
 		std::string outFile = outFolder + "/" + aSs.str() + ".json";
 
-		ConvergenceStats stats(numMeshes());
+		ConvergenceStats stats(numTetMeshes());
 		stats.energy[0] = e;
 		stats.energy_elastic[0] = eElastic;
 		stats.energy_inertia[0] = eInertia;
@@ -3531,7 +3531,7 @@ void GAIA::VBDPhysics::evaluateConvergenceGPU()
 
 	e = evaluateMeritEnergyGPU(eInertia, eElastic);
 	FloatingType avgForceNorm = 0.f;
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 		cpu_parallel_for(0, pMesh->numVertices(), [&](int iVert) {
@@ -3562,7 +3562,7 @@ void GAIA::VBDPhysics::evaluateConvergenceGPU()
 		aSs << "ConvergenceEvaluation_Frame" << std::setfill('0') << std::setw(8) << frameId << "_iter" << std::setw(4) << iIter;
 		std::string outFile = outFolder + "/" + aSs.str() + ".json";
 
-		ConvergenceStats stats(numMeshes());
+		ConvergenceStats stats(numTetMeshes());
 		stats.energy[0] = e;
 		stats.energy_elastic[0] = eElastic;
 		stats.energy_inertia[0] = eInertia;
@@ -3591,7 +3591,7 @@ FloatingType GAIA::VBDPhysics::getAcceleratorOmega(int order, CFloatingType pho,
 
 void GAIA::VBDPhysics::recordInitialPositionForAccelerator(bool sync)
 {
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		// write the intial position to the previousPositionsForLineSearch for the first line search
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
@@ -3613,7 +3613,7 @@ void GAIA::VBDPhysics::computeElasticForceHessian()
 	auto energyIter = &elasticEnergy[0];
 	auto forceIter = &elasticForce[0];
 	auto hessianIter = &elasticHessian[0];
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 		//cpu_parallel_for(0, pMesh->numTets(), [&](int iTet) {
@@ -3637,13 +3637,17 @@ void GAIA::VBDPhysics::computeElasticForceHessian()
 		//	forceIter++;
 		//	hessianIter++;
 		//}
+
+		energyIter += pMesh->numTets();
+		forceIter += pMesh->numTets();
+		hessianIter += pMesh->numTets();
 	}
 }
 
 void GAIA::VBDPhysics::computeElasticEnergy()
 {
 	auto energyIter = &elasticEnergy[0];
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 		cpu_parallel_for(0, pMesh->numTets(), [&](int iTet) {
@@ -3657,6 +3661,7 @@ void GAIA::VBDPhysics::fillNewtonSystem()
 {
 	newtonForce.setZero();
 	fillNewtonForce();
+
 	auto data_ptr = newtonHessian.valuePtr();
 	memset(data_ptr, 0, newtonHessian.nonZeros() * sizeof(FloatingType));
 	fillNewtonHessianDiagonal();
@@ -3668,7 +3673,7 @@ void GAIA::VBDPhysics::fillNewtonForce()
 {
 	NVec12* elasticForcePtr = &elasticForce[0];
 	NFloatingType* forcePtr = newtonForce.data();
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 		cpu_parallel_for(0, pMesh->numVertices(), [&](int iV) {
@@ -3694,7 +3699,7 @@ void GAIA::VBDPhysics::fillNewtonForce()
 void GAIA::VBDPhysics::fillNewtonHessianDiagonal()
 {
 	NMat12* elasticHessianPtr = &elasticHessian[0];
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 		cpu_parallel_for(0, pMesh->numVertices(), [&](int iV) {
@@ -3703,8 +3708,8 @@ void GAIA::VBDPhysics::fillNewtonHessianDiagonal()
 			if (!pMesh->fixedMask[iV])
 			{
 				// Elastic hessian
-				const size_t numNeiTest = pMesh->getNumVertexNeighborTets(iV);
-				for (size_t iNeiTet = 0; iNeiTet < numNeiTest; iNeiTet++) {
+				const size_t numNeiTets = pMesh->getNumVertexNeighborTets(iV);
+				for (size_t iNeiTet = 0; iNeiTet < numNeiTets; iNeiTet++) {
 					const auto tetId = pMesh->getVertexNeighborTet(iV, iNeiTet);
 					const auto vertedTetVId = pMesh->getVertexNeighborTetVertexOrder(iV, iNeiTet);
 					hessian += elasticHessianPtr[tetId].block<3, 3>(vertedTetVId * 3, vertedTetVId * 3);
@@ -3726,7 +3731,7 @@ void GAIA::VBDPhysics::fillNewtonHessianDiagonal()
 
 void GAIA::VBDPhysics::fillNewtonHessianOffDiagonal()
 {
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 		cpu_parallel_for(0, pMesh->numEdges(), [&](int iE) {
@@ -3736,8 +3741,8 @@ void GAIA::VBDPhysics::fillNewtonHessianOffDiagonal()
 			{
 				NMat3 hessian = NMat3::Zero();
 				// Elastic hessian
-				const size_t numNeiTest = pMesh->getNumEdgeNeighborTets(iE);
-				for (size_t iNeiTet = 0; iNeiTet < numNeiTest; iNeiTet++) {
+				const size_t numNeiTets = pMesh->getNumEdgeNeighborTets(iE);
+				for (size_t iNeiTet = 0; iNeiTet < numNeiTets; iNeiTet++) {
 					const auto tetId = pMesh->getEdgeNeighborTet(iE, iNeiTet);
 					int corner0, corner1;
 					pMesh->getEdgeNeighborTetVertexOrder(iE, iNeiTet, corner0, corner1);
@@ -3768,7 +3773,7 @@ void GAIA::VBDPhysics::fillNewtonHessianOffDiagonal()
 void GAIA::VBDPhysics::updatePositions(const VecDynamic& dx)
 {
 	int offset = 0;
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 		pMesh->vertices() += Eigen::Map<const TVerticesMat>(dx.data() + offset, 3, pMesh->numVertices());
@@ -3785,7 +3790,7 @@ GAIA::VBDPhysics::NFloatingType GAIA::VBDPhysics::evaluateMeritEnergy(NFloatingT
 		eElastic += e;
 	}
 	eInertia = 0;
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 		eInertia += pMesh->computeInertiaEnergy();
@@ -3799,8 +3804,8 @@ GAIA::VBDPhysics::NFloatingType GAIA::VBDPhysics::newtonLineSearch(const VecDyna
 	FloatingType m = dx.squaredNorm();
 
 	std::vector<TVerticesMat> orgPos{};
-	orgPos.reserve(numMeshes());
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	orgPos.reserve(numTetMeshes());
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		orgPos.push_back(tMeshes[iMesh]->vertices());
 	}
@@ -3815,7 +3820,7 @@ GAIA::VBDPhysics::NFloatingType GAIA::VBDPhysics::newtonLineSearch(const VecDyna
 	for (size_t iLineSearchIter = 0; iLineSearchIter < maxNumIters; iLineSearchIter++)
 	{
 		int offset = 0;
-		for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+		for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 		{
 			VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 			pMesh->vertices() = orgPos[iMesh] + alpha * Eigen::Map<const TVerticesMat>(dx.data() + offset, 3, pMesh->numVertices());
@@ -3851,7 +3856,7 @@ FloatingType GAIA::VBDPhysics::evaluateMeritEnergyGPU(FloatingType& eInertia, Fl
 	syncAllToCPUVertPosOnly(true);
 
 	eInertia = 0.f;
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 		eInertia += pMesh->computeInertiaEnergy();
@@ -3868,7 +3873,7 @@ FloatingType GAIA::VBDPhysics::evaluateMeritEnergyGPU(FloatingType& eInertia, Fl
 void GAIA::VBDPhysics::GDBackupPositions(bool sync, CFloatingType omega)
 {
 	pGDSolverUtilities->omegaPrev = omega;
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		// write the intial position to the previousPositionsForLineSearch for the first line search
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
@@ -3888,7 +3893,7 @@ void GAIA::VBDPhysics::GDBackupPositions(bool sync, CFloatingType omega)
 	}
 
 	//syncAllToCPUVertPosOnly(true);
-	//for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	//for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	//{
 	//	VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 	//	//pGDSolverUtilities->previousPositionsForLineSearchBuffer[iMesh]->toCPU(true, cudaStream);
@@ -3910,7 +3915,7 @@ void GAIA::VBDPhysics::GDBackupPositions(bool sync, CFloatingType omega)
 void GAIA::VBDPhysics::GDRevertToBackupPositions(bool sync, FloatingType& omega)
 {
 	omega = pGDSolverUtilities->omegaPrev;
-	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		// write the intial position to the previousPositionsForLineSearch for the first line search
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
@@ -3928,7 +3933,7 @@ void GAIA::VBDPhysics::GDRevertToBackupPositions(bool sync, FloatingType& omega)
 	}
 
 	//syncAllToCPUVertPosOnly(true);
-	//for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	//for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	//{
 	//	VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 	//	//pGDSolverUtilities->previousPositionsForLineSearchBuffer[iMesh]->toCPU(true, cudaStream);
@@ -3954,7 +3959,7 @@ FloatingType GAIA::VBDPhysics::GDLineSearch(GD_SolverUtilities::SharedPtr pGDSol
 {
 	//FloatingType m = 0;
 	//
-	//for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	//for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	//{
 	//	m += pGDSolverUtilities->dxs[iMesh].squaredNorm();
 	//}
@@ -3968,7 +3973,7 @@ FloatingType GAIA::VBDPhysics::GDLineSearch(GD_SolverUtilities::SharedPtr pGDSol
 	//	});
 	//for (size_t iLineSearchIter = 0; iLineSearchIter < maxNumIters; iLineSearchIter++)
 	//{
-	//	for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	//	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	//	{
 	//		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 	//		pMesh->vertices() = pGDSolverUtilities->previousPositionsForLineSearch[iMesh] 
@@ -3992,7 +3997,7 @@ FloatingType GAIA::VBDPhysics::GDLineSearch(GD_SolverUtilities::SharedPtr pGDSol
 	//}
 
 	//// write the solution to the previousPositionsForLineSearch for the next line search
-	//for (size_t iMesh = 0; iMesh < numMeshes(); iMesh++)
+	//for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	//{
 	//	VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 	//	pGDSolverUtilities->previousPositionsForLineSearch[iMesh] = pMesh->vertices();

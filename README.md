@@ -1,5 +1,7 @@
 # Gaia
 
+[\[Discord\]](https://discord.gg/BRRaSmRpkm "Gaia Engine")
+
 <img alt="teaser.gif" src="https://github.com/AnkaChan/Gaia/blob/main/teaser.gif?raw=true" data-hpc="true" class="Box-sc-g0xbh4-0 kzRgrI" height="256px">
 
 The Gaia engine is a C++ codebase primarily designed for physics-based simulations. It can be compiled as a standalone simulator or integrated into other applications as a third-party module.

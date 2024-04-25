@@ -477,10 +477,42 @@ void GAIA::TriMeshTopology::initialize(TriMeshFEM* pTriMesh, TriMeshParams* pObj
 		eInfo.fId1 = pE->halfedge()->face()->id();
 		eInfo.eV12Next = pE->halfedge()->he_next()->target()->id();
 
+		eInfo.eV1FaceOrder[0] = -1;
+		eInfo.eV2FaceOrder[0] = -1;
+		eInfo.eV1FaceOrder[1] = -1;
+		eInfo.eV2FaceOrder[1] = -1;
+
+		for (int  iFV = 0; iFV < 3; iFV++)
+		{
+			if (pTriMesh->facePosVId(eInfo.fId1, iFV) == eInfo.eV1)
+			{
+				eInfo.eV1FaceOrder[0] = iFV;
+			}
+
+			if (pTriMesh->facePosVId(eInfo.fId1, iFV) == eInfo.eV2)
+			{
+				eInfo.eV2FaceOrder[0] = iFV;
+			}
+		}
+		assert(eInfo.eV1FaceOrder[0] != -1 && eInfo.eV2FaceOrder[0] != -1);
+
 		if (!pE->boundary())
 		{
 			eInfo.eV21Next = pE->halfedge()->he_sym()->he_next()->target()->id();
 			eInfo.fId2 = pE->halfedge()->he_sym()->face()->id();
+			for (int iFV = 0; iFV < 3; iFV++)
+			{
+				if (pTriMesh->facePosVId(eInfo.fId2, iFV) == eInfo.eV1)
+				{
+					eInfo.eV1FaceOrder[1] = iFV;
+				}
+
+				if (pTriMesh->facePosVId(eInfo.fId2, iFV) == eInfo.eV2)
+				{
+					eInfo.eV2FaceOrder[1] = iFV;
+				}
+			}
+			assert(eInfo.eV1FaceOrder[1] != -1 && eInfo.eV2FaceOrder[1] != -1);
 		}
 		else
 		{
