@@ -179,6 +179,7 @@ void GAIA::TriMeshNewtonAssembler::initialize(std::vector<TriMeshFEM::SharedPtr>
 				}
 			}
 		}
+		meshOffsets.push_back(offset);
 		offset += pMesh->numVertices() * 3;
 	}
 	newtonHessian.resize(numAllVertices * 3, numAllVertices * 3);
@@ -188,12 +189,106 @@ void GAIA::TriMeshNewtonAssembler::initialize(std::vector<TriMeshFEM::SharedPtr>
 	elasticEnergy.resize(numAllTris);
 }
 
+void GAIA::TriMeshNewtonAssembler::analyzeCollision(const std::vector<std::vector<ClothVFContactQueryResult>>& vfCollisions, 
+	const std::vector<std::vector<ClothEEContactQueryResult>>& eeCollisions)
+{
+	newtonHessianTripletsVFCollision.clear();
+	newtonHessianTripletsEECollision.clear();
+
+	size_t numSimulatedMeshes = meshes.size();
+	for (IdType iMesh = 0; iMesh < vfCollisions.size(); iMesh++)
+	{
+		const std::vector<ClothVFContactQueryResult> vfCollisionsMesh = vfCollisions[iMesh];
+		for (IdType iV = 0; iV < vfCollisionsMesh.size(); iV++)
+		{
+			const ClothVFContactQueryResult& vfCollision = vfCollisionsMesh[iV];
+			for (IdType iVFContact = 0; iVFContact < vfCollision.contactPts.size(); iVFContact++)
+			{
+				const VFContactPointInfo& vfContact = vfCollision.contactPts[iVFContact];
+
+				CIdType contactVId = vfContact.contactVertexId;
+				CIdType contactVertexSideMeshId = vfContact.contactVertexSideMeshId;
+
+				IdType t0 = -1, t1 = -1, t2 = -1;
+				if (vfContact.contactFaceSideMeshId < numSimulatedMeshes)
+				{
+					const TriMeshFEM* pMeshFSide = meshes[vfContact.contactFaceSideMeshId].get();
+					IdType t0 = pMeshFSide->facePosVId(vfContact.contactFaceId, 0);
+					IdType t1 = pMeshFSide->facePosVId(vfContact.contactFaceId, 1);
+					IdType t2 = pMeshFSide->facePosVId(vfContact.contactFaceId, 2);
+				}
+				
+				IdType vs[4] = { contactVId, t0, t1, t2 };
+				IdType meshIds[4] = { contactVertexSideMeshId, vfContact.contactFaceSideMeshId, vfContact.contactFaceSideMeshId, vfContact.contactFaceSideMeshId };
+
+				for (IdType iRow = 0; iRow < 4; iRow++)
+				{
+					for (IdType iCol = 0; iCol < 4; iCol++)
+					{
+						if (vs[iCol] >=0 && vs[iRow] >= 0)
+						{
+							IdType vertPosRow = meshOffsets[meshIds[iRow]] + vs[iRow] * 3;
+							IdType vertPosCol = meshOffsets[meshIds[iCol]] + vs[iCol] * 3;
+
+							for (IdType i = 0; i < 3; ++i)
+							{
+								for (IdType j = 0; j < 3; ++j)
+								{
+									newtonHessianTripletsVFCollision.emplace_back(vertPosRow + i, vertPosCol + j, 1.0);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		const std::vector<ClothEEContactQueryResult> eeCollisionsMesh = eeCollisions[iMesh];
+
+		for (IdType iE = 0; iE < eeCollisions.size(); iE++)
+		{
+			const ClothEEContactQueryResult& eeCollision = eeCollisionsMesh[iE];
+			for (IdType iEEContact = 0; iEEContact < eeCollision.contactPts.size(); iEEContact++)
+			{
+				const EEContactPointInfo& eeContact = eeCollision.contactPts[iEEContact];
+				TriMeshFEM* pMesh = meshes[eeContact.contactMeshId1].get();
+
+				// we only care about the hessian of this side, the other side is handled by the collision results of other side
+				IdType vs[2] = { pMesh->getEdgeInfo(eeContact.contactEdgeId1).eV1, pMesh->getEdgeInfo(eeContact.contactEdgeId1).eV2};
+				IdType offset = meshOffsets[iMesh];
+
+				for (IdType iRow = 0; iRow < 2; iRow++)
+				{
+					for (IdType iCol = 0; iCol < 2; iCol++)
+					{
+						if (vs[iCol] >= 0 && vs[iRow] >= 0)
+						{
+							IdType vertPosRow = offset + vs[iRow] * 3;
+							IdType vertPosCol = offset + vs[iCol] * 3;
+							for (IdType i = 0; i < 3; ++i)
+							{
+								for (IdType j = 0; j < 3; ++j)
+								{
+									newtonHessianTripletsEECollision.emplace_back(vertPosRow + i, vertPosCol + j, 1.0);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+
+}
+
 void GAIA::TriMeshNewtonAssembler::makeHessian(bool makeCompressed)
 {
 	
 
 	std::vector<NTriplet> newtonHessianTripletsAll = newtonHessianTripletsElasticity;
-	newtonHessianTripletsAll.insert(newtonHessianTripletsAll.end(), newtonHessianTripletsCollision.begin(), newtonHessianTripletsCollision.end());
+	newtonHessianTripletsAll.insert(newtonHessianTripletsAll.end(), newtonHessianTripletsVFCollision.begin(), newtonHessianTripletsVFCollision.end());
+	newtonHessianTripletsAll.insert(newtonHessianTripletsAll.end(), newtonHessianTripletsEECollision.begin(), newtonHessianTripletsEECollision.end());
 
 	newtonHessian.setFromTriplets(newtonHessianTripletsElasticity.begin(), newtonHessianTripletsElasticity.end());
 	if (makeCompressed)

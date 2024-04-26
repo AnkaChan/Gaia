@@ -4,6 +4,8 @@
 #include "../TriMesh/TriMesh.h"
 #include "../TetMesh/TetMeshFEM.h"
 
+#include "../CollisionDetector/ClothContactDetector.h"
+
 #ifdef USE_MKL
 #include <Eigen/PardisoSupport>
 #endif
@@ -47,6 +49,14 @@ namespace GAIA {
 		// pointers to the off-diagonal blocks of the Hessian matrix, not necessarily corresponding to the edges
 		std::vector<std::vector<NFloatingType*>> offDiagonalHessianBlockPtrs{};
 
+		// pointers to the Hessian blocks corresponds to collision, not necessarily corresponding to the edges
+		// each VF collisoin has 4*3*3=36 elements
+		std::vector<std::vector<NFloatingType*>> VFCollisionHessianBlockPtrs{};
+		// each VF collisoin has 2*3*3=18 elements, it only corresponds to the edge of this side
+		// the vertices from the other side are handled by the other side
+		std::vector<std::vector<NFloatingType*>> EECollisionHessianBlockPtrs{};
+
+
 		NFloatingType newtonEnergy{};
 		NSpMat newtonHessian{};
 		NVecDynamic newtonForce{};
@@ -64,6 +74,7 @@ namespace GAIA {
 
 		int cgMaxIterations{ 300 };
 		FloatingType cgTolerance{ 1e-7 };
+		std::vector<IdType> meshOffsets{};
 	};
 
 	struct TetMeshNewtonAssembler : public BaseNewtonAssembler {
@@ -82,6 +93,10 @@ namespace GAIA {
 		// need to be called after each collision detection, it updates the collision Hessian and force
 		//void analyzeCollision(std::vector<TriMeshFEM::SharedPtr> meshes);
 
+
+		void analyzeCollision(const std::vector<std::vector<ClothVFContactQueryResult>>& vfCollisions,
+			const std::vector<std::vector<ClothEEContactQueryResult>>& eeCollisions);
+
 		// after calling initialize() and analyzeCollision(), call this function to make the Hessian matrix
 		void makeHessian(bool makeCompressed=false);
 
@@ -91,8 +106,12 @@ namespace GAIA {
 		std::vector<NVec9> elasticForce{};
 		std::vector<NVec12> bendingForce{};
 
-		std::vector<NTriplet> newtonHessianTripletsCollision;
-		std::vector<std::vector<NFloatingType*>> collisionHessianBlockPtrs{};
+		std::vector<NTriplet> newtonHessianTripletsVFCollision;
+		std::vector<NTriplet> newtonHessianTripletsEECollision;
+		
+		// pointers to the diagonal blocks of the Hessian matrix
+		// nMesh x nVertices x (nContact * 12 * 12)
+		// std::vector<std::vector<std::vector<NFloatingType*>>> vfCollisionHessianBlockPtrs{};
 
 		std::vector<TriMeshFEM::SharedPtr> meshes{};
 
