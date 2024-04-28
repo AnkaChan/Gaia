@@ -213,13 +213,13 @@ void GAIA::TriMeshNewtonAssembler::analyzeCollision(const std::vector<std::vecto
 				if (vfContact.contactFaceSideMeshId < numSimulatedMeshes)
 				{
 					const TriMeshFEM* pMeshFSide = meshes[vfContact.contactFaceSideMeshId].get();
-					IdType t0 = pMeshFSide->facePosVId(vfContact.contactFaceId, 0);
-					IdType t1 = pMeshFSide->facePosVId(vfContact.contactFaceId, 1);
-					IdType t2 = pMeshFSide->facePosVId(vfContact.contactFaceId, 2);
+					t0 = pMeshFSide->facePosVId(vfContact.contactFaceId, 0);
+					t1 = pMeshFSide->facePosVId(vfContact.contactFaceId, 1);
+					t2 = pMeshFSide->facePosVId(vfContact.contactFaceId, 2);
 				}
 				
-				IdType vs[4] = { contactVId, t0, t1, t2 };
-				IdType meshIds[4] = { contactVertexSideMeshId, vfContact.contactFaceSideMeshId, vfContact.contactFaceSideMeshId, vfContact.contactFaceSideMeshId };
+				IdType vs[4] = { t0, t1, t2, contactVId };
+				IdType meshIds[4] = {vfContact.contactFaceSideMeshId, vfContact.contactFaceSideMeshId, vfContact.contactFaceSideMeshId,contactVertexSideMeshId };
 
 				for (IdType iRow = 0; iRow < 4; iRow++)
 				{
@@ -253,23 +253,41 @@ void GAIA::TriMeshNewtonAssembler::analyzeCollision(const std::vector<std::vecto
 				const EEContactPointInfo& eeContact = eeCollision.contactPts[iEEContact];
 				TriMeshFEM* pMesh = meshes[eeContact.contactMeshId1].get();
 
-				// we only care about the hessian of this side, the other side is handled by the collision results of other side
-				IdType vs[2] = { pMesh->getEdgeInfo(eeContact.contactEdgeId1).eV1, pMesh->getEdgeInfo(eeContact.contactEdgeId1).eV2};
-				IdType offset = meshOffsets[iMesh];
+
+				IdType e2v1 = -1, e2v2 = -1;
+				if (eeContact.contactMeshId2 < numSimulatedMeshes)
+				{
+					TriMeshFEM* pMeshOtherSide = meshes[eeContact.contactMeshId2].get();
+					e2v1 = pMeshOtherSide->getEdgeInfo(eeContact.contactEdgeId2).eV1;
+					e2v2 = pMeshOtherSide->getEdgeInfo(eeContact.contactEdgeId2).eV2;
+				}
+
+				IdType vs[4] = {
+					pMesh->getEdgeInfo(eeContact.contactEdgeId1).eV1, pMesh->getEdgeInfo(eeContact.contactEdgeId1).eV2,
+					e2v1, e2v2
+				};
+				IdType meshIds[4] = { eeContact.contactMeshId1, eeContact.contactMeshId1, 
+					eeContact.contactMeshId2, eeContact.contactMeshId2 };
 
 				for (IdType iRow = 0; iRow < 2; iRow++)
 				{
-					for (IdType iCol = 0; iCol < 2; iCol++)
+					// we only care about the half of the off-diagonal hessian namely hessian(this side, all side), 
+					// the other half is handled by the collision results of other side
+					for (IdType iCol = 0; iCol < 4; iCol++)
 					{
 						if (vs[iCol] >= 0 && vs[iRow] >= 0)
 						{
-							IdType vertPosRow = offset + vs[iRow] * 3;
-							IdType vertPosCol = offset + vs[iCol] * 3;
-							for (IdType i = 0; i < 3; ++i)
+							if (vs[iRow] >= 0 && vs[iCol]>=0)
 							{
-								for (IdType j = 0; j < 3; ++j)
+								IdType vertPosRow = meshOffsets[meshIds[iRow]] + vs[iRow] * 3;
+								IdType vertPosCol = meshOffsets[meshIds[iCol]] + vs[iCol] * 3;
+
+								for (IdType i = 0; i < 3; ++i)
 								{
-									newtonHessianTripletsEECollision.emplace_back(vertPosRow + i, vertPosCol + j, 1.0);
+									for (IdType j = 0; j < 3; ++j)
+									{
+										newtonHessianTripletsEECollision.emplace_back(vertPosRow + i, vertPosCol + j, 1.0);
+									}
 								}
 							}
 						}

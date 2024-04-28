@@ -33,7 +33,8 @@ namespace GAIA {
 	using DirectSolverType = Eigen::PardisoLDLT<NSpMat>;
 	using CGSolverType = Eigen::ConjugateGradient<NSpMat, Eigen::Lower | Eigen::Upper>;
 #else
-	using DirectSolverType = Eigen::SimplicialLDLT<NSpMat>;
+	// using DirectSolverType = Eigen::SimplicialLDLT<NSpMat>;
+	using DirectSolverType = Eigen::SparseLU<NSpMat>;
 	using CGSolverType = Eigen::ConjugateGradient<NSpMat, Eigen::Lower | Eigen::Upper>;
 #endif
 
@@ -120,6 +121,13 @@ namespace GAIA {
 
 	};
 
-	
+	inline void addedToSparse3x3Block(NSpMat& m, IdType rowStart, IdType colStart, const Mat3 h) {
+		assert(rowStart >= 0 && colStart >= 0 && rowStart + 3 <= m.rows() && colStart + 3 <= m.cols());
+		for (IdType i = 0; i < 3; i++) {
+			for (IdType j = 0; j < 3; j++) {
+				m.coeffRef(rowStart + i, colStart + j) += h(i, j);
+			}
+		}
+	}
 
 }

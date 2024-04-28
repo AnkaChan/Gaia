@@ -37,6 +37,10 @@ namespace GAIA {
 
         virtual void setSimulatedMeshToUpToDateStatus(bool updated);
 
+		bool isSimulationMesh(IdType meshId) {
+			return meshId < baseTriMeshesForSimulation.size();
+		}
+
         std::vector<TriMeshFEM::SharedPtr> baseTriMeshesForSimulation;
         std::vector<ColliderTrimeshBase::SharedPtr> colliderMeshes;
 
