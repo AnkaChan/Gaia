@@ -59,7 +59,9 @@ namespace GAIA {
 
 
 		NFloatingType newtonEnergy{};
-		NSpMat newtonHessian{};
+		NSpMat newtonHessianElasticity{};
+		NSpMat newtonHessianCollision{};
+		NSpMat newtonHessianAll{};
 		NVecDynamic newtonForce{};
 		std::vector<NFloatingType> elasticEnergy{};
 		NFloatingType uselessHolder{};
@@ -67,8 +69,9 @@ namespace GAIA {
 		CGSolverType solverCG{};
 
 		NVecDynamic Ndx;
-
-		virtual void solve();
+		
+		void analyzePattern(bool makeCompressed = false);
+		virtual void solve(bool patternChanged);
 
 		// configurations
 		int solverType{ 0 };
@@ -97,9 +100,6 @@ namespace GAIA {
 
 		void analyzeCollision(const std::vector<std::vector<ClothVFContactQueryResult>>& vfCollisions,
 			const std::vector<std::vector<ClothEEContactQueryResult>>& eeCollisions);
-
-		// after calling initialize() and analyzeCollision(), call this function to make the Hessian matrix
-		void makeHessian(bool makeCompressed=false);
 
 		void updatePositions(const VecDynamic& dx);
 

@@ -61,17 +61,17 @@ inline void GAIA::TetMeshNewtonAssembler::initialize(std::vector<TetMeshFEM::Sha
 		}
 		offset += pMesh->numVertices() * 3;
 	}
-	newtonHessian.resize(numAllVertices * 3, numAllVertices * 3);
-	newtonHessian.setFromTriplets(newtonHessianTripletsElasticity.begin(), newtonHessianTripletsElasticity.end());
-	newtonHessian.makeCompressed();
+	newtonHessianAll.resize(numAllVertices * 3, numAllVertices * 3);
+	newtonHessianAll.setFromTriplets(newtonHessianTripletsElasticity.begin(), newtonHessianTripletsElasticity.end());
+	newtonHessianAll.makeCompressed();
 
 	if (solverType == 0)
 	{
-		solverDirect.analyzePattern(newtonHessian);
+		solverDirect.analyzePattern(newtonHessianAll);
 		
 	}
 	else {
-		solverCG.compute(newtonHessian);
+		solverCG.compute(newtonHessianAll);
 		solverCG.setMaxIterations(300);
 		solverCG.setTolerance(1e-7f);
 	}
@@ -87,7 +87,7 @@ inline void GAIA::TetMeshNewtonAssembler::initialize(std::vector<TetMeshFEM::Sha
 			{
 				for (int j = 0; j < 3; ++j)
 				{
-					diagonalHessianBlockPtrs[iMesh].push_back(&newtonHessian.coeffRef(vertPos + j, vertPos + i));
+					diagonalHessianBlockPtrs[iMesh].push_back(&newtonHessianAll.coeffRef(vertPos + j, vertPos + i));
 				}
 			}
 		}
@@ -99,14 +99,14 @@ inline void GAIA::TetMeshNewtonAssembler::initialize(std::vector<TetMeshFEM::Sha
 			{
 				for (int i = 0; i < 3; ++i)
 				{
-					offDiagonalHessianBlockPtrs[iMesh].push_back(&newtonHessian.coeffRef(vertPosi + i, vertPosj + j));
+					offDiagonalHessianBlockPtrs[iMesh].push_back(&newtonHessianAll.coeffRef(vertPosi + i, vertPosj + j));
 				}
 			}
 			for (int i = 0; i < 3; ++i)
 			{
 				for (int j = 0; j < 3; ++j)
 				{
-					offDiagonalHessianBlockPtrs[iMesh].push_back(&newtonHessian.coeffRef(vertPosj + j, vertPosi + i));
+					offDiagonalHessianBlockPtrs[iMesh].push_back(&newtonHessianAll.coeffRef(vertPosj + j, vertPosi + i));
 				}
 			}
 		}
@@ -182,11 +182,55 @@ void GAIA::TriMeshNewtonAssembler::initialize(std::vector<TriMeshFEM::SharedPtr>
 		meshOffsets.push_back(offset);
 		offset += pMesh->numVertices() * 3;
 	}
-	newtonHessian.resize(numAllVertices * 3, numAllVertices * 3);
+	newtonHessianElasticity.resize(numAllVertices * 3, numAllVertices * 3);
+	newtonHessianCollision.resize(numAllVertices * 3, numAllVertices * 3);
+	newtonHessianAll.resize(numAllVertices * 3, numAllVertices * 3);
+
 	newtonForce.resize(numAllVertices * 3);
 	elasticHessian.resize(numAllTris);
 	elasticForce.resize(numAllTris);
 	elasticEnergy.resize(numAllTris);
+
+	newtonHessianElasticity.setFromTriplets(newtonHessianTripletsElasticity.begin(), newtonHessianTripletsElasticity.end());
+	offset = 0;
+	for (int iMesh = 0; iMesh < meshes.size(); iMesh++)
+	{
+		diagonalHessianBlockPtrs[iMesh].clear();
+		offDiagonalHessianBlockPtrs[iMesh].clear();
+		TriMeshFEM::SharedPtr pMesh = meshes[iMesh];
+		for (int iV = 0; iV < pMesh->numVertices(); iV++)
+		{
+			int vertPos = offset + iV * 3;
+			for (int i = 0; i < 3; ++i)
+			{
+				for (int j = 0; j < 3; ++j)
+				{
+					diagonalHessianBlockPtrs[iMesh].push_back(&newtonHessianElasticity.coeffRef(vertPos + j, vertPos + i));
+				}
+			}
+		}
+		for (int iE = 0; iE < pMesh->numEdges(); iE++)
+		{
+			const EdgeInfo& edge = pMesh->getEdgeInfo(iE);
+			int vertPosi = offset + edge.eV1 * 3;
+			int vertPosj = offset + edge.eV2 * 3;
+			for (int j = 0; j < 3; ++j)
+			{
+				for (int i = 0; i < 3; ++i)
+				{
+					offDiagonalHessianBlockPtrs[iMesh].push_back(&newtonHessianElasticity.coeffRef(vertPosi + i, vertPosj + j));
+				}
+			}
+			for (int i = 0; i < 3; ++i)
+			{
+				for (int j = 0; j < 3; ++j)
+				{
+					offDiagonalHessianBlockPtrs[iMesh].push_back(&newtonHessianElasticity.coeffRef(vertPosj + j, vertPosi + i));
+				}
+			}
+		}
+		offset += pMesh->numVertices() * 3;
+	}
 }
 
 void GAIA::TriMeshNewtonAssembler::analyzeCollision(const std::vector<std::vector<ClothVFContactQueryResult>>& vfCollisions, 
@@ -296,75 +340,12 @@ void GAIA::TriMeshNewtonAssembler::analyzeCollision(const std::vector<std::vecto
 			}
 		}
 	}
-	
+	std::vector<NTriplet> newtonHessianTripletsAllCollisions = newtonHessianTripletsVFCollision;
+	newtonHessianTripletsAllCollisions.insert(newtonHessianTripletsAllCollisions.end(), newtonHessianTripletsEECollision.begin(), newtonHessianTripletsEECollision.end());
+	newtonHessianCollision.setFromTriplets(newtonHessianTripletsAllCollisions.begin(), newtonHessianTripletsAllCollisions.end());
 
 }
 
-void GAIA::TriMeshNewtonAssembler::makeHessian(bool makeCompressed)
-{
-	
-
-	std::vector<NTriplet> newtonHessianTripletsAll = newtonHessianTripletsElasticity;
-	newtonHessianTripletsAll.insert(newtonHessianTripletsAll.end(), newtonHessianTripletsVFCollision.begin(), newtonHessianTripletsVFCollision.end());
-	newtonHessianTripletsAll.insert(newtonHessianTripletsAll.end(), newtonHessianTripletsEECollision.begin(), newtonHessianTripletsEECollision.end());
-
-	newtonHessian.setFromTriplets(newtonHessianTripletsAll.begin(), newtonHessianTripletsAll.end());
-	if (makeCompressed)
-	{
-		newtonHessian.makeCompressed();
-	}
-
-	int offset = 0;
-	for (int iMesh = 0; iMesh < meshes.size(); iMesh++)
-	{
-		diagonalHessianBlockPtrs[iMesh].clear();
-		offDiagonalHessianBlockPtrs[iMesh].clear();
-		TriMeshFEM::SharedPtr pMesh = meshes[iMesh];
-		for (int iV = 0; iV < pMesh->numVertices(); iV++)
-		{
-			int vertPos = offset + iV * 3;
-			for (int i = 0; i < 3; ++i)
-			{
-				for (int j = 0; j < 3; ++j)
-				{
-					diagonalHessianBlockPtrs[iMesh].push_back(&newtonHessian.coeffRef(vertPos + j, vertPos + i));
-				}
-			}
-		}
-		for (int iE = 0; iE < pMesh->numEdges(); iE++)
-		{
-			const EdgeInfo& edge = pMesh->getEdgeInfo(iE);
-			int vertPosi = offset + edge.eV1 * 3;
-			int vertPosj = offset + edge.eV2 * 3;
-			for (int j = 0; j < 3; ++j)
-			{
-				for (int i = 0; i < 3; ++i)
-				{
-					offDiagonalHessianBlockPtrs[iMesh].push_back(&newtonHessian.coeffRef(vertPosi + i, vertPosj + j));
-				}
-			}
-			for (int i = 0; i < 3; ++i)
-			{
-				for (int j = 0; j < 3; ++j)
-				{
-					offDiagonalHessianBlockPtrs[iMesh].push_back(&newtonHessian.coeffRef(vertPosj + j, vertPosi + i));
-				}
-			}
-		}
-		offset += pMesh->numVertices() * 3;
-	}
-
-	if (solverType==0)
-	{
-		solverDirect.analyzePattern(newtonHessian);
-	}
-	else if (solverType == 1)
-	{
-		solverCG.compute(newtonHessian);
-		solverCG.setMaxIterations(cgMaxIterations);
-		solverCG.setTolerance(cgTolerance);
-	}
-}
 
 void GAIA::TriMeshNewtonAssembler::updatePositions(const VecDynamic& dx)
 {
@@ -377,11 +358,37 @@ void GAIA::TriMeshNewtonAssembler::updatePositions(const VecDynamic& dx)
 	}
 }
 
-void GAIA::BaseNewtonAssembler::solve()
+
+void GAIA::BaseNewtonAssembler::analyzePattern(bool makeCompressed)
 {
+	if (makeCompressed)
+	{
+		newtonHessianAll.makeCompressed();
+	}
+
 	if (solverType == 0)
 	{
-		solverDirect.factorize(newtonHessian);
+		solverDirect.analyzePattern(newtonHessianAll);
+	}
+	else if (solverType == 1)
+	{
+		solverCG.compute(newtonHessianAll);
+		solverCG.setMaxIterations(cgMaxIterations);
+		solverCG.setTolerance(cgTolerance);
+	}
+}
+
+void GAIA::BaseNewtonAssembler::solve(bool patternChanged)
+{
+	newtonHessianAll = newtonHessianElasticity + newtonHessianCollision;
+	if (patternChanged)
+	{
+		analyzePattern(false);
+	}
+
+	if (solverType == 0)
+	{
+		solverDirect.factorize(newtonHessianAll);
 		Ndx = solverDirect.solve(newtonForce);
 
 		if (solverDirect.info() != Eigen::Success)
@@ -392,7 +399,7 @@ void GAIA::BaseNewtonAssembler::solve()
 	}
 	else if (solverType == 1)
 	{
-		solverCG.compute(newtonHessian);
+		solverCG.compute(newtonHessianAll);
 		Ndx = solverCG.solve(newtonForce);
 
 		if (solverCG.info() != Eigen::Success)
