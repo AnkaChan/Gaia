@@ -308,7 +308,7 @@ void GAIA::TriMeshNewtonAssembler::makeHessian(bool makeCompressed)
 	newtonHessianTripletsAll.insert(newtonHessianTripletsAll.end(), newtonHessianTripletsVFCollision.begin(), newtonHessianTripletsVFCollision.end());
 	newtonHessianTripletsAll.insert(newtonHessianTripletsAll.end(), newtonHessianTripletsEECollision.begin(), newtonHessianTripletsEECollision.end());
 
-	newtonHessian.setFromTriplets(newtonHessianTripletsElasticity.begin(), newtonHessianTripletsElasticity.end());
+	newtonHessian.setFromTriplets(newtonHessianTripletsAll.begin(), newtonHessianTripletsAll.end());
 	if (makeCompressed)
 	{
 		newtonHessian.makeCompressed();

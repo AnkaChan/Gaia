@@ -121,10 +121,22 @@ namespace GAIA {
 
 	};
 
+
+	template<typename T>
+	inline bool isNull(const Eigen::SparseMatrix<T>& mat, int row, int col)
+	{
+		for (Eigen::SparseMatrix<T>::InnerIterator it(mat, col); it; ++it) {
+			if (it.row() == row) return false;
+		}
+		return true;
+	}
+
+
 	inline void addedToSparse3x3Block(NSpMat& m, IdType rowStart, IdType colStart, const Mat3 h) {
 		assert(rowStart >= 0 && colStart >= 0 && rowStart + 3 <= m.rows() && colStart + 3 <= m.cols());
 		for (IdType i = 0; i < 3; i++) {
 			for (IdType j = 0; j < 3; j++) {
+				assert(!isNull(m, rowStart + i, colStart + j));
 				m.coeffRef(rowStart + i, colStart + j) += h(i, j);
 			}
 		}
