@@ -18,9 +18,9 @@ namespace GAIA {
 			bowlCenter << 0, 0, 0;
 			gravity << 0, -10, 0;
 
-			worldBounds << -10, 10,
-				0, 20,
-				-10, 10;
+			worldBounds << -1e7f, 1e7f,
+				-1e7f, 1e7f,
+				-1e7f, 1e7f;
 		}
 
 		// basics

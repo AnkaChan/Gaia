@@ -57,7 +57,6 @@ void  GAIA::TriMeshFEM::initialize(TriMeshParams::SharedPtr inObjectParams, bool
 			assert(tempMesh.positions_.cols() == positions_.cols());
 			positions_ = tempMesh.positions_;
 
-			applyRotationScalingTranslation();
 		}
 		else if (fileParts.ext == ".json")
 		{
