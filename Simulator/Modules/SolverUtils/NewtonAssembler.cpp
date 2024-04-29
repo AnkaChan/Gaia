@@ -191,6 +191,14 @@ void GAIA::TriMeshNewtonAssembler::initialize(std::vector<TriMeshFEM::SharedPtr>
 	elasticForce.resize(numAllTris);
 	elasticEnergy.resize(numAllTris);
 
+	vfCollisionInfos.resize(meshes.size());
+	eeCollisionInfos.resize(meshes.size());
+	for (IdType iMesh = 0; iMesh < meshes.size(); iMesh++)
+	{
+		vfCollisionInfos[iMesh].resize(meshes[iMesh]->numVertices());
+		eeCollisionInfos[iMesh].resize(meshes[iMesh]->numEdges());
+	}
+
 	newtonHessianElasticity.setFromTriplets(newtonHessianTripletsElasticity.begin(), newtonHessianTripletsElasticity.end());
 	offset = 0;
 	for (int iMesh = 0; iMesh < meshes.size(); iMesh++)
@@ -383,7 +391,12 @@ void GAIA::BaseNewtonAssembler::solve(bool patternChanged)
 	newtonHessianAll = newtonHessianElasticity + newtonHessianCollision;
 	if (patternChanged)
 	{
+#ifdef USE_MKL
+		analyzePattern(true);
+#else
 		analyzePattern(false);
+#endif // USE_MKL
+
 	}
 
 	if (solverType == 0)

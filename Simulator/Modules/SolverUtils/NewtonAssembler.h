@@ -30,7 +30,8 @@ namespace GAIA {
 	using NTVerticesMat = Eigen::Matrix<NFloatingType, POINT_VEC_DIMS, Eigen::Dynamic>;
 
 #ifdef USE_MKL
-	using DirectSolverType = Eigen::PardisoLDLT<NSpMat>;
+	//using DirectSolverType = Eigen::PardisoLDLT<NSpMat>;
+	using DirectSolverType = Eigen::PardisoLU<NSpMat>;
 	using CGSolverType = Eigen::ConjugateGradient<NSpMat, Eigen::Lower | Eigen::Upper>;
 #else
 	// using DirectSolverType = Eigen::SimplicialLDLT<NSpMat>;
@@ -90,13 +91,19 @@ namespace GAIA {
 		size_t numAllTets{};
 	};
 
+	struct TriMeshCollisionInfoForNewton {
+		Vec3 normal;
+		Vec4 barys;
+		FloatingType lambda, d2E_dDdD;
+		bool contacting;
+	};
+
 	struct TriMeshNewtonAssembler : public BaseNewtonAssembler {
 		// only need to be called once per simulation, it initializes the elastic Hessian and force
 		// solverType: 0 for direct solverDirect, 1 for CG solverDirect
 		void initialize(std::vector<TriMeshFEM::SharedPtr> meshes_in, int solverType_in=0);
 		// need to be called after each collision detection, it updates the collision Hessian and force
 		//void analyzeCollision(std::vector<TriMeshFEM::SharedPtr> meshes);
-
 
 		void analyzeCollision(const std::vector<std::vector<ClothVFContactQueryResult>>& vfCollisions,
 			const std::vector<std::vector<ClothEEContactQueryResult>>& eeCollisions);
@@ -109,6 +116,9 @@ namespace GAIA {
 
 		std::vector<NTriplet> newtonHessianTripletsVFCollision;
 		std::vector<NTriplet> newtonHessianTripletsEECollision;
+
+		std::vector<std::vector<TriMeshCollisionInfoForNewton>> vfCollisionInfos{};
+		std::vector<std::vector<TriMeshCollisionInfoForNewton>> eeCollisionInfos{};
 		
 		// pointers to the diagonal blocks of the Hessian matrix
 		// nMesh x nVertices x (nContact * 12 * 12)
@@ -137,6 +147,7 @@ namespace GAIA {
 		for (IdType i = 0; i < 3; i++) {
 			for (IdType j = 0; j < 3; j++) {
 				assert(!isNull(m, rowStart + i, colStart + j));
+				//RELEASE_ASSERT(!isNull(m, rowStart + i, colStart + j));
 				m.coeffRef(rowStart + i, colStart + j) += h(i, j);
 			}
 		}

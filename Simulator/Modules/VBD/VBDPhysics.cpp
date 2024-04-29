@@ -3776,7 +3776,8 @@ void GAIA::VBDPhysics::updatePositions(const VecDynamic& dx)
 	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
-		pMesh->vertices() += Eigen::Map<const TVerticesMat>(dx.data() + offset, 3, pMesh->numVertices());
+		pMesh->vertices() += physicsParams().stepSize 
+			* Eigen::Map<const TVerticesMat>(dx.data() + offset, 3, pMesh->numVertices());
 		offset += pMesh->numVertices() * 3;
 	}
 }
