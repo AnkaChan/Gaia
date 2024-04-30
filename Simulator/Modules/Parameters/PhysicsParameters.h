@@ -101,6 +101,9 @@ namespace GAIA {
 		// rendering
 		std::string shaderFolderPath;
 
+		// newton
+		bool psd = true;
+
 		bool fromJson(nlohmann::json& physicsParam) {
 
 			PARSE_VEC3_INDEXED_BY_ROUND_BRACKET(physicsParam, gravity);
@@ -170,6 +173,7 @@ namespace GAIA {
 			EXTRACT_FROM_JSON(physicsParam, outputStatisticsStep);
 			EXTRACT_FROM_JSON(physicsParam, binaryModeVisualizationSteps);
 
+			EXTRACT_FROM_JSON(physicsParam, psd);
 			return true;
 		};
 
@@ -234,6 +238,8 @@ namespace GAIA {
 			PUT_TO_JSON(physicsParam, outputStatistics);
 			PUT_TO_JSON(physicsParam, outputStatisticsStep);
 			PUT_TO_JSON(physicsParam, binaryModeVisualizationSteps);
+
+			PUT_TO_JSON(physicsParam, psd);
 
 			return true;
 		};

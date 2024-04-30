@@ -68,7 +68,7 @@ inline void GAIA::TetMeshNewtonAssembler::initialize(std::vector<TetMeshFEM::Sha
 	if (solverType == 0)
 	{
 		solverDirect.analyzePattern(newtonHessianAll);
-		
+
 	}
 	else {
 		solverCG.compute(newtonHessianAll);
@@ -161,7 +161,7 @@ void GAIA::TriMeshNewtonAssembler::initialize(std::vector<TriMeshFEM::SharedPtr>
 		//off-diagonal blocks
 		for (int iE = 0; iE < pMesh->numEdges(); iE++)
 		{
-			const EdgeInfo & edge = pMesh->getEdgeInfo(iE);
+			const EdgeInfo& edge = pMesh->getEdgeInfo(iE);
 			int vertPosi = offset + edge.eV1 * 3;
 			int vertPosj = offset + edge.eV2 * 3;
 			for (int j = 0; j < 3; ++j)
@@ -239,9 +239,19 @@ void GAIA::TriMeshNewtonAssembler::initialize(std::vector<TriMeshFEM::SharedPtr>
 		}
 		offset += pMesh->numVertices() * 3;
 	}
+	if (solverType == 0)
+	{
+		solverDirect.analyzePattern(newtonHessianElasticity);
+	}
+	else if (solverType == 1)
+	{
+		solverCG.compute(newtonHessianElasticity);
+		solverCG.setMaxIterations(cgMaxIterations);
+		solverCG.setTolerance(cgTolerance);
+	}
 }
 
-void GAIA::TriMeshNewtonAssembler::analyzeCollision(const std::vector<std::vector<ClothVFContactQueryResult>>& vfCollisions, 
+void GAIA::TriMeshNewtonAssembler::analyzeCollision(const std::vector<std::vector<ClothVFContactQueryResult>>& vfCollisions,
 	const std::vector<std::vector<ClothEEContactQueryResult>>& eeCollisions)
 {
 	newtonHessianTripletsVFCollision.clear();
@@ -269,15 +279,15 @@ void GAIA::TriMeshNewtonAssembler::analyzeCollision(const std::vector<std::vecto
 					t1 = pMeshFSide->facePosVId(vfContact.contactFaceId, 1);
 					t2 = pMeshFSide->facePosVId(vfContact.contactFaceId, 2);
 				}
-				
+
 				IdType vs[4] = { t0, t1, t2, contactVId };
-				IdType meshIds[4] = {vfContact.contactFaceSideMeshId, vfContact.contactFaceSideMeshId, vfContact.contactFaceSideMeshId,contactVertexSideMeshId };
+				IdType meshIds[4] = { vfContact.contactFaceSideMeshId, vfContact.contactFaceSideMeshId, vfContact.contactFaceSideMeshId,contactVertexSideMeshId };
 
 				for (IdType iRow = 0; iRow < 4; iRow++)
 				{
 					for (IdType iCol = 0; iCol < 4; iCol++)
 					{
-						if (vs[iCol] >=0 && vs[iRow] >= 0)
+						if (vs[iCol] >= 0 && vs[iRow] >= 0)
 						{
 							IdType vertPosRow = meshOffsets[meshIds[iRow]] + vs[iRow] * 3;
 							IdType vertPosCol = meshOffsets[meshIds[iCol]] + vs[iCol] * 3;
@@ -318,7 +328,7 @@ void GAIA::TriMeshNewtonAssembler::analyzeCollision(const std::vector<std::vecto
 					pMesh->getEdgeInfo(eeContact.contactEdgeId1).eV1, pMesh->getEdgeInfo(eeContact.contactEdgeId1).eV2,
 					e2v1, e2v2
 				};
-				IdType meshIds[4] = { eeContact.contactMeshId1, eeContact.contactMeshId1, 
+				IdType meshIds[4] = { eeContact.contactMeshId1, eeContact.contactMeshId1,
 					eeContact.contactMeshId2, eeContact.contactMeshId2 };
 
 				for (IdType iRow = 0; iRow < 2; iRow++)
@@ -329,7 +339,7 @@ void GAIA::TriMeshNewtonAssembler::analyzeCollision(const std::vector<std::vecto
 					{
 						if (vs[iCol] >= 0 && vs[iRow] >= 0)
 						{
-							if (vs[iRow] >= 0 && vs[iCol]>=0)
+							if (vs[iRow] >= 0 && vs[iCol] >= 0)
 							{
 								IdType vertPosRow = meshOffsets[meshIds[iRow]] + vs[iRow] * 3;
 								IdType vertPosCol = meshOffsets[meshIds[iCol]] + vs[iCol] * 3;
@@ -386,9 +396,12 @@ void GAIA::BaseNewtonAssembler::analyzePattern(bool makeCompressed)
 	}
 }
 
-void GAIA::BaseNewtonAssembler::solve(bool patternChanged)
+void GAIA::BaseNewtonAssembler::solve(bool patternChanged, bool handleCollision)
 {
-	newtonHessianAll = newtonHessianElasticity + newtonHessianCollision;
+	if (handleCollision)
+	{
+		newtonHessianAll = newtonHessianElasticity + newtonHessianCollision;
+	}
 	if (patternChanged)
 	{
 #ifdef USE_MKL
@@ -401,7 +414,13 @@ void GAIA::BaseNewtonAssembler::solve(bool patternChanged)
 
 	if (solverType == 0)
 	{
-		solverDirect.factorize(newtonHessianAll);
+		if (handleCollision) {
+			solverDirect.factorize(newtonHessianAll);
+		}
+		else {
+			// solverDirect.analyzePattern(newtonHessianElasticity);
+			solverDirect.factorize(newtonHessianElasticity);
+		}
 		Ndx = solverDirect.solve(newtonForce);
 
 		if (solverDirect.info() != Eigen::Success)
@@ -412,7 +431,12 @@ void GAIA::BaseNewtonAssembler::solve(bool patternChanged)
 	}
 	else if (solverType == 1)
 	{
-		solverCG.compute(newtonHessianAll);
+		if (handleCollision) {
+			solverCG.compute(newtonHessianAll);
+		}
+		else {
+			solverCG.compute(newtonHessianElasticity);
+		}
 		Ndx = solverCG.solve(newtonForce);
 
 		if (solverCG.info() != Eigen::Success)
@@ -420,7 +444,8 @@ void GAIA::BaseNewtonAssembler::solve(bool patternChanged)
 			std::cerr << "CG solve failed. Error: " << solverCG.info() << std::endl;
 			//std::exit(-1);
 		}
-	} else
+	}
+	else
 	{
 		std::cout << "Error! Solver type not recognized!\n";
 		exit(1);

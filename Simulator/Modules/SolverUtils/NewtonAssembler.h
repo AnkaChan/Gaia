@@ -30,19 +30,19 @@ namespace GAIA {
 	using NTVerticesMat = Eigen::Matrix<NFloatingType, POINT_VEC_DIMS, Eigen::Dynamic>;
 
 #ifdef USE_MKL
-	//using DirectSolverType = Eigen::PardisoLDLT<NSpMat>;
-	using DirectSolverType = Eigen::PardisoLU<NSpMat>;
+	using DirectSolverType = Eigen::PardisoLDLT<NSpMat>;
+	// using DirectSolverType = Eigen::PardisoLU<NSpMat>;
 	using CGSolverType = Eigen::ConjugateGradient<NSpMat, Eigen::Lower | Eigen::Upper>;
 #else
-	// using DirectSolverType = Eigen::SimplicialLDLT<NSpMat>;
-	using DirectSolverType = Eigen::SparseLU<NSpMat>;
+	using DirectSolverType = Eigen::SimplicialLDLT<NSpMat>;
+	// using DirectSolverType = Eigen::SparseLU<NSpMat>;
 	using CGSolverType = Eigen::ConjugateGradient<NSpMat, Eigen::Lower | Eigen::Upper>;
 #endif
 
 	struct BaseNewtonAssembler {
 
 		size_t numAllVertices{};
-		size_t numAllEdges{};	
+		size_t numAllEdges{};
 
 		std::vector<NTriplet> newtonHessianTripletsElasticity;
 
@@ -70,9 +70,9 @@ namespace GAIA {
 		CGSolverType solverCG{};
 
 		NVecDynamic Ndx;
-		
+
 		void analyzePattern(bool makeCompressed = false);
-		virtual void solve(bool patternChanged);
+		virtual void solve(bool patternChanged, bool handleCollision);
 
 		// configurations
 		int solverType{ 0 };
@@ -84,7 +84,7 @@ namespace GAIA {
 
 	struct TetMeshNewtonAssembler : public BaseNewtonAssembler {
 		void initialize(std::vector<TetMeshFEM::SharedPtr> meshes);
-		
+
 		std::vector<NMat12> elasticHessian{};
 		std::vector<NVec12> elasticForce{};
 
@@ -101,7 +101,7 @@ namespace GAIA {
 	struct TriMeshNewtonAssembler : public BaseNewtonAssembler {
 		// only need to be called once per simulation, it initializes the elastic Hessian and force
 		// solverType: 0 for direct solverDirect, 1 for CG solverDirect
-		void initialize(std::vector<TriMeshFEM::SharedPtr> meshes_in, int solverType_in=0);
+		void initialize(std::vector<TriMeshFEM::SharedPtr> meshes_in, int solverType_in = 0);
 		// need to be called after each collision detection, it updates the collision Hessian and force
 		//void analyzeCollision(std::vector<TriMeshFEM::SharedPtr> meshes);
 
@@ -119,7 +119,7 @@ namespace GAIA {
 
 		std::vector<std::vector<TriMeshCollisionInfoForNewton>> vfCollisionInfos{};
 		std::vector<std::vector<TriMeshCollisionInfoForNewton>> eeCollisionInfos{};
-		
+
 		// pointers to the diagonal blocks of the Hessian matrix
 		// nMesh x nVertices x (nContact * 12 * 12)
 		// std::vector<std::vector<std::vector<NFloatingType*>>> vfCollisionHessianBlockPtrs{};
