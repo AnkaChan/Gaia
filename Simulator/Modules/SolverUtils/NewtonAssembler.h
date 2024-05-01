@@ -28,6 +28,8 @@ namespace GAIA {
 	using NVec3 = Eigen::Vector<NFloatingType, 3>;
 	using NTriplet = Eigen::Triplet<NFloatingType>;
 	using NTVerticesMat = Eigen::Matrix<NFloatingType, POINT_VEC_DIMS, Eigen::Dynamic>;
+	using NMat = Eigen::Matrix<NFloatingType, Eigen::Dynamic, Eigen::Dynamic>;
+	using NMati = Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>;
 
 #ifdef USE_MKL
 	using DirectSolverType = Eigen::PardisoLDLT<NSpMat>;
@@ -44,7 +46,8 @@ namespace GAIA {
 		size_t numAllVertices{};
 		size_t numAllEdges{};
 
-		std::vector<NTriplet> newtonHessianTripletsElasticity;
+		std::vector<NTriplet> newtonHessianTripletsElasticity{};
+		std::vector<NTriplet> newtonHessianTripletsBending{};
 
 		// pointers to the diagonal blocks of the Hessian matrix
 		std::vector<std::vector<NFloatingType*>> diagonalHessianBlockPtrs{};
@@ -58,9 +61,12 @@ namespace GAIA {
 		// the vertices from the other side are handled by the other side
 		std::vector<std::vector<NFloatingType*>> EECollisionHessianBlockPtrs{};
 
+		std::vector<NFloatingType> bendingHessianValues{};
+
 
 		NFloatingType newtonEnergy{};
 		NSpMat newtonHessianElasticity{};
+		NSpMat newtonHessianBending{};
 		NSpMat newtonHessianCollision{};
 		NSpMat newtonHessianAll{};
 		NVecDynamic newtonForce{};
@@ -110,6 +116,7 @@ namespace GAIA {
 
 		void updatePositions(const VecDynamic& dx);
 
+		void computeBendingHessian();
 		std::vector<NMat9> elasticHessian{};
 		std::vector<NVec9> elasticForce{};
 		std::vector<NVec12> bendingForce{};
