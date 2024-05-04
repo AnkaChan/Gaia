@@ -36,6 +36,7 @@ namespace GAIA {
 
 		FloatingType frictionDynamic = 0.1f;
 		FloatingType frictionEpsV = 0.01f;
+		FloatingType bendingStiffness = 0.f;
 
 		virtual bool fromJson(nlohmann::json& objectParam);
 		virtual bool toJson(nlohmann::json& objectParam);
@@ -154,7 +155,7 @@ namespace GAIA {
 		size_t numRelevantBendings(IdType iV) const;
 		IdType getVertexIthRelevantBending(IdType iV, IdType bendingId) const;
 		IdType getVertexIthRelevantBendingOrder(IdType iV, IdType bendingId) const;
-		
+
 
 		void getEdgeVertexOrderInNeighborFace(int iE, int iNeighborFace, int& corner0, int& corner1) const {
 			const EdgeInfo& edgeInfo = pTopology->edgeInfos[iE];
@@ -234,12 +235,12 @@ namespace GAIA {
 		return numVertices_;
 	}
 
-	inline int TriMeshFEM::facePosVId(int tId, int vId) const 
+	inline int TriMeshFEM::facePosVId(int tId, int vId) const
 	{
 		return facePos(vId, tId);
 	}
 
-	inline Vec3Block TriMeshFEM::vertex(size_t i) 
+	inline Vec3Block TriMeshFEM::vertex(size_t i)
 	{
 		return positions_.block<3, 1>(0, i);
 	}
@@ -281,7 +282,7 @@ namespace GAIA {
 
 	inline size_t TriMeshFEM::numNeiEdges(IdType iV) const
 	{
-		return pTopology->vertexNeighborEdges_infos(iV*2+1);
+		return pTopology->vertexNeighborEdges_infos(iV * 2 + 1);
 	}
 
 	inline IdType TriMeshFEM::getVertexIthNeiEdge(IdType iV, IdType neiId) const
@@ -296,7 +297,7 @@ namespace GAIA {
 
 	inline size_t TriMeshFEM::numRelevantBendings(IdType iV) const
 	{
-		return pTopology->vertexRelevantBendings_infos(iV*2+1);
+		return pTopology->vertexRelevantBendings_infos(iV * 2 + 1);
 	}
 
 	inline IdType TriMeshFEM::getVertexIthRelevantBendingOrder(IdType iV, IdType bendingId) const
@@ -554,11 +555,11 @@ namespace GAIA {
 		return ret;
 	}
 
-	inline size_t TriMeshFEM::numNeiVertices(IdType iV) const 
+	inline size_t TriMeshFEM::numNeiVertices(IdType iV) const
 	{
 		return pTopology->vertexNeighborVertices_infos(iV * 2 + 1);
 	}
-	 
+
 	inline Vec3 TriMeshFEM::computeNormal(int fId, bool normalize) const
 	{
 		Vec3 v1 = positions_.col(facePosVId(fId, 1)) - positions_.col(facePosVId(fId, 0));

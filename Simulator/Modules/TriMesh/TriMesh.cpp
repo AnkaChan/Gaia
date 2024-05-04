@@ -429,6 +429,7 @@ bool GAIA::TriMeshParams::fromJson(nlohmann::json& objectParam)
 	EXTRACT_FROM_JSON(objectParam, initialState);
 	EXTRACT_FROM_JSON(objectParam, frictionDynamic);
 	EXTRACT_FROM_JSON(objectParam, frictionEpsV);
+	EXTRACT_FROM_JSON(objectParam, bendingStiffness);
 	return true;
 }
 
@@ -440,6 +441,7 @@ bool GAIA::TriMeshParams::toJson(nlohmann::json& objectParam)
 	PUT_TO_JSON(objectParam, initialState);
 	PUT_TO_JSON(objectParam, frictionDynamic);
 	PUT_TO_JSON(objectParam, frictionEpsV);
+	PUT_TO_JSON(objectParam, bendingStiffness);
 	return true;
 }
 
@@ -481,7 +483,7 @@ void GAIA::TriMeshTopology::initialize(TriMeshFEM* pTriMesh, TriMeshParams* pObj
 		eInfo.eV1FaceOrder[1] = -1;
 		eInfo.eV2FaceOrder[1] = -1;
 
-		for (int  iFV = 0; iFV < 3; iFV++)
+		for (int iFV = 0; iFV < 3; iFV++)
 		{
 			if (pTriMesh->facePosVId(eInfo.fId1, iFV) == eInfo.eV1)
 			{
@@ -660,7 +662,7 @@ void GAIA::TriMeshTopology::initialize(TriMeshFEM* pTriMesh, TriMeshParams* pObj
 				// eInfo.eV2 = pE->halfedge()->target()->id();
 				MF::TriMesh::TriMeshStaticF::HEPtr pHE = MF::TriMesh::TriMeshStaticF::edgeHalfedge(pFE);
 
-				if ( pHE->source()->id() != pV->id() && pHE->target()->id() != pV->id())
+				if (pHE->source()->id() != pV->id() && pHE->target()->id() != pV->id())
 				{
 					crossEdgeFound = true;
 					numRelevantBendings++;
