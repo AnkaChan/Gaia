@@ -7,6 +7,7 @@ find_package(Eigen3 REQUIRED)
 find_package(MeshFrame2 REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../3rdParty/MeshFrame2/MeshFrame/cmake)
 find_package(embree 3.0 REQUIRED)
 find_package(CuMatrix REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../3rdParty/CuMatrix/cmake)
+find_package(TBB REQUIRED)
 set (GAIA_ROOT ${CMAKE_CURRENT_LIST_DIR}/..)
 	
 add_subdirectory ("${CMAKE_CURRENT_LIST_DIR}/../3rdParty/cmake-git-version-tracking" ${CMAKE_CURRENT_BINARY_DIR}/cmake-git-version-tracking)
@@ -32,7 +33,6 @@ set(THIRD_PARTY_INCLUDE_DIRS
         ${EIGEN3_INCLUDE_DIR}
 		${MESHFRAME_INCLUDE_DIR}
 		${CU_MATRIX_INCLUDE_DIR}
-		"${CMAKE_CURRENT_LIST_DIR}/../3rdParty/oneTBB/include"
         )
 		
 if (BUILD_GUI)
@@ -142,9 +142,8 @@ endif (BUILD_Collision_Detector)
 
 set (GAIA_LIBRARY
 	${CU_MATRIX_LIBS}
-	${EMBREE_LIBRARY}
-	${embree_DIR}/../../tbb12.lib
 	cmake_git_version_tracking
+	TBB::tbb
 	)
 
 if (BUILD_GUI)

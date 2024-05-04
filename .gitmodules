@@ -9,9 +9,6 @@
 	path = Simulator/3rdParty/MeshFrame2
 	url = https://github.com/AnkaChan/MeshFrame2.git
 
-[submodule "Simulator/3rdParty/oneTBB"]
-	path = Simulator/3rdParty/oneTBB
-	url = https://github.com/oneapi-src/oneTBB.git
 [submodule "Simulator/3rdParty/polyscope"]
 	path = Simulator/3rdParty/polyscope
 	url = git@github.com:AnkaChan/polyscope.git

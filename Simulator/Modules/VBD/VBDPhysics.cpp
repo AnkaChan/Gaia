@@ -640,7 +640,7 @@ void GAIA::VBDPhysics::initializeGPU()
 	vbdPhysicsDataGPUCPUBuffer.worldBounds[4] = physicsParams().worldBounds(1, 1);
 	vbdPhysicsDataGPUCPUBuffer.worldBounds[5] = physicsParams().worldBounds(2, 1);
 	vbdPhysicsDataGPUCPUBuffer.tetMeshes = tetMehesGPUBuffer->getGPUBuffer();
-	vbdPhysicsDataGPUCPUBuffer.numTetMeshes = numTetMeshes();
+	vbdPhysicsDataGPUCPUBuffer.numMeshes = numTetMeshes();
 	vbdPhysicsDataGPUCPUBuffer.useAccelerator = physicsParams().useAccelerator;
 	vbdPhysicsDataGPUCPUBuffer.useBlockJacobi = physicsParams().GDSolverUseBlockJacobi;
 
@@ -657,7 +657,7 @@ void GAIA::VBDPhysics::initializeGPU_cpuDebugData()
 		tetMehesGPUBuffer_forCPUDebug.push_back(pMesh->getGPUMesh_forCPUDebug());
 	}
 	vbdPhysicsDataGPU_forCPUDebug.tetMeshes = tetMehesGPUBuffer_forCPUDebug.data();
-	vbdPhysicsDataGPU_forCPUDebug.numTetMeshes = numTetMeshes();
+	vbdPhysicsDataGPU_forCPUDebug.numMeshes = numTetMeshes();
 
 	vbdPhysicsDataGPU_forCPUDebug.boundaryCollisionStiffness = physicsParams().boundaryCollisionStiffness;
 	vbdPhysicsDataGPU_forCPUDebug.boundaryFrictionDynamic = physicsParams().boundaryFrictionDynamic;
