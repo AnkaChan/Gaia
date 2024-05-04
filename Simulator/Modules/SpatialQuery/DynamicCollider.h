@@ -12,6 +12,9 @@ namespace GAIA {
 			maxQueryDis = 0.5f;
 		}
 
+		// intepolate per step
+		bool interpolate = true;
+
 
 	};
 
@@ -31,11 +34,11 @@ namespace GAIA {
 			colliderMeshes = meshes_in;
 		}
 
-		void updateColliderMeshes(IdType frameId, IdType substep, IdType iter)
+		void updateColliderMeshes(IdType frameId, IdType substep, IdType iter, size_t numsubsteps, size_t numIters)
 		{
 			for (int iColliderMesh = 0; iColliderMesh < colliderMeshes.size(); iColliderMesh++)
 			{
-				colliderMeshes[iColliderMesh]->update(frameId, substep, iter);
+				colliderMeshes[iColliderMesh]->update(frameId, substep, iter, numsubsteps, numIters);
 			}
 		}
 

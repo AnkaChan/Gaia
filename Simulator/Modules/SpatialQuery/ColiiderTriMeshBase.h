@@ -31,7 +31,7 @@ namespace GAIA {
 		typedef std::shared_ptr<ColliderTrimeshBase> SharedPtr;
 		typedef ColliderTrimeshBase* Ptr;
 
-		virtual void update(IdType frameId, IdType substepId, IdType iter) = 0;
+		virtual void update(IdType frameId, IdType substepId, IdType iter, size_t numSubsteps, size_t numIters) = 0;
 		virtual void initialize(ColliderTrimeshBaseParams::SharedPtr inObjectParams)
 		{
 			pParams = inObjectParams;

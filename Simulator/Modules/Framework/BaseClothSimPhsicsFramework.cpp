@@ -118,7 +118,7 @@ void GAIA::BaseClothPhsicsFramework::initializeViewer()
 
 void GAIA::BaseClothPhsicsFramework::updateCollider()
 {
-	pDynamicCollider->updateColliderMeshes(frameId, substep, iIter);
+	pDynamicCollider->updateColliderMeshes(frameId, substep, iIter, basePhysicsParams->numSubsteps, basePhysicsParams->iterations);
 }
 
 void BaseClothPhsicsFramework::writeOutputs(std::string outFolder, int frameId)

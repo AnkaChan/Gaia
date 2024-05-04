@@ -52,7 +52,7 @@ namespace GAIA {
     };
 
     struct RunningTimeStatistics : MF::BaseJsonConfig{
-        void setToZero() {
+        virtual void setToZero() {
             timeCsmpFrame = 0;
 
             timeCsmpAllSubSteps = 0;
