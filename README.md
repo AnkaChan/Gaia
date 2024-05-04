@@ -22,11 +22,11 @@ This Algorithm has the following dependencies:
 - [MeshFrame2](https://github.com/AnkaChan/MeshFrame2): geometric core library for mesh processing (already included as submodule)
 - [CuMatrix](https://github.com/AnkaChan/CuMatrix/tree/main): for geometry and matrix computation (already included as submodule)
 - [cmake-git-version-tracking](https://github.com/andrew-hardin/cmake-git-version-tracking): for tracking the git version infos when running experiments (already included as a submodule)
-- [OneTBB](https://github.com/oneapi-src/oneTBB) (already included as a submodule)
-- Eigen3 (tested with 3.4.0)
-- Embree (tested with 3.13.1) Known issues exist for version >= 3.13.4.
+- [OneTBB](https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#onetbb) (Need to be installed, tested with 2021.12.0)
+- Eigen3 (Need to be installed, tested with 3.4.0)
+- Embree (Need to be installed, tested with 3.13.1, not compatible with Embree 4)
 
-Ensure you install the specified versions of Eigen3 and Embree, and then add the environment variables "Eigen3_DIR" and "embree_DIR", setting their values to the respective config.cmake paths. This step is necessary for CMake to successfully locate them.
+Make you installed OneTBB, Eigen3 and Embree. Then add the environment variables "Eigen3_DIR" and "embree_DIR", setting their values to the respective config.cmake paths. This step is necessary for CMake to successfully locate them.
 
 ### Use GAIA as a Standalone Simulator
 Currently, a XPBD based simulator is provided. The CMakelists.txt of the standalone simulator is located at Gaia/Simulator/PBDDynamics. To use the simulator, you need to
@@ -68,10 +68,7 @@ The first argument, "Models.json", specifies the details of the models to be sim
 Given the complexity of manually creating "Models.json" and "Parameters.json", GAIA offers some Python scripts that can automatically generate the simulation command for you. Those scripts covers most of the experiments included in my paper: "Shortest Path to Boundary for Self Intersecting Meshes". Please see: Gaia/Simulator/PBDDynamics/ParameterGen/ for those commands.
 
 ## Common Problems
-
-1. "tbb12.lib" is not found.  
-The reason is that Embree has already had a compilation of tbb, named tbb.lib. However, OneTBB is asking for a file called tbb12.lib. An easy solution is to duplicate that tbb.lib from embree, name it "tbb12.lib" and put it in the same repository.
-2. "Host key verification failed. fatal: Could not read from remote repository."  
+1. "Host key verification failed. fatal: Could not read from remote repository."  
 This issue could be that Github isn't present in your ~/.ssh/known_hosts file.
 Append GitHub to the list of authorized hosts:
 ```ssh-keyscan -H github.com >> ~/.ssh/known_hosts```
