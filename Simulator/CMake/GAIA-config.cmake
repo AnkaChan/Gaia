@@ -142,6 +142,7 @@ endif (BUILD_Collision_Detector)
 
 set (GAIA_LIBRARY
 	${CU_MATRIX_LIBS}
+	${EMBREE_LIBRARY}
 	cmake_git_version_tracking
 	TBB::tbb
 	)
