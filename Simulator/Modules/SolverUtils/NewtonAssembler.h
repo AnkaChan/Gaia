@@ -100,7 +100,7 @@ namespace GAIA {
 	struct TriMeshCollisionInfoForNewton {
 		Vec3 normal;
 		Vec4 barys;
-		FloatingType lambda, d2E_dDdD;
+		FloatingType energy, lambda, d2E_dDdD;
 		bool contacting;
 	};
 
@@ -124,8 +124,8 @@ namespace GAIA {
 		std::vector<NTriplet> newtonHessianTripletsVFCollision;
 		std::vector<NTriplet> newtonHessianTripletsEECollision;
 
-		std::vector<std::vector<TriMeshCollisionInfoForNewton>> vfCollisionInfos{};
-		std::vector<std::vector<TriMeshCollisionInfoForNewton>> eeCollisionInfos{};
+		std::vector<std::vector<std::vector<TriMeshCollisionInfoForNewton>>> vfCollisionInfos{};
+		std::vector<std::vector<std::vector<TriMeshCollisionInfoForNewton>>> eeCollisionInfos{};
 
 		// pointers to the diagonal blocks of the Hessian matrix
 		// nMesh x nVertices x (nContact * 12 * 12)

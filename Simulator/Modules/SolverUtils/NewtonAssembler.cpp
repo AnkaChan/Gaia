@@ -196,7 +196,15 @@ void GAIA::TriMeshNewtonAssembler::initialize(std::vector<TriMeshFEM::SharedPtr>
 	for (IdType iMesh = 0; iMesh < meshes.size(); iMesh++)
 	{
 		vfCollisionInfos[iMesh].resize(meshes[iMesh]->numVertices());
+		for (IdType i = 0; i < meshes[iMesh]->numVertices(); i++)
+		{
+			vfCollisionInfos[iMesh][i].reserve(VF_CONTACT_PREALLOCATE);
+		}
 		eeCollisionInfos[iMesh].resize(meshes[iMesh]->numEdges());
+		for (IdType i = 0; i < meshes[iMesh]->numEdges(); i++)
+		{
+			eeCollisionInfos[iMesh][i].reserve(EE_CONTACT_PREALLOCATE);
+		}
 	}
 	// compute bending hessian
 	computeBendingHessian();
