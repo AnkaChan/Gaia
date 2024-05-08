@@ -52,7 +52,7 @@ namespace GAIA{
 	//	void energyProjectionLocalForVertex(int iV);
 	//	void localMeritEnergyVertexBlockCoordinateDesent(int iV);
 
-	//	FloatingType localMeritEnergyVertexBlockCoordinateBackTrackingLineSearch(int iV, FloatingType E0, Vec3 dx, FloatingType alpha, FloatingType c, FloatingType tau, int maxNumIters);
+	//	FloatingType localMeritEnergyVertexBlockCoordinateBackTrackingLineSearch(int iV, FloatingType E0, Vec3 positionsNew, FloatingType alpha, FloatingType c, FloatingType tau, int maxNumIters);
 
 
 	//	virtual void initialize(ObjectParams::SharedPtr inMaterialParams, std::shared_ptr<TetMeshMF> pTM_MF,

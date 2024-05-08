@@ -444,7 +444,7 @@ void GAIA::VBDPhysics::initialize()
 
 	if (physicsParams().useLineSearch || physicsParams().evaluateConvergence)
 	{
-		elasticEnergy.resize(numAllTets);
+		pNewtonAssembler->elasticEnergy.resize(numAllTets);
 		if (pLineSearchUtilities == nullptr)
 		{
 			pLineSearchUtilities = std::make_shared<LineSearchUtilities>();
@@ -455,16 +455,17 @@ void GAIA::VBDPhysics::initialize()
 
 void GAIA::VBDPhysics::initializeNewton()
 {
+	pNewtonAssembler = std::make_shared<TetMeshNewtonAssembler>();
 
-	vertHessianPtrs.resize(tMeshes.size());
-	edgeHessianPtrs.resize(tMeshes.size());
+	pNewtonAssembler->diagonalHessianBlockPtrs.resize(tMeshes.size());
+	pNewtonAssembler->offDiagonalHessianBlockPtrs.resize(tMeshes.size());
 	std::vector<NTriplet> newtonHessianTriplets;
 	for (int iMesh = 0; iMesh < tMeshes.size(); iMesh++)
 	{
 		VBDBaseTetMesh::SharedPtr pMesh = tMeshes[iMesh];
 
-		vertHessianPtrs[iMesh].reserve(pMesh->numVertices() * 9);
-		edgeHessianPtrs[iMesh].reserve(pMesh->numEdges() * 18);
+		pNewtonAssembler->diagonalHessianBlockPtrs[iMesh].reserve(pMesh->numVertices() * 9);
+		pNewtonAssembler->offDiagonalHessianBlockPtrs[iMesh].reserve(pMesh->numEdges() * 18);
 
 	}
 	newtonHessianTriplets.reserve(numAllVertices * 9 + numAllEdges * 18);
@@ -504,18 +505,18 @@ void GAIA::VBDPhysics::initializeNewton()
 		}
 		offset += pMesh->numVertices() * 3;
 	}
-	newtonHessian.resize(numAllVertices * 3, numAllVertices * 3);
-	newtonHessian.setFromTriplets(newtonHessianTriplets.begin(), newtonHessianTriplets.end());
-	newtonHessian.makeCompressed();
+	pNewtonAssembler->newtonHessianAll.resize(numAllVertices * 3, numAllVertices * 3);
+	pNewtonAssembler->newtonHessianAll.setFromTriplets(newtonHessianTriplets.begin(), newtonHessianTriplets.end());
+	pNewtonAssembler->newtonHessianAll.makeCompressed();
 
 	if (physicsParams().NewtonUseCG)
 	{
-		solverCG.compute(newtonHessian);
-		solverCG.setMaxIterations(300);
-		solverCG.setTolerance(1e-7f);
+		pNewtonAssembler->solverCG.compute(pNewtonAssembler->newtonHessianAll);
+		pNewtonAssembler->solverCG.setMaxIterations(300);
+		pNewtonAssembler->solverCG.setTolerance(1e-7f);
 	}
 	else {
-		solver.analyzePattern(newtonHessian);
+		pNewtonAssembler->solverDirect.analyzePattern(pNewtonAssembler->newtonHessianAll);
 	}
 
 	offset = 0;
@@ -529,7 +530,7 @@ void GAIA::VBDPhysics::initializeNewton()
 			{
 				for (int j = 0; j < 3; ++j)
 				{
-					vertHessianPtrs[iMesh].push_back(&newtonHessian.coeffRef(vertPos + j, vertPos + i));
+					pNewtonAssembler->diagonalHessianBlockPtrs[iMesh].push_back(&pNewtonAssembler->newtonHessianAll.coeffRef(vertPos + j, vertPos + i));
 				}
 			}
 		}
@@ -541,22 +542,22 @@ void GAIA::VBDPhysics::initializeNewton()
 			{
 				for (int i = 0; i < 3; ++i)
 				{
-					edgeHessianPtrs[iMesh].push_back(&newtonHessian.coeffRef(vertPosi + i, vertPosj + j));
+					pNewtonAssembler->offDiagonalHessianBlockPtrs[iMesh].push_back(&pNewtonAssembler->newtonHessianAll.coeffRef(vertPosi + i, vertPosj + j));
 				}
 			}
 			for (int i = 0; i < 3; ++i)
 			{
 				for (int j = 0; j < 3; ++j)
 				{
-					edgeHessianPtrs[iMesh].push_back(&newtonHessian.coeffRef(vertPosj + j, vertPosi + i));
+					pNewtonAssembler->offDiagonalHessianBlockPtrs[iMesh].push_back(&pNewtonAssembler->newtonHessianAll.coeffRef(vertPosj + j, vertPosi + i));
 				}
 			}
 		}
 		offset += pMesh->numVertices() * 3;
 	}
-	newtonForce.resize(numAllVertices * 3);
-	elasticHessian.resize(numAllTets);
-	elasticForce.resize(numAllTets);
+	pNewtonAssembler->newtonForce.resize(numAllVertices * 3);
+	pNewtonAssembler->elasticHessian.resize(numAllTets);
+	pNewtonAssembler->elasticForce.resize(numAllTets);
 }
 
 void GAIA::VBDPhysics::initializeGPU()
@@ -1472,23 +1473,23 @@ void GAIA::VBDPhysics::runStepNewton()
 
 			if (physicsParams().NewtonUseCG)
 			{
-				solverCG.compute(newtonHessian);
-				Ndx = solverCG.solve(newtonForce);
+				pNewtonAssembler->solverCG.compute(pNewtonAssembler->newtonHessianAll);
+				Ndx = pNewtonAssembler->solverCG.solve(pNewtonAssembler->newtonForce);
 
-				if (solverCG.info() != Eigen::Success)
+				if (pNewtonAssembler->solverCG.info() != Eigen::Success)
 				{
-					std::cerr << "CG solve failed. Error: " << solverCG.info() << std::endl;
+					std::cerr << "CG solve failed. Error: " << pNewtonAssembler->solverCG.info() << std::endl;
 					//std::exit(-1);
 				}
 			}
 			else
 			{
-				solver.factorize(newtonHessian);
-				Ndx = solver.solve(newtonForce);
+				pNewtonAssembler->solverDirect.factorize(pNewtonAssembler->newtonHessianAll);
+				Ndx = pNewtonAssembler->solverDirect.solve(pNewtonAssembler->newtonForce);
 
-				if (solver.info() != Eigen::Success)
+				if (pNewtonAssembler->solverDirect.info() != Eigen::Success)
 				{
-					std::cerr << "Factorization failed. Error: " << solver.info() << std::endl;
+					std::cerr << "Factorization failed. Error: " << pNewtonAssembler->solverDirect.info() << std::endl;
 					std::exit(-1);
 				}
 			}
@@ -1496,7 +1497,7 @@ void GAIA::VBDPhysics::runStepNewton()
 			VecDynamic dx = Ndx.cast<FloatingType>();
 
 			debugOperation(DEBUG_LVL_DEBUG, [&]() {
-				NCFloatingType averageForceNorm = Eigen::Map<NTVerticesMat>(newtonForce.data(), 3, numAllVertices).colwise().norm().mean();
+				NCFloatingType averageForceNorm = Eigen::Map<NTVerticesMat>(pNewtonAssembler->newtonForce.data(), 3, numAllVertices).colwise().norm().mean();
 				std::cout << "averageForceNorm: " << averageForceNorm << std::endl;
 				});
 			if (dx.hasNaN()) {
@@ -1508,10 +1509,10 @@ void GAIA::VBDPhysics::runStepNewton()
 					NFloatingType eInertia{};
 					NFloatingType eElastic{};
 					// Elastic is already computed during force and hessian evaluation, set elasticReady to true
-					newtonEnergy = evaluateMeritEnergy(eInertia, eElastic, true);
+					pNewtonAssembler->newtonEnergy = evaluateMeritEnergy(eInertia, eElastic, true);
 				}
 				FloatingType stepSizeNew;
-				newtonEnergy = newtonLineSearch(dx, newtonEnergy, stepSize, physicsParams().backtracingLineSearchC,
+				pNewtonAssembler->newtonEnergy = newtonLineSearch(dx, pNewtonAssembler->newtonEnergy, stepSize, physicsParams().backtracingLineSearchC,
 					physicsParams().backtracingLineSearchTau, physicsParams().backtracingLineSearchMaxIters, stepSizeNew);
 				stepSize = physicsParams().backtracingLineSearchAlpha;
 			}
@@ -2414,7 +2415,7 @@ void GAIA::VBDPhysics::VBDStepWithCollision(TetMeshFEM* pMesh_, IdType meshId, I
 
 		bool solverSuccess;
 		if (physicsParams().useDouble3x3) {
-			//construct a double version of h, forcem and dx
+			//construct a double version of h, forcem and positionsNew
 			double H[9] = { h(0,0), h(1,0), h(2,0),
 				h(0,1), h(1,1), h(2,1), h(0,2), h(1,2), h(2,2) };
 			double F[3] = { force(0), force(1), force(2) };
@@ -3597,7 +3598,7 @@ void GAIA::VBDPhysics::recordInitialPositionForAccelerator(bool sync)
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
 		CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->positionsPrevIterBuffer->getGPUBuffer(), pMesh->pTetMeshSharedBase->vertPosBuffer->getGPUBuffer(),
 			pMesh->pTetMeshShared->positionsPrevIterBuffer->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
-		// not all dx will be modified, here we first fill it with the orginal position
+		// not all positionsNew will be modified, here we first fill it with the orginal position
 		CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->dxBuffer->getGPUBuffer(), pMesh->pTetMeshSharedBase->vertPosBuffer->getGPUBuffer(),
 			pMesh->pTetMeshShared->positionsPrevIterBuffer->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
 	}
@@ -3610,9 +3611,9 @@ void GAIA::VBDPhysics::recordInitialPositionForAccelerator(bool sync)
 
 void GAIA::VBDPhysics::computeElasticForceHessian()
 {
-	auto energyIter = &elasticEnergy[0];
-	auto forceIter = &elasticForce[0];
-	auto hessianIter = &elasticHessian[0];
+	auto energyIter = &pNewtonAssembler->elasticEnergy[0];
+	auto forceIter = &pNewtonAssembler->elasticForce[0];
+	auto hessianIter = &pNewtonAssembler->elasticHessian[0];
 	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
@@ -3646,7 +3647,7 @@ void GAIA::VBDPhysics::computeElasticForceHessian()
 
 void GAIA::VBDPhysics::computeElasticEnergy()
 {
-	auto energyIter = &elasticEnergy[0];
+	auto energyIter = &pNewtonAssembler->elasticEnergy[0];
 	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
@@ -3659,11 +3660,11 @@ void GAIA::VBDPhysics::computeElasticEnergy()
 
 void GAIA::VBDPhysics::fillNewtonSystem()
 {
-	newtonForce.setZero();
+	pNewtonAssembler->newtonForce.setZero();
 	fillNewtonForce();
 
-	auto data_ptr = newtonHessian.valuePtr();
-	memset(data_ptr, 0, newtonHessian.nonZeros() * sizeof(FloatingType));
+	auto data_ptr = pNewtonAssembler->newtonHessianAll.valuePtr();
+	memset(data_ptr, 0, pNewtonAssembler->newtonHessianAll.nonZeros() * sizeof(FloatingType));
 	fillNewtonHessianDiagonal();
 	fillNewtonHessianOffDiagonal();
 	// std::cout << newtonHessian.block(0, 0, 9, 9) << "\n";
@@ -3671,8 +3672,8 @@ void GAIA::VBDPhysics::fillNewtonSystem()
 
 void GAIA::VBDPhysics::fillNewtonForce()
 {
-	NVec12* elasticForcePtr = &elasticForce[0];
-	NFloatingType* forcePtr = newtonForce.data();
+	NVec12* elasticForcePtr = &pNewtonAssembler->elasticForce[0];
+	NFloatingType* forcePtr = pNewtonAssembler->newtonForce.data();
 	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
@@ -3698,7 +3699,7 @@ void GAIA::VBDPhysics::fillNewtonForce()
 
 void GAIA::VBDPhysics::fillNewtonHessianDiagonal()
 {
-	NMat12* elasticHessianPtr = &elasticHessian[0];
+	NMat12* elasticHessianPtr = &pNewtonAssembler->elasticHessian[0];
 	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
@@ -3715,7 +3716,7 @@ void GAIA::VBDPhysics::fillNewtonHessianDiagonal()
 					hessian += elasticHessianPtr[tetId].block<3, 3>(vertedTetVId * 3, vertedTetVId * 3);
 				}
 			}
-			NFloatingType** hessianPtr = &vertHessianPtrs[iMesh][iV * 9];
+			NFloatingType** hessianPtr = &pNewtonAssembler->diagonalHessianBlockPtrs[iMesh][iV * 9];
 			for (size_t iRow = 0; iRow < 3; iRow++)
 			{
 				for (size_t iCol = 0; iCol < 3; iCol++)
@@ -3746,9 +3747,9 @@ void GAIA::VBDPhysics::fillNewtonHessianOffDiagonal()
 					const auto tetId = pMesh->getEdgeNeighborTet(iE, iNeiTet);
 					int corner0, corner1;
 					pMesh->getEdgeNeighborTetVertexOrder(iE, iNeiTet, corner0, corner1);
-					hessian += elasticHessian[tetId].block<3, 3>(corner0 * 3, corner1 * 3);
+					hessian += pNewtonAssembler->elasticHessian[tetId].block<3, 3>(corner0 * 3, corner1 * 3);
 				}
-				NFloatingType** hessianPtr = &edgeHessianPtrs[iMesh][iE * 18];
+				NFloatingType** hessianPtr = &pNewtonAssembler->offDiagonalHessianBlockPtrs[iMesh][iE * 18];
 				for (size_t iRow = 0; iRow < 3; iRow++)
 				{
 					for (size_t iCol = 0; iCol < 3; iCol++)
@@ -3782,11 +3783,11 @@ void GAIA::VBDPhysics::updatePositions(const VecDynamic& dx)
 	}
 }
 
-GAIA::VBDPhysics::NFloatingType GAIA::VBDPhysics::evaluateMeritEnergy(NFloatingType& eInertia, NFloatingType& eElastic, bool elasticReady)
+GAIA::NFloatingType GAIA::VBDPhysics::evaluateMeritEnergy(NFloatingType& eInertia, NFloatingType& eElastic, bool elasticReady)
 {
 	if (!elasticReady)computeElasticEnergy();
 	eElastic = 0;
-	for (auto& e : elasticEnergy)
+	for (auto& e : pNewtonAssembler->elasticEnergy)
 	{
 		eElastic += e;
 	}
@@ -3799,7 +3800,7 @@ GAIA::VBDPhysics::NFloatingType GAIA::VBDPhysics::evaluateMeritEnergy(NFloatingT
 	return eElastic + eInertia;
 }
 
-GAIA::VBDPhysics::NFloatingType GAIA::VBDPhysics::newtonLineSearch(const VecDynamic& dx, NFloatingType E0, FloatingType alpha,
+GAIA::NFloatingType GAIA::VBDPhysics::newtonLineSearch(const VecDynamic& dx, NFloatingType E0, FloatingType alpha,
 	FloatingType c, FloatingType tau, int maxNumIters, FloatingType& stepSizeOut)
 {
 	FloatingType m = dx.squaredNorm();

@@ -1,6 +1,5 @@
 #pragma once
 #include "../Types/Types.h"
-#include "VBD_BaseMaterial.h"
 namespace GAIA {
 	struct VBDPhysics;
 

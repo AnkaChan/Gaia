@@ -266,7 +266,7 @@ __global__ void GAIA::VBDSolveParallelGroup_allInOne_kernel(VBDPhysicsDataGPU* p
 
 				// y_k+1_accelerated = (y_k+1 - y_k-1) * omega +  y_k-1
 
-				FloatingTypeGPU* y_new = pTetMeshGPU->dx + VERTEX_BUFFER_STRIDE * vertexId;
+				FloatingTypeGPU* y_new = pTetMeshGPU->positionsNew + VERTEX_BUFFER_STRIDE * vertexId;
 
 				FloatingTypeGPU yDiff[3];
 				CuMatrix::vec3Minus(v, y_prev, yDiff);
@@ -634,7 +634,7 @@ __global__ void GAIA::VBDSolveParallelGroup_vertexSweep_kernel(VBDPhysicsDataGPU
 				&& acceleratorOmega != 1.0f)
 			{
 				// compute y_k+1
-				FloatingTypeGPU* y_new = pTetMeshGPU->dx + VERTEX_BUFFER_STRIDE * vertexId;
+				FloatingTypeGPU* y_new = pTetMeshGPU->positionsNew + VERTEX_BUFFER_STRIDE * vertexId;
 				FloatingTypeGPU* y_prev = pTetMeshGPU->positionsPrevIter + VERTEX_BUFFER_STRIDE * vertexId;
 				if (pTetMeshGPU->activeCollisionMask[vertexId])
 				{
@@ -774,7 +774,7 @@ __global__ void GAIA::VBDSolveParallelGroup_vertexSweep_kernel_V2(VBDPhysicsData
 				&& acceleratorOmega != 1.0f)
 			{
 				// compute y_k+1
-				FloatingTypeGPU* y_new = pTetMeshGPU->dx + VERTEX_BUFFER_STRIDE * vertexId;
+				FloatingTypeGPU* y_new = pTetMeshGPU->positionsNew + VERTEX_BUFFER_STRIDE * vertexId;
 				FloatingTypeGPU* y_prev = pTetMeshGPU->positionsPrevIter + VERTEX_BUFFER_STRIDE * vertexId;
 				if (pTetMeshGPU->activeCollisionMask[vertexId])
 				{
@@ -900,7 +900,7 @@ __global__ void GAIA::VBDSolveParallelGroup_allInOne_kernel_V2(VBDPhysicsDataGPU
 				&& acceleratorOmega != 1.0f)
 			{
 				// compute y_k+1
-				FloatingTypeGPU* y_new = pTetMeshGPU->dx + VERTEX_BUFFER_STRIDE * vertexId;
+				FloatingTypeGPU* y_new = pTetMeshGPU->positionsNew + VERTEX_BUFFER_STRIDE * vertexId;
 				FloatingTypeGPU* y_prev = pTetMeshGPU->positionsPrevIter + VERTEX_BUFFER_STRIDE * vertexId;
 				if (pTetMeshGPU->activeCollisionMask[vertexId])
 				{
@@ -1013,7 +1013,7 @@ __global__ void GAIA::GDSolveParallelGroup_BlockJacobi_allInOneSweep_kernel(VBDP
 		)
 	{
 		FloatingTypeGPU* v = pTetMeshGPU->getVert(vertexId);
-		FloatingTypeGPU* dx = pTetMeshGPU->dx + 3 * vertexId;
+		FloatingTypeGPU* dx = pTetMeshGPU->positionsNew + 3 * vertexId;
 		int32_t tid = threadIdx.x;
 
 		// assign material force & hessian to shared memory
@@ -1129,7 +1129,7 @@ __global__ void GAIA::GDSolveParallelGroup_updatePositionSweep_kernel(VBDPhysics
 		int32_t vertexId = parallelGroupsHead[iVert * 2 + 1];
 		VBDTetMeshNeoHookeanGPU* pTetMeshGPU = (VBDTetMeshNeoHookeanGPU*)pPhysicsData->tetMeshes[meshId];
 		FloatingTypeGPU* v = pTetMeshGPU->getVert(vertexId);
-		CFloatingTypeGPU* dx = pTetMeshGPU->dx + VERTEX_BUFFER_STRIDE * vertexId;
+		CFloatingTypeGPU* dx = pTetMeshGPU->positionsNew + VERTEX_BUFFER_STRIDE * vertexId;
 
 		if (!pTetMeshGPU->vertexFixedMask[vertexId]
 			&& pTetMeshGPU->activeForMaterialSolve
@@ -1489,7 +1489,7 @@ __device__ __host__ void GAIA::updateCollisionInfoGPU(VBDPhysicsDataGPU* pPhysic
 		T[0] * dx[0] + T[1] * dx[1] + T[2] * dx[2],
 		T[3] * dx[0] + T[4] * dx[1] + T[5] * dx[2],
 		};
-		// Vec2 u = T.transpose() * dx;
+		// Vec2 u = T.transpose() * positionsNew;
 
 		// average of the two friction coefficients
 		CFloatingTypeGPU mu = (pTetMeshGPU->frictionDynamic + pTetMeshGPU_colliding->frictionDynamic) * 0.5f;
@@ -2397,7 +2397,7 @@ GPU_CPU_INLINE_FUNC void GAIA::GDStep_vertexSweep_allInOne(VBDPhysicsDataGPU* pP
 	FloatingTypeGPU h[9] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };;
 
 	CFloatingTypeGPU* pos = pTetMeshGPU->vertPos + 3 * vertexId;
-	FloatingTypeGPU* dx = pTetMeshGPU->dx + 3 * vertexId;
+	FloatingTypeGPU* dx = pTetMeshGPU->positionsNew + 3 * vertexId;
 
 	//printf("vertex %d's pos: %f %f %f\n", vertexId, pos[0], pos[1], pos[2]);
 	//CuMatrix::printFloatVec(pos, 3);
@@ -2480,7 +2480,7 @@ GPU_CPU_INLINE_FUNC void GAIA::GDStep_vertexSweep_allInOne_blockJacobi(VBDPhysic
 	FloatingTypeGPU h[9] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };;
 
 	CFloatingTypeGPU* pos = pTetMeshGPU->vertPos + 3 * vertexId;
-	FloatingTypeGPU* dx = pTetMeshGPU->dx + 3 * vertexId;
+	FloatingTypeGPU* dx = pTetMeshGPU->positionsNew + 3 * vertexId;
 
 	//printf("vertex %d's pos: %f %f %f\n", vertexId, pos[0], pos[1], pos[2]);
 	//CuMatrix::printFloatVec(pos, 3);

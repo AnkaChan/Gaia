@@ -14,8 +14,9 @@
 
 #include "VBD_CollisionInfo.h"
 
-#include "GD_SolverUtilities.h"
-#include "LineSearchUtilities.h"
+#include "../SolverUtils/GD_SolverUtilities.h"
+#include "../SolverUtils/LineSearchUtilities.h"
+#include "../SolverUtils/NewtonAssembler.h"	
 #ifdef USE_MKL
 #include <Eigen/PardisoSupport>
 #endif
@@ -230,42 +231,7 @@ namespace GAIA {
 		LineSearchUtilities::SharedPtr pLineSearchUtilities;
 		FloatingType evaluateMeritEnergyGPU(FloatingType& eInertia, FloatingType& eElastic, bool elasticReady = false);
 
-		//For newton solver
-#ifdef USE_DOUBLE
-		using NFloatingType = double;
-#else
-		using NFloatingType = float;
-#endif
-		using NCFloatingType = const NFloatingType;
-		using NSpMat = Eigen::SparseMatrix<NFloatingType>;
-		using NVecDynamic = Eigen::Matrix<NFloatingType, Eigen::Dynamic, 1>;
-		using NMat12 = Eigen::Matrix<NFloatingType, 12, 12>;
-		using NMat9 = Eigen::Matrix<NFloatingType, 9, 9>;
-		using NMat3 = Eigen::Matrix<NFloatingType, 3, 3>;
-		using NVec9 = Eigen::Vector<NFloatingType, 9>;
-		using NVec12 = Eigen::Vector<NFloatingType, 12>;
-		using NVec3 = Eigen::Vector<NFloatingType, 3>;
-		using NTriplet = Eigen::Triplet<NFloatingType>;
-		using NTVerticesMat = Eigen::Matrix<NFloatingType, POINT_VEC_DIMS, Eigen::Dynamic>;
-
-#ifdef USE_MKL
-		using DirectSolverType = Eigen::PardisoLDLT<NSpMat>;
-		using CGSolverType = Eigen::ConjugateGradient<NSpMat, Eigen::Lower | Eigen::Upper>;
-#else
-		using DirectSolverType = Eigen::SimplicialLDLT<NSpMat>;
-		using CGSolverType = Eigen::ConjugateGradient<NSpMat, Eigen::Lower | Eigen::Upper>;
-#endif
-		NFloatingType newtonEnergy{};
-		NSpMat newtonHessian{};
-		NVecDynamic newtonForce{};
-		std::vector<NFloatingType> elasticEnergy{};
-		std::vector<NMat12> elasticHessian{};
-		std::vector<NVec12> elasticForce{};
-		NFloatingType uselessHolder{};
-		DirectSolverType solver{};
-		CGSolverType solverCG{};
-		std::vector<std::vector<NFloatingType*>> vertHessianPtrs{};
-		std::vector<std::vector<NFloatingType*>> edgeHessianPtrs{};
+		TetMeshNewtonAssembler::SharedPtr pNewtonAssembler;
 
 		void computeElasticForceHessian();
 		void computeElasticEnergy();

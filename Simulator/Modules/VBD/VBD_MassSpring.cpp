@@ -431,9 +431,9 @@
 //	//solver.factorize(hessianAssembler.hessian);
 //	//Use the factors to solve the linear system 
 //
-//	VecDynamic dx = solver.solve(gradient);
+//	VecDynamic positionsNew = solver.solve(gradient);
 //
-//	VecDynamic dxOrg = hessianAssembler.getOriginalVector(dx);
+//	VecDynamic dxOrg = hessianAssembler.getOriginalVector(positionsNew);
 //	TOCK(timeConsumptionSolve);
 //
 //	std::cout << "#iterations:     " << solver.iterations() << std::endl;
@@ -900,7 +900,7 @@
 //	//velocity(iV) = (bestPos - vertexPrevPos(iV)) / (pPhysicsParams->dt);
 //}
 //
-//FloatingType GAIA::EBDTetMesh_MassSpring::localMeritEnergyVertexBlockCoordinateBackTrackingLineSearch(int iV, FloatingType E0, Vec3 dx, 
+//FloatingType GAIA::EBDTetMesh_MassSpring::localMeritEnergyVertexBlockCoordinateBackTrackingLineSearch(int iV, FloatingType E0, Vec3 positionsNew, 
 //	FloatingType alpha, FloatingType c, FloatingType tau, int maxNumIters)
 //{
 //	Vec3 x_0 = vertex(iV);
@@ -908,13 +908,13 @@
 //	FloatingType bestAlpha = 0.f;
 //	FloatingType bestEnergy = E0;
 //
-//	// dx.dot(grad), since 
-//	FloatingType m = dx.squaredNorm();
+//	// positionsNew.dot(grad), since 
+//	FloatingType m = positionsNew.squaredNorm();
 //
 //
 //	for (size_t iIter = 0; iIter < maxNumIters; iIter++)
 //	{
-//		vertex(iV) = alpha * dx + x_0;
+//		vertex(iV) = alpha * positionsNew + x_0;
 //
 //		FloatingType e = evaluateMeritEnergyPervertex(iV);
 //
@@ -936,7 +936,7 @@
 //		}
 //	}
 //
-//	vertex(iV) = bestAlpha *dx + x_0;
+//	vertex(iV) = bestAlpha *positionsNew + x_0;
 //
 //	return bestAlpha;
 //}

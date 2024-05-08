@@ -32,11 +32,41 @@ namespace GAIA {
 	{
 		virtual void update(IdType frameId, IdType substepId, IdType iter, size_t numsubsteps, size_t numIters) 
 		{
-			if (frameId != curFrameId && frameId >=0 && frameId+1 < colliderParameters().meshFiles.size())
+			if (frameId != curFrameId && frameId >= 0)
 			{
-				curFrameId = frameId;
-				curFrameMesh.positions() = nextFrameMesh.positions();
-				nextFrameMesh.loadObj(colliderParameters().meshFiles[frameId + 1]);
+				// move to the next frame
+				if (frameId == curFrameId + 1)
+				{
+					if (frameId + 1 < colliderParameters().meshFiles.size())
+					{
+						curFrameId = frameId;
+						curFrameMesh.positions() = nextFrameMesh.positions();
+						nextFrameMesh.loadObj(colliderParameters().meshFiles[frameId + 1]);
+					}
+				}
+				// inconsistent frame id
+				else
+				{
+					// reload the mesh
+					if (frameId < colliderParameters().meshFiles.size())
+					{
+						curFrameId = frameId;
+						curFrameMesh.loadObj(colliderParameters().meshFiles[frameId]);
+					}
+					else
+					{
+						curFrameId = colliderParameters().meshFiles.size() - 1;
+						curFrameMesh.loadObj(colliderParameters().meshFiles[colliderParameters().meshFiles.size()-1]);
+					}
+
+					if (frameId + 1 < colliderParameters().meshFiles.size())
+					{
+						nextFrameMesh.loadObj(colliderParameters().meshFiles[frameId + 1]);
+					}
+					else {
+						nextFrameMesh.positions() = curFrameMesh.positions();
+					}
+				}
 			}
 
 			if (iter == 0)
@@ -44,7 +74,7 @@ namespace GAIA {
 				if (colliderParameters().interpolate)
 				{
 					FloatingType t = FloatingType(numsubsteps - substepId) / numsubsteps;
-					positions() = curFrameMesh.positions() * (1 - t) + nextFrameMesh.positions() * (t);
+					positions() = curFrameMesh.positions() * t + nextFrameMesh.positions() * (1-t);
 				}
 				else
 				{

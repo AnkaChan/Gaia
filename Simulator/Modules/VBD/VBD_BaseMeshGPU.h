@@ -47,7 +47,7 @@ namespace GAIA {
 		FloatingTypeGPU* tetForceAndHessians;
 #ifdef GPU_JACOBI_DX
 		// for jacobi style iteration
-		FloatingTypeGPU* dx;
+		FloatingTypeGPU* positionsNew;
 #endif // !GPU_JACOBI_DX
 
 		// for Chebyshev accelerator

@@ -42,6 +42,8 @@ namespace GAIA {
 #endif
 
 	struct BaseNewtonAssembler {
+		typedef std::shared_ptr<BaseNewtonAssembler> BaseSharedPtr;
+		typedef BaseNewtonAssembler* BasePtr;
 
 		size_t numAllVertices{};
 		size_t numAllEdges{};
@@ -89,7 +91,11 @@ namespace GAIA {
 	};
 
 	struct TetMeshNewtonAssembler : public BaseNewtonAssembler {
+		typedef std::shared_ptr<TetMeshNewtonAssembler> SharedPtr;
+		typedef TetMeshNewtonAssembler* Ptr;
+		
 		void initialize(std::vector<TetMeshFEM::SharedPtr> meshes);
+
 
 		std::vector<NMat12> elasticHessian{};
 		std::vector<NVec12> elasticForce{};
@@ -105,6 +111,9 @@ namespace GAIA {
 	};
 
 	struct TriMeshNewtonAssembler : public BaseNewtonAssembler {
+		typedef std::shared_ptr<TriMeshNewtonAssembler> SharedPtr;
+		typedef TriMeshNewtonAssembler* Ptr;
+
 		// only need to be called once per simulation, it initializes the elastic Hessian and force
 		// solverType: 0 for direct solverDirect, 1 for CG solverDirect
 		void initialize(std::vector<TriMeshFEM::SharedPtr> meshes_in, int solverType_in = 0);

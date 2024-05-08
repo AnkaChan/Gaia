@@ -1,4 +1,4 @@
-#include "VBDPhysics.h"
+#include "../VBD/VBDPhysics.h"
 #include "LineSearchUtilities.h"
 
 void GAIA::LineSearchUtilities::initialize(const VBDPhysics& physics)

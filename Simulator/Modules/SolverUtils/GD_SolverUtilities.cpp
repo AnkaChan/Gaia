@@ -1,4 +1,4 @@
-#include "VBDPhysics.h"
+#include "../VBD/VBDPhysics.h"
 #include "GD_SolverUtilities.h"
 
 void GAIA::GD_SolverUtilities::initialize(VBDPhysics& physics)
