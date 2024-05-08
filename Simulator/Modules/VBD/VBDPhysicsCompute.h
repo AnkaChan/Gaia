@@ -57,9 +57,11 @@ namespace GAIA {
 	__global__ void VBDSolveParallelGroup_vertexSweep_kernel(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead,
 		int32_t parallelGroupSize, CFloatingTypeGPU acceleratorOmega = 1.0f);
 
+	// this is the recommended version, which does the block-thread two layer parallelism
 	__global__ void VBDSolveParallelGroup_vertexSweep_kernel_V2(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead,
 		int32_t parallelGroupSize, CFloatingTypeGPU acceleratorOmega = 1.0f);
-
+	__global__ void VBDSolveParallelGroup_updateVertexPositions(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead,
+		int32_t parallelGroupSize);
 
 	__global__ void VBDSolveParallelGroup_allInOne_kernel_V2(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead,
 		int32_t parallelGroupSize, CFloatingTypeGPU acceleratorOmega = 1.0f);

@@ -54,7 +54,7 @@ namespace GAIA {
 		ManagedBuffer<int8_t>::SharedPtr activeCollisionMaskBuffer;
 		ManagedBuffer<FloatingTypeGPU>::SharedPtr inertiaBuffer;
 #ifdef GPU_JACOBI_DX
-		ManagedBuffer<FloatingTypeGPU>::SharedPtr dxBuffer;
+		ManagedBuffer<FloatingTypeGPU>::SharedPtr positionsNewBuffer;
 #endif // GPU_JACOBI_DX
 
 		// for acceleration
@@ -467,8 +467,8 @@ namespace GAIA {
 		inertiaBuffer->toGPU(false);
 		SET_GPU_MESH_BUFER_PTR(pTetMeshGPU, inertia);
 #ifdef GPU_JACOBI_DX
-		dxBuffer = std::make_shared<ManagedBuffer<FloatingTypeGPU>>(pTetMesh->inertia.size(), false);
-		SET_GPU_MESH_BUFER_PTR(pTetMeshGPU, dx);
+		positionsNewBuffer = std::make_shared<ManagedBuffer<FloatingTypeGPU>>(pTetMesh->inertia.size(), false);
+		SET_GPU_MESH_BUFER_PTR(pTetMeshGPU, positionsNew);
 #endif // GPU_JACOBI_DX
 
 		if (withAccelerator)

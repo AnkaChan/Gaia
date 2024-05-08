@@ -934,8 +934,8 @@ void GAIA::VBDPhysics::runStepGPU()
 			//	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 			//	{
 			//		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
-			//		CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->vertPosBuffer->getGPUBuffer(), pMesh->pTetMeshSharedBase->dxBuffer->getGPUBuffer(),
-			//			pMesh->pTetMeshShared->dxBuffer->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
+			//		CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->vertPosBuffer->getGPUBuffer(), pMesh->pTetMeshSharedBase->positionsNewBuffer->getGPUBuffer(),
+			//			pMesh->pTetMeshShared->positionsNewBuffer->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
 			//	}
 			//}
 
@@ -1032,8 +1032,8 @@ void GAIA::VBDPhysics::runStepGPU_allInOneSweep()
 				for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 				{
 					VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
-					CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->vertPosBuffer->getGPUBuffer(), pMesh->pTetMeshSharedBase->dxBuffer->getGPUBuffer(),
-						pMesh->pTetMeshShared->dxBuffer->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
+					CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->vertPosBuffer->getGPUBuffer(), pMesh->pTetMeshSharedBase->positionsNewBuffer->getGPUBuffer(),
+						pMesh->pTetMeshShared->positionsNewBuffer->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
 				}
 			}
 
@@ -3599,7 +3599,7 @@ void GAIA::VBDPhysics::recordInitialPositionForAccelerator(bool sync)
 		CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->positionsPrevIterBuffer->getGPUBuffer(), pMesh->pTetMeshSharedBase->vertPosBuffer->getGPUBuffer(),
 			pMesh->pTetMeshShared->positionsPrevIterBuffer->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
 		// not all positionsNew will be modified, here we first fill it with the orginal position
-		CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->dxBuffer->getGPUBuffer(), pMesh->pTetMeshSharedBase->vertPosBuffer->getGPUBuffer(),
+		CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->positionsNewBuffer->getGPUBuffer(), pMesh->pTetMeshSharedBase->vertPosBuffer->getGPUBuffer(),
 			pMesh->pTetMeshShared->positionsPrevIterBuffer->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
 	}
 
