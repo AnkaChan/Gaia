@@ -145,7 +145,6 @@ namespace GAIA {
 		int32_t* getTetParallelGroupsHeadGPU(int iGroup) { return tetParallelGroupHeadsGPU[iGroup]; }
 
 		VBDPhysicsDataGPU* getVBDPhysicsDataGPU() { return pPhysicsDataGPUBuffer->getData(); };
-		void setGPUAcceleratorOmega(CFloatingType omega);
 
 		void syncAllToGPU(bool sync = false);
 		void syncAllToCPU(bool sync = false);
@@ -153,7 +152,6 @@ namespace GAIA {
 		void syncAllToCPUVertPosOnly(bool sync = false);
 
 		// test code
-		void testGPUCollisionHandlingCode();
 		void prepareCollisionDataCPUAndGPU();
 		void printCPUCollisionDataForVertex(IdType meshId, IdType vertexId);
 		void printCPUCollisionData(VBDCollisionDetectionResult& colResult, int iIntersection = 0);
@@ -263,12 +261,6 @@ namespace GAIA {
 	inline CollisionDetectionParamters& VBDPhysics::collisionParams()
 	{
 		return *baseCollisionParams;
-	}
-
-	inline void VBDPhysics::setGPUAcceleratorOmega(CFloatingType omega)
-	{
-		cudaMemcpy(&pPhysicsDataGPUBuffer->getData()->acceleratorOmega,
-			&omega, sizeof(CFloatingType), cudaMemcpyHostToDevice);
 	}
 
 	inline void VBDPhysics::syncAllToGPU(bool sync)

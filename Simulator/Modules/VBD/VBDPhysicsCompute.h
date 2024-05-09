@@ -14,7 +14,7 @@ namespace GAIA {
 		int32_t numThreads, cudaStream_t cudaStream);
 
 	void VBDSolveParallelGroup_applyAccelerationGPU(VBDPhysicsDataGPU* pPhysicsData, int32_t* vertexParallelGroupsHead, int32_t veretxParallelGroupSize,
-		int32_t numThreads, cudaStream_t cudaStream);
+		int32_t numThreads, CFloatingTypeGPU acceleratorOmega, cudaStream_t cudaStream);
 
 	void GDSolveParallelGroup_allInOneSweepGPU(VBDPhysicsDataGPU* pPhysicsData, int32_t* vertexParallelGroupsHead, int32_t veretxParallelGroupSize,
 		int32_t numThreads, cudaStream_t cudaStream);
@@ -45,7 +45,7 @@ namespace GAIA {
 	__global__ void VBDSolveParallelGroup_updateVertexPosition_kernel(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead,
 		int32_t parallelGroupSize);
 	__global__ void VBDSolveParallelGroup_applyAcceleration_kernel(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead,
-		int32_t parallelGroupSize);
+		int32_t parallelGroupSize, CFloatingTypeGPU acceleratorOmega);
 
 	__global__ void evaluateElasticEnergy_kernel(VBDPhysicsDataGPU* pPhysicsData, int32_t* tetParallelGroupsHead, int32_t tetParallelGroupSize, FloatingTypeGPU* tetElasticEnergy);
 

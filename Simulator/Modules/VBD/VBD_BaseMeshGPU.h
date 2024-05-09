@@ -111,7 +111,6 @@ namespace GAIA {
 		FloatingTypeGPU stepSizeGD;
 		//FloatingTypeGPU solveOffHeight;
 		
-		FloatingTypeGPU acceleratorOmega;
 		int32_t useAccelerator;
 		int32_t useBlockJacobi; // for GD only
 	};

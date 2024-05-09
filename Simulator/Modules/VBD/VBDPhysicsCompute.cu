@@ -133,10 +133,10 @@ void GAIA::VBDSolveParallelGroup_updateVertexPositionGPU(VBDPhysicsDataGPU* pPhy
 }
 
 void GAIA::VBDSolveParallelGroup_applyAccelerationGPU(VBDPhysicsDataGPU* pPhysicsData, int32_t* vertexParallelGroupsHead, int32_t veretxParallelGroupSize,
-	int32_t numThreads, cudaStream_t cudaStream)
+	int32_t numThreads, CFloatingTypeGPU acceleratorOmega, cudaStream_t cudaStream)
 {
 	VBDSolveParallelGroup_applyAcceleration_kernel KERNEL_ARGS4((veretxParallelGroupSize + numThreads - 1) / numThreads, numThreads, 0, cudaStream)
-		(pPhysicsData, vertexParallelGroupsHead, veretxParallelGroupSize);
+		(pPhysicsData, vertexParallelGroupsHead, veretxParallelGroupSize, acceleratorOmega);
 }
 
 //void GAIA::VBDSolveParallelGroup_vertexSweepAcceleratedGS(VBDPhysicsDataGPU* pPhysicsData, int32_t* vertexParallelGroupsHead, int32_t veretxParallelGroupSize, FloatingTypeGPU acceleratorOmega, int32_t numThreads, cudaStream_t cudaStream)
@@ -907,7 +907,8 @@ __global__ void GAIA::VBDSolveParallelGroup_allInOne_kernel_V2(VBDPhysicsDataGPU
 	return ;
 }
 
-__global__ void GAIA::VBDSolveParallelGroup_applyAcceleration_kernel(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead, int32_t parallelGroupSize)
+__global__ void GAIA::VBDSolveParallelGroup_applyAcceleration_kernel(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead, int32_t parallelGroupSize, 
+	CFloatingTypeGPU acceleratorOmega)
 {
 	int32_t iVert = blockIdx.x * blockDim.x + threadIdx.x;
 	if (iVert < parallelGroupSize)
@@ -931,7 +932,7 @@ __global__ void GAIA::VBDSolveParallelGroup_applyAcceleration_kernel(VBDPhysicsD
 				FloatingTypeGPU yDiff[3];
 				CuMatrix::vec3Minus(v, y_prevprev, yDiff);
 				CuMatrix::vec3Set(v, y_prevprev);
-				CuMatrix::vec3MulAddTo(yDiff, pPhysicsData->acceleratorOmega, v);
+				CuMatrix::vec3MulAddTo(yDiff, acceleratorOmega, v);
 
 			}
 			// write y_k to y_k-1

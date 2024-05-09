@@ -886,7 +886,7 @@ void GAIA::VBDPhysics::runStepGPU()
 			}
 			if (physicsParams().useAccelerator)
 			{
-				acceleratorOmega = getAcceleratorOmega(iIter + 1, physicsParams().acceleratorPho, acceleratorOmega);
+				acceleratorOmega = getAcceleratorOmega(iIter + 1, physicsParams().acceleratorRho, acceleratorOmega);
 			}
 
 			if (!graphCreated)
@@ -899,6 +899,12 @@ void GAIA::VBDPhysics::runStepGPU()
 				recordPrevIterPositionsAccelerator(false);
 			}
 			cudaGraphLaunch(VBDSolveInstance, cudaStream);
+
+			if (physicsParams().useAccelerator)
+			{
+				VBDSolveParallelGroup_applyAccelerationGPU(getVBDPhysicsDataGPU(), vertexAllParallelGroupsBuffer->getGPUBuffer(), numAllVertices,
+					physicsParams().numThreadsVBDSolve, acceleratorOmega, cudaStream);
+			}
 
 			//for (size_t iGroup = 0; iGroup < vertexParallelGroups.size(); iGroup++)
 			//{
@@ -1012,7 +1018,7 @@ void GAIA::VBDPhysics::runStepGPU()
 //			}
 //			if (physicsParams().useAccelerator)
 //			{
-//				acceleratorOmega = getAcceleratorOmega(iIter + 1, physicsParams().acceleratorPho, acceleratorOmega);
+//				acceleratorOmega = getAcceleratorOmega(iIter + 1, physicsParams().acceleratorRho, acceleratorOmega);
 //			}
 //
 //			for (size_t iGroup = 0; iGroup < vertexParallelGroups.size(); iGroup++)
@@ -1110,7 +1116,7 @@ void GAIA::VBDPhysics::runStepGPU()
 //			}
 //			if (physicsParams().useAccelerator)
 //			{
-//				acceleratorOmega = getAcceleratorOmega(iIter + 1, physicsParams().acceleratorPho, acceleratorOmega);
+//				acceleratorOmega = getAcceleratorOmega(iIter + 1, physicsParams().acceleratorRho, acceleratorOmega);
 //			}
 //
 //			for (size_t iGroup = 0; iGroup < vertexParallelGroups.size(); iGroup++)
@@ -1225,7 +1231,7 @@ void GAIA::VBDPhysics::runStepGPU_GD()
 		{
 			if (physicsParams().useAccelerator)
 			{
-				acceleratorOmega = getAcceleratorOmega(iIter + 1, physicsParams().acceleratorPho, acceleratorOmega);
+				acceleratorOmega = getAcceleratorOmega(iIter + 1, physicsParams().acceleratorRho, acceleratorOmega);
 			}
 			//syncAllToCPUVertPosOnly(true);
 			//saveDebugState("beforeIter_retry_" + std::to_string(retry) + "_", true);
