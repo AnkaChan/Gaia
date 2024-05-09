@@ -912,8 +912,7 @@ __global__ void GAIA::VBDSolveParallelGroup_allInOne_kernel_V2(VBDPhysicsDataGPU
 				CuMatrix::vec3MulAddTo(descentDirection, stepSize, vNew);
 			}
 
-			// CuMatrix::vec3Set(vPosNew, vNew);
-			CuMatrix::vec3Set(pTetMeshGPU->getVert(vertexId), vNew);
+			CuMatrix::vec3Set(vPosNew, vNew);
 		}
 	}
 

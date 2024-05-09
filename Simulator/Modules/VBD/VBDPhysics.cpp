@@ -1556,8 +1556,8 @@ void GAIA::VBDPhysics::recordVBDSolveGraph()
 		VBDSolveParallelGroup_vertexSweep_2hierarchies(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
 			sizeVertexParallelGroup(iGroup), cudaStream);
 
-		// VBDSolveParallelGroup_updateVertexPosition(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
-		// 	sizeVertexParallelGroup(iGroup), physicsParams().numThreadsVBDSolve, cudaStream);
+		VBDSolveParallelGroup_updateVertexPosition(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
+			sizeVertexParallelGroup(iGroup), physicsParams().numThreadsVBDSolve, cudaStream);
 
 		//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
 	}
