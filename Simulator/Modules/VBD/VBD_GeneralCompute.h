@@ -102,7 +102,6 @@ namespace GAIA {
                 CFloatingTypeGPU penetrationDepth = lowerBound - v[iDim];
 				force[iDim] += penetrationDepth * boundaryCollisionStiffness;
 				hessian[iDim + iDim * 3] += boundaryCollisionStiffness;
-#ifdef USE_IPC_BOUNDARY_FRICTION
                 // Friction
                 if (!frictionApplied)
                     // avoid multiple friction when there it exeeds more than one boundary
@@ -126,9 +125,8 @@ namespace GAIA {
                     CFloatingTypeGPU epsV = pPhysicsData->boundaryFrictionEpsV;
                     CFloatingTypeGPU epsU = epsV * pPhysicsData->dt;
 
-                    //accumulateVertexFrictionGPU(mu, lambda, T, u, epsU, force, hessian);
+                    accumulateVertexFrictionGPU(mu, lambda, T, u, epsU, force, hessian);
                 }
-#endif // USE_IPC_BOUNDARY_FRICTION
 
 			}
 			else if (v[iDim] > upperBound)
@@ -138,7 +136,6 @@ namespace GAIA {
 
 				hessian[iDim + iDim * 3] += boundaryCollisionStiffness;
 
-#ifdef USE_IPC_BOUNDARY_FRICTION
                 // Friction
                 if (!frictionApplied)
                 // avoid multiple friction when there it exeeds more than one boundary
@@ -162,9 +159,8 @@ namespace GAIA {
                     CFloatingTypeGPU epsV = pPhysicsData->boundaryFrictionEpsV;
                     CFloatingTypeGPU epsU = epsV * pPhysicsData->dt;
 
-                    //accumulateVertexFrictionGPU(mu, lambda, T, u, epsU, force, hessian);
+                    accumulateVertexFrictionGPU(mu, lambda, T, u, epsU, force, hessian);
                 }
-#endif // USE_IPC_BOUNDARY_FRICTION
             }
 		}
 	}

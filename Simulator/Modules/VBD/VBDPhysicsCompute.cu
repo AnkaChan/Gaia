@@ -177,9 +177,6 @@ void GAIA::GDSolveParallelGroup_updatePositionSweep(VBDPhysicsDataGPU* pPhysicsD
 void GAIA::VBDUpdateVelocity(VBDPhysicsDataGPU* pPhysicsData, const int32_t* vertexAllParallelGroups, const int32_t numVertices,
 	int32_t numThreads, cudaStream_t cudaStream)
 {
-	VBDUpdateRelativeVelocity_kernel KERNEL_ARGS4((numVertices + numThreads - 1) / numThreads, numThreads, 0, cudaStream)
-		(pPhysicsData, vertexAllParallelGroups, numVertices);
-
 	VBDUpdateVelocity_kernel KERNEL_ARGS4((numVertices + numThreads - 1) / numThreads, numThreads, 0, cudaStream)
 		(pPhysicsData, vertexAllParallelGroups, numVertices);
 }
@@ -210,16 +207,9 @@ __global__ void GAIA::VBDUpdateVelocity_kernel(VBDPhysicsDataGPU* pPhysicsData, 
 				CFloatingTypeGPU dt = pPhysicsData->dt;
 				CFloatingTypeGPU vertInvMass = 1.f / pTetMeshGPU->vertexMass[vertexId];
 				updateVertexVelocity(pTetMeshGPU, vertexId, dt);
-#ifndef USE_IPC_BOUNDARY_FRICTION
-				applyBoundaryFriction(pPhysicsData, pTetMeshGPU, vertexId, dt, vertInvMass);
-#endif // !USE_IPC_BOUNDARY_FRICTION
-#ifndef USE_IPC_FRICTION
-				applyCollisionFriction(pPhysicsData, pTetMeshGPU, vertexId, dt, vertInvMass);
-#endif // !USE_IPC_FRICTION
 				dampVelocity(vel, pTetMeshGPU->maxVelocityMagnitude, pTetMeshGPU->exponentialVelDamping, pTetMeshGPU->constantVelDamping);
 			}
 		}
-
 	}
 	return;
 }
