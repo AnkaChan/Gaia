@@ -21,11 +21,12 @@ namespace GAIA {
 		ObjectParametersVBDNeoHookean() {
 			materialType = NeoHookean;
 		}
-		FloatingType lmbd = 1e4;
+		// deviatoric energy stiffness
 		FloatingType miu = 1e4;
-		FloatingType damping = 0;
-		FloatingType dampingShear = 0;
-		FloatingType dampingVolume = 0;
+		// hydrostatic energy stiffness
+		FloatingType lmbd = 1e4;
+		FloatingType dampingDeviatoric = 0;
+		FloatingType dampingHydrostatic = 0;
 
 		virtual bool fromJson(nlohmann::json& objectJsonParams);
 		virtual bool toJson(nlohmann::json& objectJsonParams);

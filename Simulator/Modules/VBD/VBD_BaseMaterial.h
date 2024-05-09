@@ -27,7 +27,7 @@ namespace GAIA {
 		typedef ObjectParamsVBD* Ptr;
 
 		FloatingType frictionDynamic = 0.1f;
-		FloatingType frictionEpsV = 1.0f;
+		FloatingType frictionEpsV = 0.01f;
 
 		FloatingType exponentialVelDamping = 1.0f;
 		FloatingType constantVelDamping = 0.0f;

@@ -323,7 +323,7 @@ __global__ void GAIA::VBDApplyAccelerator_kernel(VBDPhysicsDataGPU* pPhysicsData
 //			FloatingTypeGPU tetFAndH[12] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
 //
 //			evaluateNeoHookeanMaterialForceAndHessian(pTetMeshGPU->miu, pTetMeshGPU->lmbd, pTetMeshGPU->tetRestVolume[tetId], tetId, vertexOrderInTet,
-//				tetVIds, pTetMeshGPU->vertPos, pTetMeshGPU->vertPrevPos, pTetMeshGPU->DmInvs, tetFAndH, tetFAndH + 3, pTetMeshGPU->dampingVolume, pTetMeshGPU->dampingShear, pPhysicsData->dt);
+//				tetVIds, pTetMeshGPU->vertPos, pTetMeshGPU->vertPrevPos, pTetMeshGPU->DmInvs, tetFAndH, tetFAndH + 3, pTetMeshGPU->dampingHydrostatic, pTetMeshGPU->dampingDeviatoric, pPhysicsData->dt);
 //
 //			FloatingTypeGPU* tetFAndHStorage = pTetMeshGPU->tetForceAndHessians + 12 * tetId;
 //
@@ -370,8 +370,8 @@ __global__ void GAIA::VBDApplyAccelerator_kernel(VBDPhysicsDataGPU* pPhysicsData
 //			FloatingTypeGPU* force = tetFAndH;
 //			FloatingTypeGPU* h = tetFAndH + 3;
 //
-//			FloatingTypeGPU dampingVolume = pTetMeshGPU->dampingVolume;
-//			FloatingTypeGPU dampingShear = pTetMeshGPU->dampingShear;
+//			FloatingTypeGPU dampingHydrostatic = pTetMeshGPU->dampingHydrostatic;
+//			FloatingTypeGPU dampingDeviatoric = pTetMeshGPU->dampingDeviatoric;
 //
 //			CFloatingTypeGPU* DmInvs = pTetMeshGPU->DmInvs;
 //
@@ -536,17 +536,17 @@ __global__ void GAIA::VBDApplyAccelerator_kernel(VBDPhysicsDataGPU* pPhysicsData
 //			CFloatingTypeGPU m1 = ms[vertexOrderInTet][0], m2 = ms[vertexOrderInTet][1], m3 = ms[vertexOrderInTet][2];
 //			assembleVertexVForceAndHessian(dE_dF, &d2E_dF_dF, m1, m2, m3, force, h);
 //
-//			if (dampingVolume > 0.f || dampingShear > 0.f)
+//			if (dampingHydrostatic > 0.f || dampingDeviatoric > 0.f)
 //			{
 //				FloatingTypeGPU dampingH[9];
-//				CuMatrix::vec9Mul(h, dampingVolume, dampingH);
+//				CuMatrix::vec9Mul(h, dampingHydrostatic, dampingH);
 //
 //				FloatingTypeGPU tmp = (m1 * m1 + m2 * m2 + m3 * m3) * miu * A;
 //
 //				h[0] += tmp;
 //				h[4] += tmp;
 //				h[8] += tmp;
-//				tmp *= dampingShear;
+//				tmp *= dampingDeviatoric;
 //				dampingH[0] += tmp;
 //				dampingH[4] += tmp;
 //				dampingH[8] += tmp;
@@ -843,7 +843,7 @@ __global__ void GAIA::VBDSolveParallelGroup_allInOne_kernel_V2(VBDPhysicsDataGPU
 			//VEC12_SET(forceAndHessian, tetFAndHStorage);
 			// instead of using the precomputed hessians we compute them on the fly
 			evaluateNeoHookeanMaterialForceAndHessian(pTetMeshGPU->miu, pTetMeshGPU->lmbd, pTetMeshGPU->tetRestVolume[neiTetId], neiTetId, vertexOrderInTet,
-				tetVIds, pTetMeshGPU->vertPos, pTetMeshGPU->vertPrevPos, pTetMeshGPU->DmInvs, forceAndHessian, hessian, pTetMeshGPU->dampingVolume, pTetMeshGPU->dampingShear, pPhysicsData->dt);
+				tetVIds, pTetMeshGPU->vertPos, pTetMeshGPU->vertPrevPos, pTetMeshGPU->DmInvs, forceAndHessian, hessian, pTetMeshGPU->dampingHydrostatic, pTetMeshGPU->dampingDeviatoric, pPhysicsData->dt);
 		}
 
 		if (numNeiTets > NUM_THREADS_VERTEX_SWEEP)
@@ -862,7 +862,7 @@ __global__ void GAIA::VBDSolveParallelGroup_allInOne_kernel_V2(VBDPhysicsDataGPU
 					CFloatingTypeGPU tetRestVolume = pTetMeshGPU->tetRestVolume[neiTetId];
 					// instead of using the precomputed hessians we compute them on the fly
 					evaluateNeoHookeanMaterialForceAndHessian(pTetMeshGPU->miu, pTetMeshGPU->lmbd, pTetMeshGPU->tetRestVolume[neiTetId], neiTetId, vertexOrderInTet,
-						tetVIds, pTetMeshGPU->vertPos, pTetMeshGPU->vertPrevPos, pTetMeshGPU->DmInvs, forceAndHessian, hessian, pTetMeshGPU->dampingVolume, pTetMeshGPU->dampingShear, pPhysicsData->dt);
+						tetVIds, pTetMeshGPU->vertPos, pTetMeshGPU->vertPrevPos, pTetMeshGPU->DmInvs, forceAndHessian, hessian, pTetMeshGPU->dampingHydrostatic, pTetMeshGPU->dampingDeviatoric, pPhysicsData->dt);
 				}
 			}
 		}
@@ -1081,7 +1081,7 @@ __global__ void GAIA::GDSolveParallelGroup_BlockJacobi_allInOneSweep_kernel(VBDP
 			//VEC12_SET(forceAndHessian, tetFAndHStorage);
 			// instead of using the precomputed hessians we compute them on the fly
 			evaluateNeoHookeanMaterialForceAndHessian(pTetMeshGPU->miu, pTetMeshGPU->lmbd, pTetMeshGPU->tetRestVolume[neiTetId], neiTetId, vertexOrderInTet,
-				tetVIds, pTetMeshGPU->vertPos, pTetMeshGPU->vertPrevPos, pTetMeshGPU->DmInvs, forceAndHessian, hessian, pTetMeshGPU->dampingVolume, pTetMeshGPU->dampingShear, pPhysicsData->dt);
+				tetVIds, pTetMeshGPU->vertPos, pTetMeshGPU->vertPrevPos, pTetMeshGPU->DmInvs, forceAndHessian, hessian, pTetMeshGPU->dampingHydrostatic, pTetMeshGPU->dampingDeviatoric, pPhysicsData->dt);
 		}
 
 		if (numNeiTets > NUM_THREADS_VERTEX_SWEEP)
@@ -1100,7 +1100,7 @@ __global__ void GAIA::GDSolveParallelGroup_BlockJacobi_allInOneSweep_kernel(VBDP
 					CFloatingTypeGPU tetRestVolume = pTetMeshGPU->tetRestVolume[neiTetId];
 					// instead of using the precomputed hessians we compute them on the fly
 					evaluateNeoHookeanMaterialForceAndHessian(pTetMeshGPU->miu, pTetMeshGPU->lmbd, pTetMeshGPU->tetRestVolume[neiTetId], neiTetId, vertexOrderInTet,
-						tetVIds, pTetMeshGPU->vertPos, pTetMeshGPU->vertPrevPos, pTetMeshGPU->DmInvs, forceAndHessian, hessian, pTetMeshGPU->dampingVolume, pTetMeshGPU->dampingShear, pPhysicsData->dt);
+						tetVIds, pTetMeshGPU->vertPos, pTetMeshGPU->vertPrevPos, pTetMeshGPU->DmInvs, forceAndHessian, hessian, pTetMeshGPU->dampingHydrostatic, pTetMeshGPU->dampingDeviatoric, pPhysicsData->dt);
 				}
 			}
 		}
@@ -1243,7 +1243,7 @@ GPU_CPU_INLINE_FUNC void GAIA::caculateMaterialForceAndHessian_NeoHookean_oneTet
 {
 	const int32_t* tetVIds = pTetMeshGPU->pTopology->tetVIds + 4 * tetId;
 	evaluateNeoHookeanMaterialForceAndHessian(pTetMeshGPU->miu, pTetMeshGPU->lmbd, pTetMeshGPU->tetRestVolume[tetId], tetId, vertexOrderInTet,
-		tetVIds, pTetMeshGPU->vertPos, pTetMeshGPU->vertPrevPos, pTetMeshGPU->DmInvs, force, h + 3, pTetMeshGPU->dampingVolume, pTetMeshGPU->dampingShear, dt);
+		tetVIds, pTetMeshGPU->vertPos, pTetMeshGPU->vertPrevPos, pTetMeshGPU->DmInvs, force, h + 3, pTetMeshGPU->dampingHydrostatic, pTetMeshGPU->dampingDeviatoric, dt);
 	return;
 }
 
@@ -1704,7 +1704,7 @@ __device__ __host__  void GAIA::accumulateMaterialForceAndHessianForVertex_NeoHo
 		int32_t* tetVIds = pTopology->tetVIds + 4 * neiTetId;
 		int32_t vOrderInTet = pTopology->vertexNeighborTets_vertexOrder[neiTetsStart + iNeiTet];
 		evaluateNeoHookeanMaterialForceAndHessian(pTetMeshGPU->miu, pTetMeshGPU->lmbd, pTetMeshGPU->tetRestVolume[neiTetId], neiTetId, vOrderInTet,
-			tetVIds, pTetMeshGPU->vertPos, pTetMeshGPU->vertPrevPos, pTetMeshGPU->DmInvs, force, h, pTetMeshGPU->dampingVolume, pTetMeshGPU->dampingShear, dt);
+			tetVIds, pTetMeshGPU->vertPos, pTetMeshGPU->vertPrevPos, pTetMeshGPU->DmInvs, force, h, pTetMeshGPU->dampingHydrostatic, pTetMeshGPU->dampingDeviatoric, dt);
 	}
 }
 
@@ -2034,7 +2034,7 @@ GPU_CPU_INLINE_FUNC void GAIA::accumlateCollisionForceAndHessianPerCollision_v2(
 
 GPU_CPU_INLINE_FUNC  void  GAIA::evaluateNeoHookeanMaterialForceAndHessian(CFloatingTypeGPU miu, CFloatingTypeGPU lmbd, CFloatingTypeGPU A, int32_t tetId, int32_t vOrderInTet,
 	const int32_t* tetVIds, CFloatingTypeGPU* vs, CFloatingTypeGPU* vsPrev, CFloatingTypeGPU* DmInvs, FloatingTypeGPU* force, FloatingTypeGPU* h,
-	CFloatingTypeGPU dampingVolume, CFloatingTypeGPU dampingShear, CFloatingTypeGPU dt)
+	CFloatingTypeGPU dampingHydrostatic, CFloatingTypeGPU dampingDeviatoric, CFloatingTypeGPU dt)
 {
 
 	CFloatingTypeGPU* v0 = vs + VERTEX_BUFFER_STRIDE * tetVIds[0];
@@ -2195,17 +2195,17 @@ GPU_CPU_INLINE_FUNC  void  GAIA::evaluateNeoHookeanMaterialForceAndHessian(CFloa
 	CFloatingTypeGPU m1 = ms[vOrderInTet][0], m2 = ms[vOrderInTet][1], m3 = ms[vOrderInTet][2];
 	assembleVertexVForceAndHessian(dE_dF, &d2E_dF_dF, m1, m2, m3, force, h);
 
-	if (dampingVolume > 0.f || dampingShear > 0.f)
+	if (dampingHydrostatic > 0.f || dampingDeviatoric > 0.f)
 	{
 		FloatingTypeGPU dampingH[9];
-		CuMatrix::vec9Mul(h, dampingVolume, dampingH);
+		CuMatrix::vec9Mul(h, dampingHydrostatic, dampingH);
 
 		FloatingTypeGPU tmp = (m1 * m1 + m2 * m2 + m3 * m3) * miu * A;
 
 		h[0] += tmp;
 		h[4] += tmp;
 		h[8] += tmp;
-		tmp *= dampingShear;
+		tmp *= dampingDeviatoric;
 		dampingH[0] += tmp;
 		dampingH[4] += tmp;
 		dampingH[8] += tmp;
@@ -2656,7 +2656,7 @@ GPU_CPU_INLINE_FUNC void GAIA::GDStep_vertexSweep_allInOne_blockJacobi(VBDPhysic
 		int32_t vertexOrderInTet = pTopology->vertexNeighborTets_vertexOrder[neiTetsStart + iNeiTet];
 
 		evaluateNeoHookeanMaterialForceAndHessian(pTetMeshGPU->miu, pTetMeshGPU->lmbd, pTetMeshGPU->tetRestVolume[neiTetId], neiTetId, vertexOrderInTet,
-			tetVIds, pTetMeshGPU->vertPos, pTetMeshGPU->vertPrevPos, pTetMeshGPU->DmInvs, force, h, pTetMeshGPU->dampingVolume, pTetMeshGPU->dampingShear, pPhysics->dt);
+			tetVIds, pTetMeshGPU->vertPos, pTetMeshGPU->vertPrevPos, pTetMeshGPU->DmInvs, force, h, pTetMeshGPU->dampingHydrostatic, pTetMeshGPU->dampingDeviatoric, pPhysics->dt);
 	}
 	accumulateBoundaryForceAndHessianGPU(pPhysics, pTetMeshGPU, vertexId, force, h);
 

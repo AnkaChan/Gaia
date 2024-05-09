@@ -7,9 +7,8 @@ namespace GAIA {
 		FloatingTypeGPU lmbd;
 		FloatingTypeGPU miu;
 
-		FloatingTypeGPU dampingVolume;
-		FloatingTypeGPU dampingShear;
-
+		FloatingTypeGPU dampingHydrostatic;
+		FloatingTypeGPU dampingDeviatoric;
 	};
 
 

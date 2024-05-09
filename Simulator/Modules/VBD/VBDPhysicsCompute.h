@@ -74,7 +74,7 @@ namespace GAIA {
 	
 	GPU_CPU_INLINE_FUNC  void evaluateNeoHookeanMaterialForceAndHessian(CFloatingTypeGPU miu, CFloatingTypeGPU lmbd, CFloatingTypeGPU A, int32_t tetId, int32_t vOrderInTet,
 		const int32_t* tetVIds, CFloatingTypeGPU* vs, CFloatingTypeGPU* vsPrev, CFloatingTypeGPU* DmInvs, FloatingTypeGPU* force, FloatingTypeGPU* h,
-		CFloatingTypeGPU dampingVolume, CFloatingTypeGPU dampingShear, CFloatingTypeGPU dt);
+		CFloatingTypeGPU dampingHydrostatic, CFloatingTypeGPU dampingDeviatoric, CFloatingTypeGPU dt);
 	
 	GPU_CPU_INLINE_FUNC  void evaluateNeoHookeanMaterialForceAndDiagonalHessian(FloatingTypeGPU miu, FloatingTypeGPU lmbd, FloatingTypeGPU A, int32_t tetId, int32_t vOrderInTet,
 		const int32_t* tetVIds, FloatingTypeGPU* vs, CFloatingTypeGPU* DmInvs, FloatingTypeGPU* force, FloatingTypeGPU* h);
