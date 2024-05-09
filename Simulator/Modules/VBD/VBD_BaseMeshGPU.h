@@ -51,7 +51,9 @@ namespace GAIA {
 #endif // !GPU_JACOBI_DX
 
 		// for Chebyshev accelerator
+		FloatingTypeGPU* positionsPrevPrevIter;
 		FloatingTypeGPU* positionsPrevIter;
+
 		int8_t* activeCollisionMask;
 		FloatingTypeGPU* inertia;
 
@@ -67,6 +69,10 @@ namespace GAIA {
 
 		GPU_CPU_INLINE_FUNC FloatingTypeGPU* getVert(int32_t iVert) { return vertPos + VERTEX_BUFFER_STRIDE * iVert; }
 		GPU_CPU_INLINE_FUNC CFloatingTypeGPU* getVert(int32_t iVert) const { return vertPos + VERTEX_BUFFER_STRIDE * iVert; }
+
+
+		GPU_CPU_INLINE_FUNC FloatingTypeGPU* getVertPosNew(int32_t iVert) { return positionsNew + VERTEX_BUFFER_STRIDE * iVert; }
+		GPU_CPU_INLINE_FUNC CFloatingTypeGPU* getVertPosNew(int32_t iVert) const { return positionsNew + VERTEX_BUFFER_STRIDE * iVert; }
 
 		GPU_CPU_INLINE_FUNC FloatingTypeGPU* getVertPrevPos(int32_t iVert) { return vertPrevPos + VERTEX_BUFFER_STRIDE * iVert; }
 		GPU_CPU_INLINE_FUNC CFloatingTypeGPU* getVertPrevPos(int32_t iVert) const { return vertPrevPos + VERTEX_BUFFER_STRIDE * iVert; }
@@ -105,6 +111,7 @@ namespace GAIA {
 		FloatingTypeGPU stepSizeGD;
 		//FloatingTypeGPU solveOffHeight;
 		
+		FloatingTypeGPU acceleratorOmega;
 		int32_t useAccelerator;
 		int32_t useBlockJacobi; // for GD only
 	};

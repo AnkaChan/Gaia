@@ -898,6 +898,10 @@ void GAIA::VBDPhysics::runStepGPU()
 				recordVBDSolveGraph();
 			}
 
+			if (physicsParams().useAccelerator)
+			{
+				recordPrevIterPositionsAccelerator(false);
+			}
 			cudaGraphLaunch(VBDSolveInstance, cudaStream);
 
 			//for (size_t iGroup = 0; iGroup < vertexParallelGroups.size(); iGroup++)
@@ -916,7 +920,7 @@ void GAIA::VBDPhysics::runStepGPU()
 			//			activeCollisionsEachParallelGroupBuffer[iGroup]->getGPUBuffer(), physicsParams().numThreadsVBDSolve, cudaStream);
 			//	}
 			//	//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-			//	VBDSolveParallelGroup_vertexSweep(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
+			//	VBDSolveParallelGroup_vertexSweep_2hierarchies(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
 			//		sizeVertexParallelGroup(iGroup), acceleratorOmega, physicsParams().numThreadsVBDSolve, cudaStream);
 
 			//	//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
@@ -1135,8 +1139,8 @@ void GAIA::VBDPhysics::runStepGPU_acceleratedGS()
 						sizeVertexParallelGroup(iGroup), acceleratorOmega, physicsParams().numThreadsVBDSolve, cudaStream);
 				}
 				else {
-					VBDSolveParallelGroup_vertexSweep(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
-						sizeVertexParallelGroup(iGroup), physicsParams().numThreadsVBDSolve, 1.0f, cudaStream);
+					VBDSolveParallelGroup_vertexSweep_2hierarchies(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
+						sizeVertexParallelGroup(iGroup), cudaStream);
 				}
 
 
@@ -1349,8 +1353,8 @@ void GAIA::VBDPhysics::runStepGPU_debugOnCPU()
 				}
 				//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
 
-				VBDSolveParallelGroup_vertexSweep(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
-					sizeVertexParallelGroup(iGroup), 1.0f, physicsParams().numThreadsVBDSolve, cudaStream);
+				VBDSolveParallelGroup_vertexSweep_2hierarchies(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
+					sizeVertexParallelGroup(iGroup), cudaStream);
 
 				// CHECK_CUDA_ERROR(cudaDeviceSynchronize());
 			}
@@ -1403,8 +1407,8 @@ void GAIA::VBDPhysics::runStepGPUNoCollision()
 				VBDSolveParallelGroup_tetSweep(getVBDPhysicsDataGPU(), tetParallelGroupHeadsGPU[iGroup],
 					sizeTetParallelGroup(iGroup), physicsParams().numThreadsVBDSolve, cudaStream);
 
-				VBDSolveParallelGroup_vertexSweep(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
-					sizeVertexParallelGroup(iGroup), 1.0f, physicsParams().numThreadsVBDSolve, cudaStream);
+				VBDSolveParallelGroup_vertexSweep_2hierarchies(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
+					sizeVertexParallelGroup(iGroup), cudaStream);
 
 				// CHECK_CUDA_ERROR(cudaDeviceSynchronize());
 			}
@@ -1549,8 +1553,11 @@ void GAIA::VBDPhysics::recordVBDSolveGraph()
 		//	sizeTetParallelGroup(iGroup), physicsParams().numThreadsVBDSolve, cudaStream);
 		//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
 
-		VBDSolveParallelGroup_vertexSweep(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
-			sizeVertexParallelGroup(iGroup), physicsParams().numThreadsVBDSolve, 1.0f, cudaStream);
+		VBDSolveParallelGroup_vertexSweep_2hierarchies(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
+			sizeVertexParallelGroup(iGroup), cudaStream);
+
+		// VBDSolveParallelGroup_updateVertexPosition(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
+		// 	sizeVertexParallelGroup(iGroup), physicsParams().numThreadsVBDSolve, cudaStream);
 
 		//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
 	}
@@ -3596,10 +3603,25 @@ void GAIA::VBDPhysics::recordInitialPositionForAccelerator(bool sync)
 	{
 		// write the intial position to the previousPositionsForLineSearch for the first line search
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
-		CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->positionsPrevIterBuffer->getGPUBuffer(), pMesh->pTetMeshSharedBase->vertPosBuffer->getGPUBuffer(),
-			pMesh->pTetMeshShared->positionsPrevIterBuffer->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
+		CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->positionsPrevPrevIterBuffer->getGPUBuffer(), pMesh->pTetMeshSharedBase->vertPosBuffer->getGPUBuffer(),
+			pMesh->pTetMeshShared->positionsPrevPrevIterBuffer->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
 		// not all positionsNew will be modified, here we first fill it with the orginal position
 		CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->positionsNewBuffer->getGPUBuffer(), pMesh->pTetMeshSharedBase->vertPosBuffer->getGPUBuffer(),
+			pMesh->pTetMeshShared->positionsPrevPrevIterBuffer->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
+	}
+
+	if (sync)
+	{
+		CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+	}
+}
+
+void GAIA::VBDPhysics::recordPrevIterPositionsAccelerator(bool sync)
+{
+	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
+	{
+		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
+		CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->positionsPrevIterBuffer->getGPUBuffer(), pMesh->pTetMeshShared->vertPosBuffer->getGPUBuffer(),
 			pMesh->pTetMeshShared->positionsPrevIterBuffer->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
 	}
 
@@ -3884,7 +3906,7 @@ void GAIA::VBDPhysics::GDBackupPositions(bool sync, CFloatingType omega)
 
 		if (physicsParams().useAccelerator)
 		{
-			CHECK_CUDA_ERROR(cudaMemcpyAsync(pGDSolverUtilities->prevPrevPositionsForAcceleratorBuffer[iMesh]->getGPUBuffer(), pMesh->pTetMeshSharedBase->positionsPrevIterBuffer->getGPUBuffer(),
+			CHECK_CUDA_ERROR(cudaMemcpyAsync(pGDSolverUtilities->prevPrevPositionsForAcceleratorBuffer[iMesh]->getGPUBuffer(), pMesh->pTetMeshSharedBase->positionsPrevPrevIterBuffer->getGPUBuffer(),
 				pGDSolverUtilities->prevPrevPositionsForAcceleratorBuffer[iMesh]->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
 		}
 	}
@@ -3925,7 +3947,7 @@ void GAIA::VBDPhysics::GDRevertToBackupPositions(bool sync, FloatingType& omega)
 			pGDSolverUtilities->previousPositionsForLineSearchBuffer[iMesh]->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
 		if (physicsParams().useAccelerator)
 		{
-			CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshSharedBase->positionsPrevIterBuffer->getGPUBuffer(), pGDSolverUtilities->prevPrevPositionsForAcceleratorBuffer[iMesh]->getGPUBuffer(),
+			CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshSharedBase->positionsPrevPrevIterBuffer->getGPUBuffer(), pGDSolverUtilities->prevPrevPositionsForAcceleratorBuffer[iMesh]->getGPUBuffer(),
 				pGDSolverUtilities->prevPrevPositionsForAcceleratorBuffer[iMesh]->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
 		}
 	}
@@ -3945,8 +3967,8 @@ void GAIA::VBDPhysics::GDRevertToBackupPositions(bool sync, FloatingType& omega)
 	//	//std::cout << (pMesh->vertices() - prevpos).transpose();
 
 	//	pGDSolverUtilities->prevPrevPositionsForAcceleratorBuffer[iMesh]->toCPU(true, cudaStream);
-	//	pMesh->pTetMeshShared->positionsPrevIterBuffer->toCPU(true);
-	//	Eigen::Map<Eigen::Matrix<FloatingType, 3, -1>> posPrevIterInMesh(pMesh->pTetMeshShared->positionsPrevIterBuffer->getCPUBuffer(), 3, pMesh->numVertices());
+	//	pMesh->pTetMeshShared->positionsPrevPrevIterBuffer->toCPU(true);
+	//	Eigen::Map<Eigen::Matrix<FloatingType, 3, -1>> posPrevIterInMesh(pMesh->pTetMeshShared->positionsPrevPrevIterBuffer->getCPUBuffer(), 3, pMesh->numVertices());
 
 
 	//	Eigen::Map<Eigen::Matrix<FloatingType, 3, -1>> posPrevIter(pGDSolverUtilities->prevPrevPositionsForAcceleratorBuffer[iMesh]->getCPUBuffer(), 3, pMesh->numVertices());

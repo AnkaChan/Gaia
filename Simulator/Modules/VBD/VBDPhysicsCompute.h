@@ -6,9 +6,6 @@
 #define NUM_THREADS_VERTEX_SWEEP 32
 
 namespace GAIA {
-
-
-
 	// update and precompute the collision info
 	void VBDSolveParallelGroup_collisionSweep(VBDPhysicsDataGPU* pPhysicsData, int32_t numActiveCollisions, int32_t* activeCollisionsEachParallelGroup,
 		int32_t numThreads, cudaStream_t cudaStream);
@@ -16,8 +13,15 @@ namespace GAIA {
 	void VBDSolveParallelGroup_tetSweep(VBDPhysicsDataGPU* pPhysicsData, int32_t* tetParallelGroupsHead, int32_t tetParallelGroupSize,
 		int32_t numThreads, cudaStream_t cudaStream);
 
-	void VBDSolveParallelGroup_vertexSweep(VBDPhysicsDataGPU* pPhysicsData, int32_t* vertexParallelGroupsHead, int32_t veretxParallelGroupSize, CFloatingTypeGPU acceleratorOmega,
+	void VBDSolveParallelGroup_vertexSweep_2hierarchies(VBDPhysicsDataGPU* pPhysicsData, int32_t* vertexParallelGroupsHead, int32_t veretxParallelGroupSize,
+		cudaStream_t cudaStream);
+
+	void VBDSolveParallelGroup_updateVertexPosition(VBDPhysicsDataGPU* pPhysicsData, int32_t* vertexParallelGroupsHead, int32_t veretxParallelGroupSize,
 		int32_t numThreads, cudaStream_t cudaStream);
+
+	void VBDSolveParallelGroup_applyAcceleration(VBDPhysicsDataGPU* pPhysicsData, int32_t* vertexParallelGroupsHead, int32_t veretxParallelGroupSize,
+		int32_t numThreads, cudaStream_t cudaStream);
+
 	void VBDSolveParallelGroup_vertexSweepAcceleratedGS(VBDPhysicsDataGPU* pPhysicsData, int32_t* vertexParallelGroupsHead, int32_t veretxParallelGroupSize,
 		FloatingTypeGPU acceleratorOmega, int32_t numThreads, cudaStream_t cudaStream);
 
@@ -57,14 +61,18 @@ namespace GAIA {
 	__global__ void VBDSolveParallelGroup_vertexSweep_kernel(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead,
 		int32_t parallelGroupSize, CFloatingTypeGPU acceleratorOmega = 1.0f);
 
-	// this is the recommended version, which does the block-thread two layer parallelism
 	__global__ void VBDSolveParallelGroup_vertexSweep_kernel_V2(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead,
 		int32_t parallelGroupSize, CFloatingTypeGPU acceleratorOmega = 1.0f);
-	__global__ void VBDSolveParallelGroup_updateVertexPositions(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead,
-		int32_t parallelGroupSize);
 
+	// this is the recommended version, which does the block-thread two layer parallelism
 	__global__ void VBDSolveParallelGroup_allInOne_kernel_V2(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead,
-		int32_t parallelGroupSize, CFloatingTypeGPU acceleratorOmega = 1.0f);
+		int32_t parallelGroupSize);
+	// copy the updated position to the original position buffer to ensure GS iteration
+	// also in charge of acceleration
+	__global__ void VBDSolveParallelGroup_updateVertexPosition_kernel(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead,
+		int32_t parallelGroupSize);
+	__global__ void VBDSolveParallelGroup_applyAcceleration_kernel(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead,
+		int32_t parallelGroupSize);
 
 	__global__ void VBDSolveParallelGroup_vertexSweepAcceleratedGS_kernel(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead,
 		int32_t parallelGroupSize, FloatingTypeGPU acceleratorOmega);
@@ -119,6 +127,10 @@ namespace GAIA {
 	// collisionVertexOrder: 0~3
 	GPU_CPU_INLINE_FUNC void accumlateCollisionForceAndHessianPerCollision(const VBDPhysicsDataGPU* pPhysicsData, const VBDBaseTetMeshGPU* pTetMeshGPU, 
 		const CollisionDataGPU& collisionResult, int32_t collisionResultId,  int32_t collisionVertexOrder, FloatingTypeGPU* force, FloatingTypeGPU* hessian);
+	// compute the force and hessian on the fly
+	GPU_CPU_INLINE_FUNC void accumlateCollisionForceAndHessianPerCollision_v2(const VBDPhysicsDataGPU* pPhysicsData, const VBDBaseTetMeshGPU* pTetMeshGPU,
+		const CollisionDataGPU& collisionResult, int32_t collisionResultId, int32_t collisionVertexOrder, FloatingTypeGPU* force, FloatingTypeGPU* hessian);
+
 	GPU_CPU_INLINE_FUNC  FloatingTypeGPU computeCollisionForcePerCollision(const VBDPhysicsDataGPU* pPhysicsData, const VBDBaseTetMeshGPU* pTetMeshGPU,
 		const CollisionDataGPU& collisionResult, int32_t collisionResultId, int32_t collisionVertexOrder,  FloatingTypeGPU* contactNormal);
 

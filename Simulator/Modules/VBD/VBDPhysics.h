@@ -58,7 +58,6 @@ namespace GAIA {
 
 		void sortVertexColorGroupsByMortonCode();
 
-
 		virtual TetMeshFEM::SharedPtr initializeMaterial(ObjectParams::SharedPtr objParam, std::shared_ptr<TetMeshMF> pTMeshMF,
 			BasePhysicsParams::SharedPtr physicsParaemters);
 
@@ -146,6 +145,7 @@ namespace GAIA {
 		int32_t* getTetParallelGroupsHeadGPU(int iGroup) { return tetParallelGroupHeadsGPU[iGroup]; }
 
 		VBDPhysicsDataGPU* getVBDPhysicsDataGPU() { return pPhysicsDataGPUBuffer->getData(); };
+		void setGPUAcceleratorOmega(CFloatingType omega);
 
 		void syncAllToGPU(bool sync = false);
 		void syncAllToCPU(bool sync = false);
@@ -169,6 +169,7 @@ namespace GAIA {
 		// accelerator
 		FloatingType getAcceleratorOmega(int order, CFloatingType pho, CFloatingType prevOmega);
 		void recordInitialPositionForAccelerator(bool sync);
+		void recordPrevIterPositionsAccelerator(bool sync);
 
 		// data
 	public:
@@ -262,6 +263,12 @@ namespace GAIA {
 	inline CollisionDetectionParamters& VBDPhysics::collisionParams()
 	{
 		return *baseCollisionParams;
+	}
+
+	inline void VBDPhysics::setGPUAcceleratorOmega(CFloatingType omega)
+	{
+		cudaMemcpy(&pPhysicsDataGPUBuffer->getData()->acceleratorOmega,
+			&omega, sizeof(CFloatingType), cudaMemcpyHostToDevice);
 	}
 
 	inline void VBDPhysics::syncAllToGPU(bool sync)

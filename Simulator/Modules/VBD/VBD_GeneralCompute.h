@@ -34,17 +34,16 @@ namespace GAIA {
             // force = -mu * lambda * f1_SF_over_x * T_3x2 * u_2x1;
             CuMatrix::vec3MulAddTo(forceFriction, -mu * lambda * f1_SF_over_x, force);
 
-
-            FloatingTypeGPU uOutterProductAndDiagonal[4] = {
-                mu * lambda * (u_2x1[0] * u_2x1[0] * df1_x_minus_f1_over_x3 + f1_SF_over_x), // (0,0)
-                mu * lambda * (u_2x1[1] * u_2x1[0] * df1_x_minus_f1_over_x3), // (1, 0)
-                mu * lambda * (u_2x1[1] * u_2x1[0] * df1_x_minus_f1_over_x3), // (0, 1)
-                mu * lambda * (u_2x1[1] * u_2x1[1] * df1_x_minus_f1_over_x3 + f1_SF_over_x) // (1, 1)
+            FloatingTypeGPU f1_SF_over_x_I2[4] = {
+                mu * lambda * f1_SF_over_x, // (0,0)
+                0.f, // (1, 0)
+                0.f, // (0, 1)
+                mu * lambda * f1_SF_over_x // (1, 1)
             };
 
-            // compute T * (df1_x_minus_f1_over_x3 * u * u.transpose() + f1_SF_over_x * Mat2::Identity()) * T.transpose();
+            // compute T * (f1_SF_over_x * Mat2::Identity()) * T.transpose();
             FloatingTypeGPU m1[6];
-            CuMatrix::matMulMxN<FloatingTypeGPU, 3, 2, 2>(T_3x2, uOutterProductAndDiagonal, m1);
+            CuMatrix::matMulMxN<FloatingTypeGPU, 3, 2, 2>(T_3x2, f1_SF_over_x_I2, m1);
 
             for (int r = 0; r < 3; r++)
             {

@@ -112,19 +112,31 @@ void GAIA::VBDSolveParallelGroup_tetSweep(VBDPhysicsDataGPU* pPhysicsData, int32
 		(pPhysicsData, tetParallelGroupsHead, tetParallelGroupSize);
 }
 
-void GAIA::VBDSolveParallelGroup_vertexSweep(VBDPhysicsDataGPU* pPhysicsData, int32_t* vertexParallelGroupsHead,
-	int32_t veretxParallelGroupSize, CFloatingTypeGPU acceleratorOmega, int32_t numThreads, cudaStream_t cudaStream)
+void GAIA::VBDSolveParallelGroup_vertexSweep_2hierarchies(VBDPhysicsDataGPU* pPhysicsData, int32_t* vertexParallelGroupsHead,
+	int32_t veretxParallelGroupSize, cudaStream_t cudaStream)
 {
 	//VBDSolveParallelGroup_vertexSweep_kernel KERNEL_ARGS4((veretxParallelGroupSize + numThreads - 1) / numThreads, numThreads, 0, cudaStream)
 	//	(pPhysicsData, vertexParallelGroupsHead, veretxParallelGroupSize, acceleratorOmega);
 
 	// V2, one block for each vertex
-	//std::cout << "vertexSweep_kernel: " << (veretxParallelGroupSize + NUM_THREADS_TET_SWEEP - 1) / NUM_THREADS_TET_SWEEP << " blocks" << NUM_THREADS_TET_SWEEP << " threads\n";
-	//VBDSolveParallelGroup_vertexSweep_kernel_V2 KERNEL_ARGS4(veretxParallelGroupSize, NUM_THREADS_VERTEX_SWEEP, 0, cudaStream)
-	//	(pPhysicsData, vertexParallelGroupsHead, veretxParallelGroupSize, acceleratorOmega);
-
+	// use fixed number of threads defined by NUM_THREADS_VERTEX_SWEEP
 	VBDSolveParallelGroup_allInOne_kernel_V2 KERNEL_ARGS4(veretxParallelGroupSize, NUM_THREADS_VERTEX_SWEEP, 0, cudaStream)
-		(pPhysicsData, vertexParallelGroupsHead, veretxParallelGroupSize, acceleratorOmega);
+		(pPhysicsData, vertexParallelGroupsHead, veretxParallelGroupSize);
+}
+
+void GAIA::VBDSolveParallelGroup_updateVertexPosition(VBDPhysicsDataGPU* pPhysicsData, int32_t* vertexParallelGroupsHead, 
+	int32_t veretxParallelGroupSize, int32_t numThreads, cudaStream_t cudaStream)
+{
+	// one thread for each vertex
+	VBDSolveParallelGroup_updateVertexPosition_kernel KERNEL_ARGS4((veretxParallelGroupSize + numThreads - 1) / numThreads, numThreads, 0, cudaStream)
+		(pPhysicsData, vertexParallelGroupsHead, veretxParallelGroupSize);
+}
+
+void GAIA::VBDSolveParallelGroup_applyAcceleration(VBDPhysicsDataGPU* pPhysicsData, int32_t* vertexParallelGroupsHead, int32_t veretxParallelGroupSize,
+	int32_t numThreads, cudaStream_t cudaStream)
+{
+	VBDSolveParallelGroup_applyAcceleration_kernel KERNEL_ARGS4((veretxParallelGroupSize + numThreads - 1) / numThreads, numThreads, 0, cudaStream)
+		(pPhysicsData, vertexParallelGroupsHead, veretxParallelGroupSize);
 }
 
 void GAIA::VBDSolveParallelGroup_vertexSweepAcceleratedGS(VBDPhysicsDataGPU* pPhysicsData, int32_t* vertexParallelGroupsHead, int32_t veretxParallelGroupSize, FloatingTypeGPU acceleratorOmega, int32_t numThreads, cudaStream_t cudaStream)
@@ -262,7 +274,7 @@ __global__ void GAIA::VBDSolveParallelGroup_allInOne_kernel(VBDPhysicsDataGPU* p
 			{
 				// compute y_k+1
 
-				FloatingTypeGPU* y_prev = pTetMeshGPU->positionsPrevIter + VERTEX_BUFFER_STRIDE * vertexId;
+				FloatingTypeGPU* y_prev = pTetMeshGPU->positionsPrevPrevIter + VERTEX_BUFFER_STRIDE * vertexId;
 
 				// y_k+1_accelerated = (y_k+1 - y_k-1) * omega +  y_k-1
 
@@ -635,7 +647,7 @@ __global__ void GAIA::VBDSolveParallelGroup_vertexSweep_kernel(VBDPhysicsDataGPU
 			{
 				// compute y_k+1
 				FloatingTypeGPU* y_new = pTetMeshGPU->positionsNew + VERTEX_BUFFER_STRIDE * vertexId;
-				FloatingTypeGPU* y_prev = pTetMeshGPU->positionsPrevIter + VERTEX_BUFFER_STRIDE * vertexId;
+				FloatingTypeGPU* y_prev = pTetMeshGPU->positionsPrevPrevIter + VERTEX_BUFFER_STRIDE * vertexId;
 				if (pTetMeshGPU->activeCollisionMask[vertexId])
 				{
 					CuMatrix::vec3Set(y_new, v);
@@ -679,7 +691,8 @@ __inline__ __device__ void unwarppedReduction(volatile FloatingTypeGPU* forceAnd
 	//forceAndHessianAll[tid] += s_data[tid + 1];
 }
 
-__global__ void GAIA::VBDSolveParallelGroup_vertexSweep_kernel_V2(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead, int32_t parallelGroupSize, CFloatingTypeGPU acceleratorOmega)
+__global__ void GAIA::VBDSolveParallelGroup_vertexSweep_kernel_V2(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead, 
+	int32_t parallelGroupSize, CFloatingTypeGPU acceleratorOmega)
 {
 	__shared__ __builtin_align__(16) FloatingTypeGPU forceAndHessianAll[NUM_THREADS_VERTEX_SWEEP * 12];
 
@@ -799,7 +812,8 @@ __global__ void GAIA::VBDSolveParallelGroup_vertexSweep_kernel_V2(VBDPhysicsData
 
 
 
-__global__ void GAIA::VBDSolveParallelGroup_allInOne_kernel_V2(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead, int32_t parallelGroupSize, CFloatingTypeGPU acceleratorOmega)
+__global__ void GAIA::VBDSolveParallelGroup_allInOne_kernel_V2(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead, 
+	int32_t parallelGroupSize)
 {
 	__shared__ __builtin_align__(16) FloatingTypeGPU forceAndHessianAll[NUM_THREADS_VERTEX_SWEEP * 12];
 
@@ -807,13 +821,15 @@ __global__ void GAIA::VBDSolveParallelGroup_allInOne_kernel_V2(VBDPhysicsDataGPU
 	int32_t meshId = parallelGroupsHead[iV * 2];
 	int32_t vertexId = parallelGroupsHead[iV * 2 + 1];
 	VBDTetMeshNeoHookeanGPU* pTetMeshGPU = (VBDTetMeshNeoHookeanGPU*)pPhysicsData->tetMeshes[meshId];
-	FloatingTypeGPU* v = pTetMeshGPU->getVert(vertexId);
+
 
 	if (!pTetMeshGPU->vertexFixedMask[vertexId]
 		&& pTetMeshGPU->activeForMaterialSolve
 		//&& v[GRAVITY_DIM] < pPhysicsData->collisionOffHeight
 		)
 	{
+		FloatingTypeGPU* vPosNew = pTetMeshGPU->getVertPosNew(vertexId);
+
 		int32_t tid = threadIdx.x;
 
 		// assign material force & hessian to shared memory
@@ -879,50 +895,88 @@ __global__ void GAIA::VBDSolveParallelGroup_allInOne_kernel_V2(VBDPhysicsDataGPU
 
 		if (tid == 0)
 		{
+			FloatingTypeGPU vNew[3];
+			CuMatrix::vec3Set(vNew, pTetMeshGPU->getVert(vertexId));
+
 			accumulateInertiaForceAndHessian(pTetMeshGPU, vertexId, pPhysicsData->dtSqrReciprocal, forceAndHessian, hessian);
 			accumulateCollisionForceAndHessian(pPhysicsData, pTetMeshGPU, vertexId, forceAndHessian, hessian);
 			accumulateBoundaryForceAndHessianGPU(pPhysicsData, pTetMeshGPU, vertexId, forceAndHessian, hessian);
-			FloatingTypeGPU y_k[3];
-			// record y_k
-			CuMatrix::vec3Set(y_k, v);
 
-			if (CuMatrix::vec3NormSquare(hessian) > CMP_EPSILON2)
+			if (CuMatrix::vec3NormSquare(forceAndHessian) > CMP_EPSILON2)
 			{
 				FloatingTypeGPU descentDirection[3];
 				bool solverSuccess = CuMatrix::solve3x3_psd_stable(hessian, forceAndHessian, descentDirection);
 
 				FloatingTypeGPU stepSize = solverSuccess ? pPhysicsData->stepSize : pPhysicsData->stepSizeGD;
 
-				CuMatrix::vec3MulAddTo(descentDirection, stepSize, v);
+				CuMatrix::vec3MulAddTo(descentDirection, stepSize, vNew);
 			}
 
-			if (pPhysicsData->useAccelerator
-				&& acceleratorOmega != 1.0f)
-			{
-				// compute y_k+1
-				FloatingTypeGPU* y_new = pTetMeshGPU->positionsNew + VERTEX_BUFFER_STRIDE * vertexId;
-				FloatingTypeGPU* y_prev = pTetMeshGPU->positionsPrevIter + VERTEX_BUFFER_STRIDE * vertexId;
-				if (pTetMeshGPU->activeCollisionMask[vertexId])
-				{
-					CuMatrix::vec3Set(y_new, v);
-				}
-				else
-				{
-					// y_k+1_accelerated = (y_k+1 - y_k-1) * omega +  y_k-1
-
-					FloatingTypeGPU yDiff[3];
-					CuMatrix::vec3Minus(v, y_prev, yDiff);
-					CuMatrix::vec3Set(y_new, y_prev);
-					CuMatrix::vec3MulAddTo(yDiff, acceleratorOmega, y_new);
-
-				}
-				// write y_k to y_k-1
-				CuMatrix::vec3Set(y_prev, y_k);
-			}
+			// CuMatrix::vec3Set(vPosNew, vNew);
+			CuMatrix::vec3Set(pTetMeshGPU->getVert(vertexId), vNew);
 		}
 	}
 
 	return ;
+}
+
+__global__ void GAIA::VBDSolveParallelGroup_applyAcceleration_kernel(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead, int32_t parallelGroupSize)
+{
+	int32_t iVert = blockIdx.x * blockDim.x + threadIdx.x;
+	if (iVert < parallelGroupSize)
+	{
+		int32_t meshId = parallelGroupsHead[iVert * 2];
+		int32_t vertexId = parallelGroupsHead[iVert * 2 + 1];
+		VBDTetMeshNeoHookeanGPU* pTetMeshGPU = (VBDTetMeshNeoHookeanGPU*)pPhysicsData->tetMeshes[meshId];
+		if (!pTetMeshGPU->vertexFixedMask[vertexId]
+			&& pTetMeshGPU->activeForMaterialSolve
+			//&& v[GRAVITY_DIM] < pPhysicsData->collisionOffHeight
+			)
+		{
+			FloatingTypeGPU* v = pTetMeshGPU->getVert(vertexId);
+
+			// compute y_k+1
+			FloatingTypeGPU* y_prevprev = pTetMeshGPU->positionsPrevPrevIter + VERTEX_BUFFER_STRIDE * vertexId;
+			if (!pTetMeshGPU->activeCollisionMask[vertexId])
+			{
+				// y_k+1_accelerated = (y_k+1 - y_k-1) * omega +  y_k-1
+
+				FloatingTypeGPU yDiff[3];
+				CuMatrix::vec3Minus(v, y_prevprev, yDiff);
+				CuMatrix::vec3Set(v, y_prevprev);
+				CuMatrix::vec3MulAddTo(yDiff, pPhysicsData->acceleratorOmega, v);
+
+			}
+			// write y_k to y_k-1
+			CFloatingTypeGPU* y_prev = pTetMeshGPU->positionsPrevIter + VERTEX_BUFFER_STRIDE * vertexId;
+			CuMatrix::vec3Set(y_prevprev, y_prev);
+		}
+	}
+	return;
+}
+
+__global__ void GAIA::VBDSolveParallelGroup_updateVertexPosition_kernel(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead, 
+	int32_t parallelGroupSize)
+{
+	int32_t iVert = blockIdx.x * blockDim.x + threadIdx.x;
+	if (iVert < parallelGroupSize)
+	{
+		int32_t meshId = parallelGroupsHead[iVert * 2];
+		int32_t vertexId = parallelGroupsHead[iVert * 2 + 1];
+		VBDTetMeshNeoHookeanGPU* pTetMeshGPU = (VBDTetMeshNeoHookeanGPU*)pPhysicsData->tetMeshes[meshId];
+		if (!pTetMeshGPU->vertexFixedMask[vertexId]
+			&& pTetMeshGPU->activeForMaterialSolve
+			//&& v[GRAVITY_DIM] < pPhysicsData->collisionOffHeight
+			)
+		{
+			CFloatingTypeGPU* vPosNew = pTetMeshGPU->getVertPosNew(vertexId);
+			FloatingTypeGPU* v = pTetMeshGPU->getVert(vertexId);
+
+			CuMatrix::vec3Set(v, vPosNew);
+		}
+	}
+	
+	return;
 }
 
 __global__ void GAIA::VBDSolveParallelGroup_vertexSweepAcceleratedGS_kernel(VBDPhysicsDataGPU* pPhysicsData, int32_t* parallelGroupsHead, int32_t parallelGroupSize, FloatingTypeGPU acceleratorOmega)
@@ -948,7 +1002,7 @@ __global__ void GAIA::VBDSolveParallelGroup_vertexSweepAcceleratedGS_kernel(VBDP
 
 			if (acceleratorOmega != 1.0f)
 			{
-				FloatingTypeGPU* y_prev = pTetMeshGPU->positionsPrevIter + VERTEX_BUFFER_STRIDE * vertexId;
+				FloatingTypeGPU* y_prev = pTetMeshGPU->positionsPrevPrevIter + VERTEX_BUFFER_STRIDE * vertexId;
 
 				// y_k+1_accelerated = (y_k+1 - y_k-1) * omega +  y_k-1
 
@@ -1143,7 +1197,7 @@ __global__ void GAIA::GDSolveParallelGroup_updatePositionSweep_kernel(VBDPhysics
 
 			if (acceleratorOmega != 1.0f)
 			{
-				FloatingTypeGPU* y_prev = pTetMeshGPU->positionsPrevIter + VERTEX_BUFFER_STRIDE * vertexId;
+				FloatingTypeGPU* y_prev = pTetMeshGPU->positionsPrevPrevIter + VERTEX_BUFFER_STRIDE * vertexId;
 
 				// y_k+1_accelerated = (y_k+1 - y_k-1) * omega +  y_k-1
 
@@ -1701,7 +1755,7 @@ __device__ __host__ void GAIA::accumulateCollisionForceAndHessian(const VBDPhysi
 		//	collisionData.closestSurfaceFaceVIds[0], collisionData.closestSurfaceFaceVIds[1], collisionData.closestSurfaceFaceVIds[2],
 		//	collisionData.intersectedTMeshId);
 
-		accumlateCollisionForceAndHessianPerCollision(pPhysicsData, pTetMeshGPU, collisionData, iV, 3, force, h);
+		accumlateCollisionForceAndHessianPerCollision_v2(pPhysicsData, pTetMeshGPU, collisionData, iV, 3, force, h);
 		activeColliding = true;
 	}
 
@@ -1720,7 +1774,7 @@ __device__ __host__ void GAIA::accumulateCollisionForceAndHessian(const VBDPhysi
 					collisionDataOther.closestSurfaceFaceVIds[0], collisionDataOther.closestSurfaceFaceVIds[1], collisionDataOther.closestSurfaceFaceVIds[2],
 					collisionDataOther.intersectedTMeshId);*/
 
-			accumlateCollisionForceAndHessianPerCollision(pPhysicsData, pTetMeshGPUOther, collisionDataOther,
+			accumlateCollisionForceAndHessianPerCollision_v2(pPhysicsData, pTetMeshGPUOther, collisionDataOther,
 				collisionRelation.collisionPrimitiveId, collisionRelation.collisionVertexOrder, force, h);
 			activeColliding = true;
 		}
@@ -1767,6 +1821,127 @@ GPU_CPU_INLINE_FUNC CFloatingTypeGPU GAIA::evaluateNeoHookeanEnergy(FloatingType
 
 	return E;
 }
+
+GPU_CPU_INLINE_FUNC void GAIA::accumlateCollisionForceAndHessianPerCollision_v2(const VBDPhysicsDataGPU* pPhysicsData, const VBDBaseTetMeshGPU* pTetMeshGPU,
+	const CollisionDataGPU& collisionData, int32_t vertexId, int32_t collisionVertexOrder, FloatingTypeGPU* force, FloatingTypeGPU* hessian)
+{
+	int collidedMeshID = collisionData.intersectedTMeshId;
+	const VBDBaseTetMeshGPU* pTetMeshGPU_colliding = pPhysicsData->tetMeshes[collidedMeshID];
+
+	// update the closest point
+	CFloatingTypeGPU* A = pTetMeshGPU_colliding->getVert(collisionData.closestSurfaceFaceVIds[0]);
+	CFloatingTypeGPU* B = pTetMeshGPU_colliding->getVert(collisionData.closestSurfaceFaceVIds[1]);
+	CFloatingTypeGPU* C = pTetMeshGPU_colliding->getVert(collisionData.closestSurfaceFaceVIds[2]);
+
+	FloatingTypeGPU closestSurfacePtBarycentrics[4];
+	FloatingTypeGPU closestSurfacePt[3];
+	CFloatingTypeGPU* p = pTetMeshGPU->getVert(vertexId);
+
+	ClosestPointOnTriangleTypeGPU closestPtType =
+		closestPointTriangle(p, A, B, C, closestSurfacePtBarycentrics, closestSurfacePt);
+
+	// compute contact normal
+	// face interior
+	//FloatingTypeGPU* normal = collisionData.closestPointNormal;
+	FloatingTypeGPU normal[3];
+	FloatingTypeGPU faceNormal[3];
+	CuMatrix::faceNormal(A, B, C, faceNormal);
+	FloatingTypeGPU diff[3];
+	CuMatrix::vec3Minus(closestSurfacePt, p, diff);
+
+	if (closestPtType == GAIA::ClosestPointOnTriangleTypeGPU::AtInterior)
+	{
+		CuMatrix::vec3Set(normal, faceNormal);
+	}
+	// all other cases
+	else if (closestPtType != GAIA::ClosestPointOnTriangleTypeGPU::NotFound)
+	{
+		CuMatrix::vec3Mul(diff, 1.f / CuMatrix::vec3Norm(diff), normal);
+
+		if (CuMatrix::vec3DotProduct(normal, faceNormal) < 0)
+		{
+			CuMatrix::vec3Mul(normal, -1.f, normal);
+		}
+	}
+	CFloatingTypeGPU penetrationDepth = CuMatrix::vec3DotProduct(diff, normal);
+
+	closestSurfacePtBarycentrics[3] = -1.0f;
+	// collision force and hessian is precomputed in updateCollisionInfoGPU
+	if (penetrationDepth > 0.f)
+	{
+		CFloatingTypeGPU b = -closestSurfacePtBarycentrics[collisionVertexOrder];
+		
+		// collision force
+		CFloatingTypeGPU k = pPhysicsData->collisionStiffness;
+		CFloatingTypeGPU lambda = penetrationDepth * k;
+		FloatingTypeGPU collisionForce[3];
+		FloatingTypeGPU collisionHessian[9];
+
+		CuMatrix::vec3Mul(normal, lambda, collisionForce);
+		CuMatrix::vec3OuterProduct(normal, normal, collisionHessian);
+		CuMatrix::vec9Mul(collisionHessian, k, collisionHessian);
+
+		FloatingTypeGPU dx3[3];
+		CuMatrix::vec3Minus(p, pTetMeshGPU->getVertPrevPos(vertexId), dx3);
+		FloatingTypeGPU dx0[3];
+		CuMatrix::vec3Minus(A,pTetMeshGPU_colliding->getVertPrevPos(collisionData.closestSurfaceFaceVIds[0]), dx0);
+		//pIntersectedTM->vertex(t0) - pIntersectedTM->vertexPrevPos(t0);
+		FloatingTypeGPU dx1[3];
+		CuMatrix::vec3Minus(B, pTetMeshGPU_colliding->getVertPrevPos(collisionData.closestSurfaceFaceVIds[1]), dx1);
+		FloatingTypeGPU dx2[3];
+		CuMatrix::vec3Minus(C, pTetMeshGPU_colliding->getVertPrevPos(collisionData.closestSurfaceFaceVIds[2]), dx2);
+
+		CFloatingTypeGPU bary0 = closestSurfacePtBarycentrics[0];
+		CFloatingTypeGPU bary1 = closestSurfacePtBarycentrics[1];
+		CFloatingTypeGPU bary2 = closestSurfacePtBarycentrics[2];
+		CFloatingTypeGPU dx[3] = {
+			dx3[0] - (bary0 * dx0[0] + bary1 * dx1[0] + bary2 * dx2[0]),
+			dx3[1] - (bary0 * dx0[1] + bary1 * dx1[1] + bary2 * dx2[1]),
+			dx3[2] - (bary0 * dx0[2] + bary1 * dx1[2] + bary2 * dx2[2])
+		};
+		FloatingTypeGPU e0[3];
+		CuMatrix::vec3Minus(pTetMeshGPU_colliding->getVert(collisionData.closestSurfaceFaceVIds[1]),
+			pTetMeshGPU_colliding->getVert(collisionData.closestSurfaceFaceVIds[0]),
+			e0);
+		CuMatrix::vec3Normalize(e0);
+		//e0 = (pIntersectedTM->vertex(t1) - pIntersectedTM->vertex(t0)).normalized();
+
+		FloatingTypeGPU e1[3];
+		CuMatrix::vec3CrossProduct(e0, normal, e1);
+		CuMatrix::vec3Normalize(e1);
+
+		FloatingTypeGPU T[6] = {
+			e0[0],
+			e0[1],
+			e0[2],
+			e1[0],
+			e1[1],
+			e1[2]
+		};
+		//T.col(0) = e0;
+		//T.col(1) = (e0.cross(n)).normalized();
+
+		CFloatingTypeGPU u[2] = {
+		T[0] * dx[0] + T[1] * dx[1] + T[2] * dx[2],
+		T[3] * dx[0] + T[4] * dx[1] + T[5] * dx[2],
+		};
+		// Vec2 u = T.transpose() * positionsNew;
+
+		// average of the two friction coefficients
+		CFloatingTypeGPU mu = (pTetMeshGPU->frictionDynamic + pTetMeshGPU_colliding->frictionDynamic) * 0.5f;
+		CFloatingTypeGPU epsV = (pTetMeshGPU->frictionEpsV + pTetMeshGPU_colliding->frictionEpsV) * 0.5f;
+		CFloatingTypeGPU dt = pPhysicsData->dt;
+		CFloatingTypeGPU epsU = epsV * dt;
+
+		accumulateVertexFrictionGPU(mu, lambda, T, u, epsU, collisionForce, collisionHessian);
+
+		CuMatrix::vec3MulAddTo(collisionForce, b, force);
+		CuMatrix::vec9MulAddTo(collisionHessian, b * b, hessian);
+	}
+
+	return;
+}
+
 
 GPU_CPU_INLINE_FUNC  FloatingTypeGPU GAIA::computeCollisionForcePerCollision(const VBDPhysicsDataGPU* pPhysicsData, const VBDBaseTetMeshGPU* pTetMeshGPU,
 	const CollisionDataGPU& collisionResult, int32_t collisionResultId, int32_t collisionVertexOrder, FloatingTypeGPU* contactNormal)
