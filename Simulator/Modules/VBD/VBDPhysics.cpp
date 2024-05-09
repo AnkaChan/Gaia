@@ -808,11 +808,7 @@ void GAIA::VBDPhysics::timeStepEqualize()
 
 void GAIA::VBDPhysics::runStep()
 {
-	if (physicsParams().debugGPU)
-	{
-		runStepGPU_debugOnCPU();
-	}
-	else if (physicsParams().useNewton)
+	if (physicsParams().useNewton)
 	{
 		runStepNewton();
 	}
@@ -920,7 +916,7 @@ void GAIA::VBDPhysics::runStepGPU()
 			//			activeCollisionsEachParallelGroupBuffer[iGroup]->getGPUBuffer(), physicsParams().numThreadsVBDSolve, cudaStream);
 			//	}
 			//	//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-			//	VBDSolveParallelGroup_vertexSweep_2hierarchies(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
+			//	VBDSolveParallelGroup_vertexSweep_2hierarchiesGPU(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
 			//		sizeVertexParallelGroup(iGroup), acceleratorOmega, physicsParams().numThreadsVBDSolve, cudaStream);
 
 			//	//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
@@ -966,209 +962,209 @@ void GAIA::VBDPhysics::runStepGPU()
 	} // substep
 }
 
-void GAIA::VBDPhysics::runStepGPU_allInOneSweep()
-{
-	for (substep = 0; substep < physicsParams().numSubsteps; substep++)
-	{
-		curTime += physicsParams().dt;
-		debugOperation(DEBUG_LVL_DEBUG, [&]() {
-			std::cout << "Substep step: " << substep << std::endl;
-			});
-		dcd();
+//void GAIA::VBDPhysics::runStepGPU_allInOneSweep()
+//{
+//	for (substep = 0; substep < physicsParams().numSubsteps; substep++)
+//	{
+//		curTime += physicsParams().dt;
+//		debugOperation(DEBUG_LVL_DEBUG, [&]() {
+//			std::cout << "Substep step: " << substep << std::endl;
+//			});
+//		dcd();
+//
+//		TICK(timeCsmpInitialStep);
+//		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
+//			if (tMeshes[iMesh]->activeForMaterialSolve)
+//			{
+//				tMeshes[iMesh]->evaluateExternalForce();
+//				tMeshes[iMesh]->applyInitialStep();
+//			}
+//			});
+//		TOCK_STRUCT(timeStatistics(), timeCsmpInitialStep);
+//		ccd();
+//
+//		prepareCollisionDataGPU();
+//
+//		applyDeformers();
+//
+//		syncAllToGPU(false);
+//
+//		if (physicsParams().evaluateConvergence)
+//		{
+//			iIter = -1;
+//			evaluateConvergenceGPU();
+//		}
+//
+//		FloatingType acceleratorOmega = 1.f;
+//		if (physicsParams().useAccelerator)
+//		{
+//			recordInitialPositionForAccelerator(false);
+//		}
+//
+//		TICK(timeCsmpMaterialSolve);
+//		for (iIter = 0; iIter < physicsParams().iterations; iIter++)
+//		{
+//			if (physicsParams().intermediateCollisionIterations > 0
+//				&& !(iIter % physicsParams().intermediateCollisionIterations)
+//				&& iIter)
+//			{
+//				intermediateCollisionDetection();
+//			}
+//			if (physicsParams().useAccelerator)
+//			{
+//				acceleratorOmega = getAcceleratorOmega(iIter + 1, physicsParams().acceleratorPho, acceleratorOmega);
+//			}
+//
+//			for (size_t iGroup = 0; iGroup < vertexParallelGroups.size(); iGroup++)
+//			{
+//				// VBDSolveParallelGroup_allInOneSweep(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup], 
+//				// 	sizeVertexParallelGroup(iGroup), physicsParams().numThreadsVBDSolve);
+//
+//				VBDSolveParallelGroup_allInOneSweep(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
+//					sizeVertexParallelGroup(iGroup), acceleratorOmega, physicsParams().numThreadsVBDSolve, cudaStream);
+//
+//				//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+//			}
+//
+//			if (physicsParams().useAccelerator && acceleratorOmega != 1.f)
+//			{
+//				// copy accelerated positions to vertPos
+//				for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
+//				{
+//					VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
+//					CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->vertPosBuffer->getGPUBuffer(), pMesh->pTetMeshSharedBase->positionsNewBuffer->getGPUBuffer(),
+//						pMesh->pTetMeshShared->positionsNewBuffer->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
+//				}
+//			}
+//
+//			if (physicsParams().evaluateConvergence && iIter % physicsParams().evaluationSteps == 0)
+//			{
+//				evaluateConvergenceGPU();
+//			}
+//
+//		} // iteration
+//
+//		// copy the CPU data before syncing
+//		//TVerticesMat vertFromCPU = tMeshes[0]->positions();
+//
+//		//std::cout << vertFromCPU - tMeshes[0]->positions() << std::endl;
+//
+//		TICK(timeCsmpUpdateVelocity);
+//		//updateVelocities();
+//		updateVelocitiesGPU();
+//		TOCK_STRUCT(timeStatistics(), timeCsmpUpdateVelocity);
+//
+//		syncAllToCPU(true);
+//		TOCK_STRUCT(timeStatistics(), timeCsmpMaterialSolve);
+//
+//	} // substep
+//}
 
-		TICK(timeCsmpInitialStep);
-		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
-			if (tMeshes[iMesh]->activeForMaterialSolve)
-			{
-				tMeshes[iMesh]->evaluateExternalForce();
-				tMeshes[iMesh]->applyInitialStep();
-			}
-			});
-		TOCK_STRUCT(timeStatistics(), timeCsmpInitialStep);
-		ccd();
-
-		prepareCollisionDataGPU();
-
-		applyDeformers();
-
-		syncAllToGPU(false);
-
-		if (physicsParams().evaluateConvergence)
-		{
-			iIter = -1;
-			evaluateConvergenceGPU();
-		}
-
-		FloatingType acceleratorOmega = 1.f;
-		if (physicsParams().useAccelerator)
-		{
-			recordInitialPositionForAccelerator(false);
-		}
-
-		TICK(timeCsmpMaterialSolve);
-		for (iIter = 0; iIter < physicsParams().iterations; iIter++)
-		{
-			if (physicsParams().intermediateCollisionIterations > 0
-				&& !(iIter % physicsParams().intermediateCollisionIterations)
-				&& iIter)
-			{
-				intermediateCollisionDetection();
-			}
-			if (physicsParams().useAccelerator)
-			{
-				acceleratorOmega = getAcceleratorOmega(iIter + 1, physicsParams().acceleratorPho, acceleratorOmega);
-			}
-
-			for (size_t iGroup = 0; iGroup < vertexParallelGroups.size(); iGroup++)
-			{
-				// VBDSolveParallelGroup_allInOneSweep(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup], 
-				// 	sizeVertexParallelGroup(iGroup), physicsParams().numThreadsVBDSolve);
-
-				VBDSolveParallelGroup_allInOneSweep(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
-					sizeVertexParallelGroup(iGroup), acceleratorOmega, physicsParams().numThreadsVBDSolve, cudaStream);
-
-				//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-			}
-
-			if (physicsParams().useAccelerator && acceleratorOmega != 1.f)
-			{
-				// copy accelerated positions to vertPos
-				for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
-				{
-					VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
-					CHECK_CUDA_ERROR(cudaMemcpyAsync(pMesh->pTetMeshShared->vertPosBuffer->getGPUBuffer(), pMesh->pTetMeshSharedBase->positionsNewBuffer->getGPUBuffer(),
-						pMesh->pTetMeshShared->positionsNewBuffer->nBytes(), cudaMemcpyDeviceToDevice, cudaStream));
-				}
-			}
-
-			if (physicsParams().evaluateConvergence && iIter % physicsParams().evaluationSteps == 0)
-			{
-				evaluateConvergenceGPU();
-			}
-
-		} // iteration
-
-		// copy the CPU data before syncing
-		//TVerticesMat vertFromCPU = tMeshes[0]->positions();
-
-		//std::cout << vertFromCPU - tMeshes[0]->positions() << std::endl;
-
-		TICK(timeCsmpUpdateVelocity);
-		//updateVelocities();
-		updateVelocitiesGPU();
-		TOCK_STRUCT(timeStatistics(), timeCsmpUpdateVelocity);
-
-		syncAllToCPU(true);
-		TOCK_STRUCT(timeStatistics(), timeCsmpMaterialSolve);
-
-	} // substep
-}
-
-void GAIA::VBDPhysics::runStepGPU_acceleratedGS()
-{
-	for (substep = 0; substep < physicsParams().numSubsteps; substep++)
-	{
-		curTime += physicsParams().dt;
-		debugOperation(DEBUG_LVL_DEBUG, [&]() {
-			std::cout << "Substep step: " << substep << std::endl;
-			});
-		dcd();
-
-		TICK(timeCsmpInitialStep);
-		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
-			if (tMeshes[iMesh]->activeForMaterialSolve)
-			{
-				tMeshes[iMesh]->evaluateExternalForce();
-				tMeshes[iMesh]->applyInitialStep();
-			}
-			});
-		TOCK_STRUCT(timeStatistics(), timeCsmpInitialStep);
-		ccd();
-
-		prepareCollisionDataGPU();
-
-		applyDeformers();
-
-		syncAllToGPU(false);
-
-		if (physicsParams().evaluateConvergence)
-		{
-			iIter = -1;
-			evaluateConvergenceGPU();
-		}
-
-		FloatingType acceleratorOmega = 1.f;
-		if (physicsParams().useAccelerator)
-		{
-			recordInitialPositionForAccelerator(false);
-		}
-
-		TICK(timeCsmpMaterialSolve);
-		for (iIter = 0; iIter < physicsParams().iterations; iIter++)
-		{
-			if (physicsParams().intermediateCollisionIterations > 0
-				&& !(iIter % physicsParams().intermediateCollisionIterations)
-				&& iIter)
-			{
-				intermediateCollisionDetection();
-			}
-			if (physicsParams().useAccelerator)
-			{
-				acceleratorOmega = getAcceleratorOmega(iIter + 1, physicsParams().acceleratorPho, acceleratorOmega);
-			}
-
-			for (size_t iGroup = 0; iGroup < vertexParallelGroups.size(); iGroup++)
-			{
-				// VBDSolveParallelGroup_allInOneSweep(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup], 
-				// 	sizeVertexParallelGroup(iGroup), physicsParams().numThreadsVBDSolve);
-
-				VBDSolveParallelGroup_tetSweep(getVBDPhysicsDataGPU(), tetParallelGroupHeadsGPU[iGroup],
-					sizeTetParallelGroup(iGroup), physicsParams().numThreadsVBDSolve, cudaStream);
-				//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-
-				size_t numActiveCollisions = activeColllisionList.numActiveCollisionsEachParallelGroup[iGroup];
-				if (numActiveCollisions)
-				{
-					VBDSolveParallelGroup_collisionSweep(getVBDPhysicsDataGPU(), numActiveCollisions,
-						activeCollisionsEachParallelGroupBuffer[iGroup]->getGPUBuffer(), physicsParams().numThreadsVBDSolve, cudaStream);
-				}
-				//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-				if (physicsParams().useAccelerator)
-				{
-					VBDSolveParallelGroup_vertexSweepAcceleratedGS(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
-						sizeVertexParallelGroup(iGroup), acceleratorOmega, physicsParams().numThreadsVBDSolve, cudaStream);
-				}
-				else {
-					VBDSolveParallelGroup_vertexSweep_2hierarchies(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
-						sizeVertexParallelGroup(iGroup), cudaStream);
-				}
-
-
-				//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-			}
-
-			if (physicsParams().evaluateConvergence && iIter % physicsParams().evaluationSteps == 0)
-			{
-				evaluateConvergenceGPU();
-			}
-
-		} // iteration
-
-		// copy the CPU data before syncing
-		//TVerticesMat vertFromCPU = tMeshes[0]->positions();
-
-		//std::cout << vertFromCPU - tMeshes[0]->positions() << std::endl;
-
-		TICK(timeCsmpUpdateVelocity);
-		//updateVelocities();
-		updateVelocitiesGPU();
-		TOCK_STRUCT(timeStatistics(), timeCsmpUpdateVelocity);
-
-		syncAllToCPU(true);
-		TOCK_STRUCT(timeStatistics(), timeCsmpMaterialSolve);
-
-	} // substep
-}
+//void GAIA::VBDPhysics::runStepGPU_acceleratedGS()
+//{
+//	for (substep = 0; substep < physicsParams().numSubsteps; substep++)
+//	{
+//		curTime += physicsParams().dt;
+//		debugOperation(DEBUG_LVL_DEBUG, [&]() {
+//			std::cout << "Substep step: " << substep << std::endl;
+//			});
+//		dcd();
+//
+//		TICK(timeCsmpInitialStep);
+//		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
+//			if (tMeshes[iMesh]->activeForMaterialSolve)
+//			{
+//				tMeshes[iMesh]->evaluateExternalForce();
+//				tMeshes[iMesh]->applyInitialStep();
+//			}
+//			});
+//		TOCK_STRUCT(timeStatistics(), timeCsmpInitialStep);
+//		ccd();
+//
+//		prepareCollisionDataGPU();
+//
+//		applyDeformers();
+//
+//		syncAllToGPU(false);
+//
+//		if (physicsParams().evaluateConvergence)
+//		{
+//			iIter = -1;
+//			evaluateConvergenceGPU();
+//		}
+//
+//		FloatingType acceleratorOmega = 1.f;
+//		if (physicsParams().useAccelerator)
+//		{
+//			recordInitialPositionForAccelerator(false);
+//		}
+//
+//		TICK(timeCsmpMaterialSolve);
+//		for (iIter = 0; iIter < physicsParams().iterations; iIter++)
+//		{
+//			if (physicsParams().intermediateCollisionIterations > 0
+//				&& !(iIter % physicsParams().intermediateCollisionIterations)
+//				&& iIter)
+//			{
+//				intermediateCollisionDetection();
+//			}
+//			if (physicsParams().useAccelerator)
+//			{
+//				acceleratorOmega = getAcceleratorOmega(iIter + 1, physicsParams().acceleratorPho, acceleratorOmega);
+//			}
+//
+//			for (size_t iGroup = 0; iGroup < vertexParallelGroups.size(); iGroup++)
+//			{
+//				// VBDSolveParallelGroup_allInOneSweep(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup], 
+//				// 	sizeVertexParallelGroup(iGroup), physicsParams().numThreadsVBDSolve);
+//
+//				VBDSolveParallelGroup_tetSweep(getVBDPhysicsDataGPU(), tetParallelGroupHeadsGPU[iGroup],
+//					sizeTetParallelGroup(iGroup), physicsParams().numThreadsVBDSolve, cudaStream);
+//				//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+//
+//				size_t numActiveCollisions = activeColllisionList.numActiveCollisionsEachParallelGroup[iGroup];
+//				if (numActiveCollisions)
+//				{
+//					VBDSolveParallelGroup_collisionSweep(getVBDPhysicsDataGPU(), numActiveCollisions,
+//						activeCollisionsEachParallelGroupBuffer[iGroup]->getGPUBuffer(), physicsParams().numThreadsVBDSolve, cudaStream);
+//				}
+//				//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+//				if (physicsParams().useAccelerator)
+//				{
+//					VBDSolveParallelGroup_vertexSweepAcceleratedGS(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
+//						sizeVertexParallelGroup(iGroup), acceleratorOmega, physicsParams().numThreadsVBDSolve, cudaStream);
+//				}
+//				else {
+//					VBDSolveParallelGroup_vertexSweep_2hierarchiesGPU(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
+//						sizeVertexParallelGroup(iGroup), cudaStream);
+//				}
+//
+//
+//				//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+//			}
+//
+//			if (physicsParams().evaluateConvergence && iIter % physicsParams().evaluationSteps == 0)
+//			{
+//				evaluateConvergenceGPU();
+//			}
+//
+//		} // iteration
+//
+//		// copy the CPU data before syncing
+//		//TVerticesMat vertFromCPU = tMeshes[0]->positions();
+//
+//		//std::cout << vertFromCPU - tMeshes[0]->positions() << std::endl;
+//
+//		TICK(timeCsmpUpdateVelocity);
+//		//updateVelocities();
+//		updateVelocitiesGPU();
+//		TOCK_STRUCT(timeStatistics(), timeCsmpUpdateVelocity);
+//
+//		syncAllToCPU(true);
+//		TOCK_STRUCT(timeStatistics(), timeCsmpMaterialSolve);
+//
+//	} // substep
+//}
 
 void GAIA::VBDPhysics::runStepGPU_GD()
 {
@@ -1236,15 +1232,15 @@ void GAIA::VBDPhysics::runStepGPU_GD()
 
 			if (physicsParams().GDSolverUseBlockJacobi)
 			{
-				GDSolveParallelGroup_BlockJacobi_allInOneSweep(getVBDPhysicsDataGPU(), vertexAllParallelGroupsBuffer->getGPUBuffer(), numAllVertices,
+				GDSolveParallelGroup_BlockJacobi_allInOneSweepGPU(getVBDPhysicsDataGPU(), vertexAllParallelGroupsBuffer->getGPUBuffer(), numAllVertices,
 					physicsParams().numThreadsVBDSolve, cudaStream);
 			}
 			else {
 
-				GDSolveParallelGroup_allInOneSweep(getVBDPhysicsDataGPU(), vertexAllParallelGroupsBuffer->getGPUBuffer(), numAllVertices,
+				GDSolveParallelGroup_allInOneSweepGPU(getVBDPhysicsDataGPU(), vertexAllParallelGroupsBuffer->getGPUBuffer(), numAllVertices,
 					physicsParams().numThreadsVBDSolve, cudaStream);
 			}
-			GDSolveParallelGroup_updatePositionSweep(getVBDPhysicsDataGPU(), pGDSolverUtilities->stepSizePrevStep, acceleratorOmega, vertexAllParallelGroupsBuffer->getGPUBuffer(), numAllVertices,
+			GDSolveParallelGroup_updatePositionSweepGPU(getVBDPhysicsDataGPU(), pGDSolverUtilities->stepSizePrevStep, acceleratorOmega, vertexAllParallelGroupsBuffer->getGPUBuffer(), numAllVertices,
 				physicsParams().numThreadsVBDSolve, cudaStream);
 			//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
 			//syncAllToCPUVertPosOnly(true);
@@ -1309,125 +1305,125 @@ void GAIA::VBDPhysics::runStepGPU_GD()
 	} // substep
 }
 
-void GAIA::VBDPhysics::runStepGPU_debugOnCPU()
-{
+//void GAIA::VBDPhysics::runStepGPU_debugOnCPU()
+//{
+//
+//	for (substep = 0; substep < physicsParams().numSubsteps; substep++)
+//	{
+//		debugOperation(DEBUG_LVL_DEBUG, [&]() {
+//			std::cout << "Substep step: " << substep << std::endl;
+//			});
+//		dcd();
+//
+//		TICK(timeCsmpInitialStep);
+//		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
+//			if (tMeshes[iMesh]->activeForMaterialSolve)
+//			{
+//				tMeshes[iMesh]->evaluateExternalForce();
+//				tMeshes[iMesh]->applyInitialStep();
+//			}
+//			});
+//		TOCK_STRUCT(timeStatistics(), timeCsmpInitialStep);
+//		ccd();
+//
+//		prepareCollisionDataCPUAndGPU();
+//		testGPUCollisionHandlingCode();
+//
+//		TICK(timeCsmpMaterialSolve);
+//		syncAllToGPU(false);
+//		for (iIter = 0; iIter < physicsParams().iterations; iIter++)
+//		{
+//			for (size_t iGroup = 0; iGroup < vertexParallelGroups.size(); iGroup++)
+//			{
+//				// VBDSolveParallelGroup_allInOneSweep(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup], 
+//				// 	sizeVertexParallelGroup(iGroup), physicsParams().numThreadsVBDSolve);
+//
+//				VBDSolveParallelGroup_tetSweep(getVBDPhysicsDataGPU(), tetParallelGroupHeadsGPU[iGroup],
+//					sizeTetParallelGroup(iGroup), physicsParams().numThreadsVBDSolve, cudaStream);
+//
+//				size_t numActiveCollisions = activeColllisionList.numActiveCollisionsEachParallelGroup[iGroup];
+//				if (numActiveCollisions)
+//				{
+//					VBDSolveParallelGroup_collisionSweep(getVBDPhysicsDataGPU(), numActiveCollisions,
+//						activeCollisionsEachParallelGroupBuffer[iGroup]->getGPUBuffer(), physicsParams().numThreadsVBDSolve, cudaStream);
+//				}
+//				//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+//
+//				VBDSolveParallelGroup_vertexSweep_2hierarchiesGPU(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
+//					sizeVertexParallelGroup(iGroup), cudaStream);
+//
+//				// CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+//			}
+//
+//		} // iteration
+//
+//		// copy the CPU data before syncing
+//		//TVerticesMat vertFromCPU = tMeshes[0]->positions();
+//
+//		syncAllToCPUVertPosOnly(true);
+//		TOCK_STRUCT(timeStatistics(), timeCsmpMaterialSolve);
+//
+//		//std::cout << vertFromCPU - tMeshes[0]->positions() << std::endl;
+//
+//		TICK(timeCsmpUpdateVelocity);
+//		updateVelocities();
+//		TOCK_STRUCT(timeStatistics(), timeCsmpUpdateVelocity);
+//	} // substep
+//}
 
-	for (substep = 0; substep < physicsParams().numSubsteps; substep++)
-	{
-		debugOperation(DEBUG_LVL_DEBUG, [&]() {
-			std::cout << "Substep step: " << substep << std::endl;
-			});
-		dcd();
-
-		TICK(timeCsmpInitialStep);
-		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
-			if (tMeshes[iMesh]->activeForMaterialSolve)
-			{
-				tMeshes[iMesh]->evaluateExternalForce();
-				tMeshes[iMesh]->applyInitialStep();
-			}
-			});
-		TOCK_STRUCT(timeStatistics(), timeCsmpInitialStep);
-		ccd();
-
-		prepareCollisionDataCPUAndGPU();
-		testGPUCollisionHandlingCode();
-
-		TICK(timeCsmpMaterialSolve);
-		syncAllToGPU(false);
-		for (iIter = 0; iIter < physicsParams().iterations; iIter++)
-		{
-			for (size_t iGroup = 0; iGroup < vertexParallelGroups.size(); iGroup++)
-			{
-				// VBDSolveParallelGroup_allInOneSweep(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup], 
-				// 	sizeVertexParallelGroup(iGroup), physicsParams().numThreadsVBDSolve);
-
-				VBDSolveParallelGroup_tetSweep(getVBDPhysicsDataGPU(), tetParallelGroupHeadsGPU[iGroup],
-					sizeTetParallelGroup(iGroup), physicsParams().numThreadsVBDSolve, cudaStream);
-
-				size_t numActiveCollisions = activeColllisionList.numActiveCollisionsEachParallelGroup[iGroup];
-				if (numActiveCollisions)
-				{
-					VBDSolveParallelGroup_collisionSweep(getVBDPhysicsDataGPU(), numActiveCollisions,
-						activeCollisionsEachParallelGroupBuffer[iGroup]->getGPUBuffer(), physicsParams().numThreadsVBDSolve, cudaStream);
-				}
-				//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-
-				VBDSolveParallelGroup_vertexSweep_2hierarchies(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
-					sizeVertexParallelGroup(iGroup), cudaStream);
-
-				// CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-			}
-
-		} // iteration
-
-		// copy the CPU data before syncing
-		//TVerticesMat vertFromCPU = tMeshes[0]->positions();
-
-		syncAllToCPUVertPosOnly(true);
-		TOCK_STRUCT(timeStatistics(), timeCsmpMaterialSolve);
-
-		//std::cout << vertFromCPU - tMeshes[0]->positions() << std::endl;
-
-		TICK(timeCsmpUpdateVelocity);
-		updateVelocities();
-		TOCK_STRUCT(timeStatistics(), timeCsmpUpdateVelocity);
-	} // substep
-}
-
-void GAIA::VBDPhysics::runStepGPUNoCollision()
-{
-	for (substep = 0; substep < physicsParams().numSubsteps; substep++)
-	{
-		debugOperation(DEBUG_LVL_DEBUG, [&]() {
-			std::cout << "Substep step: " << substep << std::endl;
-			});
-
-		TICK(timeCsmpInitialStep);
-		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
-			if (tMeshes[iMesh]->activeForMaterialSolve)
-			{
-				tMeshes[iMesh]->evaluateExternalForce();
-				tMeshes[iMesh]->applyInitialStep();
-			}
-			});
-		TOCK_STRUCT(timeStatistics(), timeCsmpInitialStep);
-
-		TICK(timeCsmpMaterialSolve);
-
-		syncAllToGPU(false);
-
-		for (iIter = 0; iIter < physicsParams().iterations; iIter++)
-		{
-			for (size_t iGroup = 0; iGroup < vertexParallelGroups.size(); iGroup++)
-			{
-				// VBDSolveParallelGroup_allInOneSweep(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup], 
-				// 	sizeVertexParallelGroup(iGroup), physicsParams().numThreadsVBDSolve);
-
-				VBDSolveParallelGroup_tetSweep(getVBDPhysicsDataGPU(), tetParallelGroupHeadsGPU[iGroup],
-					sizeTetParallelGroup(iGroup), physicsParams().numThreadsVBDSolve, cudaStream);
-
-				VBDSolveParallelGroup_vertexSweep_2hierarchies(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
-					sizeVertexParallelGroup(iGroup), cudaStream);
-
-				// CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-			}
-
-		} // iteration
-
-		// copy the CPU data before syncing
-		//TVerticesMat vertFromCPU = tMeshes[0]->positions();
-
-		syncAllToCPUVertPosOnly(true);
-		TOCK_STRUCT(timeStatistics(), timeCsmpMaterialSolve);
-
-		//std::cout << vertFromCPU - tMeshes[0]->positions() << std::endl;
-
-		TICK(timeCsmpUpdateVelocity);
-		updateVelocities();
-		TOCK_STRUCT(timeStatistics(), timeCsmpUpdateVelocity);
-	} // substep
-}
+//void GAIA::VBDPhysics::runStepGPUNoCollision()
+//{
+//	for (substep = 0; substep < physicsParams().numSubsteps; substep++)
+//	{
+//		debugOperation(DEBUG_LVL_DEBUG, [&]() {
+//			std::cout << "Substep step: " << substep << std::endl;
+//			});
+//
+//		TICK(timeCsmpInitialStep);
+//		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
+//			if (tMeshes[iMesh]->activeForMaterialSolve)
+//			{
+//				tMeshes[iMesh]->evaluateExternalForce();
+//				tMeshes[iMesh]->applyInitialStep();
+//			}
+//			});
+//		TOCK_STRUCT(timeStatistics(), timeCsmpInitialStep);
+//
+//		TICK(timeCsmpMaterialSolve);
+//
+//		syncAllToGPU(false);
+//
+//		for (iIter = 0; iIter < physicsParams().iterations; iIter++)
+//		{
+//			for (size_t iGroup = 0; iGroup < vertexParallelGroups.size(); iGroup++)
+//			{
+//				// VBDSolveParallelGroup_allInOneSweep(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup], 
+//				// 	sizeVertexParallelGroup(iGroup), physicsParams().numThreadsVBDSolve);
+//
+//				VBDSolveParallelGroup_tetSweep(getVBDPhysicsDataGPU(), tetParallelGroupHeadsGPU[iGroup],
+//					sizeTetParallelGroup(iGroup), physicsParams().numThreadsVBDSolve, cudaStream);
+//
+//				VBDSolveParallelGroup_vertexSweep_2hierarchiesGPU(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
+//					sizeVertexParallelGroup(iGroup), cudaStream);
+//
+//				// CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+//			}
+//
+//		} // iteration
+//
+//		// copy the CPU data before syncing
+//		//TVerticesMat vertFromCPU = tMeshes[0]->positions();
+//
+//		syncAllToCPUVertPosOnly(true);
+//		TOCK_STRUCT(timeStatistics(), timeCsmpMaterialSolve);
+//
+//		//std::cout << vertFromCPU - tMeshes[0]->positions() << std::endl;
+//
+//		TICK(timeCsmpUpdateVelocity);
+//		updateVelocities();
+//		TOCK_STRUCT(timeStatistics(), timeCsmpUpdateVelocity);
+//	} // substep
+//}
 
 void GAIA::VBDPhysics::runStepNewton()
 {
@@ -1553,10 +1549,10 @@ void GAIA::VBDPhysics::recordVBDSolveGraph()
 		//	sizeTetParallelGroup(iGroup), physicsParams().numThreadsVBDSolve, cudaStream);
 		//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
 
-		VBDSolveParallelGroup_vertexSweep_2hierarchies(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
+		VBDSolveParallelGroup_vertexSweep_2hierarchiesGPU(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
 			sizeVertexParallelGroup(iGroup), cudaStream);
 
-		VBDSolveParallelGroup_updateVertexPosition(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
+		VBDSolveParallelGroup_updateVertexPositionGPU(getVBDPhysicsDataGPU(), vertexParallelGroupHeadsGPU[iGroup],
 			sizeVertexParallelGroup(iGroup), physicsParams().numThreadsVBDSolve, cudaStream);
 
 		//CHECK_CUDA_ERROR(cudaDeviceSynchronize());
@@ -2492,7 +2488,7 @@ void GAIA::VBDPhysics::updateVelocities()
 
 void GAIA::VBDPhysics::updateVelocitiesGPU()
 {
-	VBDUpdateVelocity(getVBDPhysicsDataGPU(), vertexAllParallelGroupsBuffer->getGPUBuffer(), numAllVertices,
+	VBDUpdateVelocityGPU(getVBDPhysicsDataGPU(), vertexAllParallelGroupsBuffer->getGPUBuffer(), numAllVertices,
 		physicsParams().numThreadsVBDSolve, cudaStream);
 }
 
@@ -3133,90 +3129,90 @@ ObjectParams::SharedPtr GAIA::ObjectParamsListVBD::createObjectParam(const std::
 	return pObjParams;
 }
 
-void VBDPhysics::testGPUCollisionHandlingCode()
-{
-	VBDPhysicsDataGPU* pPhysicsData = &vbdPhysicsDataGPU_forCPUDebug;
-	Vec3 forceCPU, forceGPU;
-	Mat3 hessianCPU, hessianGPU;
-
-	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
-	{
-		VBDBaseTetMeshGPU* pTetMeshGPU = vbdPhysicsDataGPU_forCPUDebug.tetMeshes[iMesh];
-
-		VBDBaseTetMesh* pTetMesh = tMeshes[iMesh].get();
-
-		for (size_t iV = 0; iV < pTetMesh->numVertices(); iV++)
-		{
-			forceCPU.setZero();
-			forceGPU.setZero();
-			hessianCPU.setZero();
-			hessianGPU.setZero();
-
-			if (pTetMesh->activeCollisionMask[iV])
-			{
-				updateCollisionInfoForVertex(pTetMesh, iMesh, iV);
-				accumlateCollisionForceAndHessian(pTetMesh, iMesh, iV, forceCPU, hessianCPU);
-
-				printCPUCollisionDataForVertex(iMesh, iV);
-
-				CollisionDataGPU& collisionDataGPU = pTetMesh->pTetMeshSharedBase->getCollisionDataCPUBuffer(iV);
-				if (collisionDataGPU.activeColliding)
-				{
-					updateCollisionInfoGPU(pPhysicsData, iMesh, iV);
-				}
-
-				if (collisionDataGPU.numCollisionRelations)
-				{
-					for (int32_t iCollision = 0; iCollision < collisionDataGPU.numCollisionRelations; iCollision++)
-					{
-						const CollisionRelationGPU& collisionRelation = collisionDataGPU.collisionRelations[iCollision];
-						const VBDBaseTetMeshGPU* pTetMeshGPUOther = pPhysicsData->tetMeshes[collisionRelation.meshId];
-						const CollisionDataGPU& collisionDataOther = pTetMeshGPUOther->getCollisionData(collisionRelation.collisionPrimitiveId);
-
-						updateCollisionInfoGPU(pPhysicsData, collisionRelation.meshId, collisionRelation.collisionPrimitiveId);
-					}
-				}
-				accumulateCollisionForceAndHessian(&vbdPhysicsDataGPU_forCPUDebug, pTetMeshGPU,
-					iV, forceGPU.data(), hessianGPU.data());
-				printVBDPhysicsDataGPUForVertex(pPhysicsData, iMesh, iV);
-
-				// updateCollisionInfoGPU()
-
-				compareCPUandGPU(forceCPU, hessianCPU, forceGPU, hessianGPU);
-
-			}
-			//std::cout << "---------------------------------\n";
-
-			accumlateBoundaryForceAndHessian(pTetMesh, iMesh, iV, forceCPU, hessianCPU);
-			accumulateBoundaryForceAndHessianGPU(pPhysicsData, pTetMeshGPU, iV, forceGPU.data(), hessianGPU.data());
-			compareCPUandGPU(forceCPU, hessianCPU, forceGPU, hessianGPU);
-
-			VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
-			if (!pMesh->fixedMask[iV])
-			{
-				pMesh->accumlateInertiaForceAndHessian(iV, forceCPU, hessianCPU);
-				accumulateInertiaForceAndHessian(pTetMeshGPU, iV, physicsParams().dtSqrReciprocal, forceGPU.data(), hessianGPU.data());
-				compareCPUandGPU(forceCPU, hessianCPU, forceGPU, hessianGPU);
-
-				pMesh->accumlateMaterialForceAndHessian(iV, forceCPU, hessianCPU);
-				accumulateMaterialForceAndHessianForVertex_NeoHookean((VBDTetMeshNeoHookeanGPU*)pTetMeshGPU, iV, forceGPU.data(), hessianGPU.data(), pPhysicsData->dt);
-				//compareCPUandGPU(forceCPU, hessianCPU, forceGPU, hessianGPU);
-			}
-
-			// std::cout << "forceCPU: " << forceCPU.transpose() << "\n";
-			// std::cout << "hessianCPU:\n" << hessianCPU << "\n";
-			// 
-			// std::cout << "forceGPU: " << forceGPU.transpose() << "\n";
-			// std::cout << "hessianGPU:\n" << hessianGPU << "\n";
-
-
-
-			// std::cout << "---------------------------------\n";
-
-		}
-	}
-
-}
+//void VBDPhysics::testGPUCollisionHandlingCode()
+//{
+//	VBDPhysicsDataGPU* pPhysicsData = &vbdPhysicsDataGPU_forCPUDebug;
+//	Vec3 forceCPU, forceGPU;
+//	Mat3 hessianCPU, hessianGPU;
+//
+//	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
+//	{
+//		VBDBaseTetMeshGPU* pTetMeshGPU = vbdPhysicsDataGPU_forCPUDebug.tetMeshes[iMesh];
+//
+//		VBDBaseTetMesh* pTetMesh = tMeshes[iMesh].get();
+//
+//		for (size_t iV = 0; iV < pTetMesh->numVertices(); iV++)
+//		{
+//			forceCPU.setZero();
+//			forceGPU.setZero();
+//			hessianCPU.setZero();
+//			hessianGPU.setZero();
+//
+//			if (pTetMesh->activeCollisionMask[iV])
+//			{
+//				updateCollisionInfoForVertex(pTetMesh, iMesh, iV);
+//				accumlateCollisionForceAndHessian(pTetMesh, iMesh, iV, forceCPU, hessianCPU);
+//
+//				printCPUCollisionDataForVertex(iMesh, iV);
+//
+//				CollisionDataGPU& collisionDataGPU = pTetMesh->pTetMeshSharedBase->getCollisionDataCPUBuffer(iV);
+//				if (collisionDataGPU.activeColliding)
+//				{
+//					updateCollisionInfoGPU(pPhysicsData, iMesh, iV);
+//				}
+//
+//				if (collisionDataGPU.numCollisionRelations)
+//				{
+//					for (int32_t iCollision = 0; iCollision < collisionDataGPU.numCollisionRelations; iCollision++)
+//					{
+//						const CollisionRelationGPU& collisionRelation = collisionDataGPU.collisionRelations[iCollision];
+//						const VBDBaseTetMeshGPU* pTetMeshGPUOther = pPhysicsData->tetMeshes[collisionRelation.meshId];
+//						const CollisionDataGPU& collisionDataOther = pTetMeshGPUOther->getCollisionData(collisionRelation.collisionPrimitiveId);
+//
+//						updateCollisionInfoGPU(pPhysicsData, collisionRelation.meshId, collisionRelation.collisionPrimitiveId);
+//					}
+//				}
+//				accumulateCollisionForceAndHessian(&vbdPhysicsDataGPU_forCPUDebug, pTetMeshGPU,
+//					iV, forceGPU.data(), hessianGPU.data());
+//				printVBDPhysicsDataGPUForVertex(pPhysicsData, iMesh, iV);
+//
+//				// updateCollisionInfoGPU()
+//
+//				compareCPUandGPU(forceCPU, hessianCPU, forceGPU, hessianGPU);
+//
+//			}
+//			//std::cout << "---------------------------------\n";
+//
+//			accumlateBoundaryForceAndHessian(pTetMesh, iMesh, iV, forceCPU, hessianCPU);
+//			accumulateBoundaryForceAndHessianGPU(pPhysicsData, pTetMeshGPU, iV, forceGPU.data(), hessianGPU.data());
+//			compareCPUandGPU(forceCPU, hessianCPU, forceGPU, hessianGPU);
+//
+//			VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
+//			if (!pMesh->fixedMask[iV])
+//			{
+//				pMesh->accumlateInertiaForceAndHessian(iV, forceCPU, hessianCPU);
+//				accumulateInertiaForceAndHessian(pTetMeshGPU, iV, physicsParams().dtSqrReciprocal, forceGPU.data(), hessianGPU.data());
+//				compareCPUandGPU(forceCPU, hessianCPU, forceGPU, hessianGPU);
+//
+//				pMesh->accumlateMaterialForceAndHessian(iV, forceCPU, hessianCPU);
+//				accumulateMaterialForceAndHessianForVertex_NeoHookean((VBDTetMeshNeoHookeanGPU*)pTetMeshGPU, iV, forceGPU.data(), hessianGPU.data(), pPhysicsData->dt);
+//				//compareCPUandGPU(forceCPU, hessianCPU, forceGPU, hessianGPU);
+//			}
+//
+//			// std::cout << "forceCPU: " << forceCPU.transpose() << "\n";
+//			// std::cout << "hessianCPU:\n" << hessianCPU << "\n";
+//			// 
+//			// std::cout << "forceGPU: " << forceGPU.transpose() << "\n";
+//			// std::cout << "hessianGPU:\n" << hessianGPU << "\n";
+//
+//
+//
+//			// std::cout << "---------------------------------\n";
+//
+//		}
+//	}
+//
+//}
 
 void GAIA::VBDPhysics::prepareCollisionDataCPUAndGPU()
 {

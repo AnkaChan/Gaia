@@ -63,21 +63,23 @@ namespace GAIA {
 
 		void timeStepEqualize();
 		void runStep();
-		void runStepGPU();
-		void runStepGPU_allInOneSweep();
-		void runStepGPU_acceleratedGS();
 		void runStepGPU_GD();
-		void runStepGPU_debugOnCPU();
-		void runStepGPUNoCollision();
 		void runStepNewton();
+		// GPU VBD
+		void runStepGPU();
+		// CPU VBD
+		void runStep_serialCollisionHandling();
+		void runStep_hybridCollisionHandling();
 
+		// void runStepGPU_debugOnCPU();
+		// void runStepGPUNoCollision();
+		// void runStepGPU_allInOneSweep();
+		// void runStepGPU_acceleratedGS();
+		
 		// record VBD graph
 		void recordVBDSolveGraph();
 
 		void applyDeformers();
-
-		void runStep_serialCollisionHandling();
-		void runStep_hybridCollisionHandling();
 
 		void prepareCollisionDataCPU();
 		void prepareCollisionDataGPU();
