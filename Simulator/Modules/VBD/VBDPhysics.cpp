@@ -218,9 +218,9 @@ void GAIA::VBDPhysics::initialize()
 			InertiaForce.push_back(TVerticesMat::Zero(3, tMeshes[iMesh]->numVertices()));
 			boundaryFrictionForce.push_back(TVerticesMat::Zero(3, tMeshes[iMesh]->numVertices()));
 			boundaryCollisionForce.push_back(TVerticesMat::Zero(3, tMeshes[iMesh]->numVertices()));
-			frictionForce.push_back(TVerticesMat::Zero(3, tMeshes[iMesh]->numVertices()));
-			collisionForce.push_back(TVerticesMat::Zero(3, tMeshes[iMesh]->numVertices()));
-			});
+			frictionForceAll.push_back(TVerticesMat::Zero(3, tMeshes[iMesh]->numVertices()));
+			collisionForceAll.push_back(TVerticesMat::Zero(3, tMeshes[iMesh]->numVertices()));
+		});
 	}
 
 	// initialize collision results
@@ -2265,7 +2265,6 @@ void GAIA::VBDPhysics::updateCollisionInfo(VBDCollisionDetectionResult& collisio
 			VBDCollisionInfo& collisionForceAndHessian = collisionResult.collisionForceAndHessian[iIntersection];
 
 			Vec3 x = pCurTM->vertex(collisionResult.idVQuery);
-			collisionForceAndHessian.diff = collidingPt.closestSurfacePt - x;
 			Vec3 dx3 = x - pCurTM->vertexPrevPos(collisionResult.idVQuery);
 			Vec3 dx0 = pIntersectedTM->vertex(t0) - pIntersectedTM->vertexPrevPos(t0);
 			Vec3 dx1 = pIntersectedTM->vertex(t1) - pIntersectedTM->vertexPrevPos(t1);
@@ -2283,9 +2282,23 @@ void GAIA::VBDPhysics::updateCollisionInfo(VBDCollisionDetectionResult& collisio
 			CFloatingType epsV = (getObjectParam(collidedMeshID).frictionEpsV + getObjectParam(curMeshID).frictionEpsV) * 0.5;
 			CFloatingType dt = physicsParams().dt;
 			CFloatingType epsU = epsV * dt;
-			//Vec3 frictionForce;
+			//Vec3 collisionForce;
 			//Mat3 frictionForceHessian;
-			computeVertexFriction(mu, 1.0f, T, u, epsU, collisionForceAndHessian.frictionForce, collisionForceAndHessian.frictionHessian);
+
+			Vec3 diff = collidingPt.closestSurfacePt - x;
+			collisionForceAndHessian.penetrationDepth = diff.dot(collidingPt.closestPointNormal);
+			CFloatingType k = physicsParams().collisionStiffness;
+			CFloatingType lambda = collisionForceAndHessian.penetrationDepth * k;
+
+			collisionForceAndHessian.collisionForce.setZero();
+			collisionForceAndHessian.collisionHessian.setZero();
+			if (collisionForceAndHessian.penetrationDepth > 0.f)
+			{
+				computeVertexFriction(mu, lambda, T, u, epsU, collisionForceAndHessian.collisionForce, collisionForceAndHessian.collisionHessian);
+
+				collisionForceAndHessian.collisionForce += lambda * n;
+				collisionForceAndHessian.collisionHessian += k * n * n.transpose();
+			}
 
 		}
 	}
@@ -2604,43 +2617,43 @@ void GAIA::VBDPhysics::applyBoudnaryFriction(TetMeshFEM* pMesh, IdType vertexId)
 	}
 }
 
-void GAIA::VBDPhysics::applyCollisionFriction(VBDBaseTetMesh* pMesh, IdType meshId, IdType vertexId)
-{
-	if (pMesh->activeCollisionMask[vertexId])
-	{
-		CFloatingType dt = physicsParams().dt;
-		CFloatingType vertInvMass = pMesh->vertexInvMass(vertexId);
-		CFloatingType frictionRatio = pMesh->pObjParamsVBD->frictionDynamic;
-
-		int surfaceVId = pMesh->tetVertIndicesToSurfaceVertIndices()(vertexId);
-		FloatingType collisionForce = 0.f;
-		VBDCollisionDetectionResult& colResult = getCollisionDetectionResultFromSurfaceMeshId(meshId, surfaceVId);
-		Vec3 contactNormal;
-		// v side of the v-f collisions
-		if (colResult.numIntersections())
-		{
-			for (size_t iIntersection = 0; iIntersection < colResult.numIntersections(); iIntersection++)
-			{
-				collisionForce = computeCollisionRepulsiveForcePerCollision(iIntersection, 3, colResult, contactNormal);
-				pMesh->velocity(vertexId) =
-					applyFrictinalVelocityDamping(pMesh->velocity(vertexId), contactNormal, vertInvMass, frictionRatio, collisionForce, dt);
-			}
-		}
-
-		// f side of the v-f collision
-		CollisionRelationList& colRelations = getCollisionRelationList(meshId, vertexId);
-		for (size_t iCollision = 0; iCollision < colRelations.size(); iCollision++)
-		{
-			CollisionRelation& colRelation = colRelations[iCollision];
-
-			VBDCollisionDetectionResult& colResultOther = getCollisionDetectionResultFromSurfaceMeshId(colRelation.meshId, colRelation.surfaceVertexId);
-			collisionForce = computeCollisionRepulsiveForcePerCollision(colRelation.collisionId, colRelation.collisionVertexOrder, colResultOther, contactNormal);
-			pMesh->velocity(vertexId) =
-				applyFrictinalVelocityDamping(pMesh->velocity(vertexId), contactNormal, vertInvMass, frictionRatio, collisionForce, dt);
-		}
-	}
-
-}
+//void GAIA::VBDPhysics::applyCollisionFriction(VBDBaseTetMesh* pMesh, IdType meshId, IdType vertexId)
+//{
+//	if (pMesh->activeCollisionMask[vertexId])
+//	{
+//		CFloatingType dt = physicsParams().dt;
+//		CFloatingType vertInvMass = pMesh->vertexInvMass(vertexId);
+//		CFloatingType frictionRatio = pMesh->pObjParamsVBD->frictionDynamic;
+//
+//		int surfaceVId = pMesh->tetVertIndicesToSurfaceVertIndices()(vertexId);
+//		FloatingType collisionForce = 0.f;
+//		VBDCollisionDetectionResult& colResult = getCollisionDetectionResultFromSurfaceMeshId(meshId, surfaceVId);
+//		Vec3 contactNormal;
+//		// v side of the v-f collisions
+//		if (colResult.numIntersections())
+//		{
+//			for (size_t iIntersection = 0; iIntersection < colResult.numIntersections(); iIntersection++)
+//			{
+//				collisionForce = computeCollisionRepulsiveForcePerCollision(iIntersection, 3, colResult, contactNormal);
+//				pMesh->velocity(vertexId) =
+//					applyFrictinalVelocityDamping(pMesh->velocity(vertexId), contactNormal, vertInvMass, frictionRatio, collisionForce, dt);
+//			}
+//		}
+//
+//		// f side of the v-f collision
+//		CollisionRelationList& colRelations = getCollisionRelationList(meshId, vertexId);
+//		for (size_t iCollision = 0; iCollision < colRelations.size(); iCollision++)
+//		{
+//			CollisionRelation& colRelation = colRelations[iCollision];
+//
+//			VBDCollisionDetectionResult& colResultOther = getCollisionDetectionResultFromSurfaceMeshId(colRelation.meshId, colRelation.surfaceVertexId);
+//			collisionForce = computeCollisionRepulsiveForcePerCollision(colRelation.collisionId, colRelation.collisionVertexOrder, colResultOther, contactNormal);
+//			pMesh->velocity(vertexId) =
+//				applyFrictinalVelocityDamping(pMesh->velocity(vertexId), contactNormal, vertInvMass, frictionRatio, collisionForce, dt);
+//		}
+//	}
+//
+//}
 
 //FloatingType GAIA::VBDPhysics::computeCollisionRepulsiveForce(VBDBaseTetMesh* pMesh, IdType meshId, IdType vertexId)
 //{
@@ -2669,80 +2682,80 @@ void GAIA::VBDPhysics::applyCollisionFriction(VBDBaseTetMesh* pMesh, IdType mesh
 //	return collisionForce;
 //}
 
-FloatingType GAIA::VBDPhysics::computeCollisionRepulsiveForcePerCollision(int collisionId, int collisionVertexOrder, VBDCollisionDetectionResult& collisionResult,
-	Vec3& contactNormal)
-{
-	int curMeshID = collisionResult.idTMQuery;
-	VBDBaseTetMesh* pCurTM = tMeshes[curMeshID].get();
-	CollidingPointInfo& collidingPt = collisionResult.collidingPts[collisionId];
-
-	if (!collidingPt.shortestPathFound)
-	{
-		return 0.f;
-	}
-
-	int collidedMeshID = collidingPt.intersectedMeshId;
-	int closestFaceId = collidingPt.closestSurfaceFaceId;
-	VBDBaseTetMesh* pIntersectedTM = tMeshes[collidedMeshID].get();
-
-	FloatingType b;
-	Vec3 p = pCurTM->vertex(collisionResult.idVQuery);
-	Vec3 diff, c, n;
-	CFloatingType k = physicsParams().collisionStiffness;
-	CFloatingType collisionRadius = physicsParams().collisionAirDistance;
-	n = collidingPt.closestPointNormal;
-	c = collidingPt.closestSurfacePt;
-	diff = p - c;
-
-	contactNormal = n;
-	FloatingType penetrationDepth = -diff.dot(n);
-
-	if (physicsParams().collisionEnergyType == 1)
-	{
-		penetrationDepth += physicsParams().collisionAirDistance;
-	}
-
-	FloatingType collisionRepulsiveForce = 0.f;
-	if (penetrationDepth > 0)
-	{
-		switch (collisionVertexOrder)
-		{
-		case 0:
-			b = -collidingPt.closestSurfacePtBarycentrics[0];
-			break;
-		case 1:
-			b = -collidingPt.closestSurfacePtBarycentrics[1];
-			break;
-		case 2:
-			b = -collidingPt.closestSurfacePtBarycentrics[2];
-			break;
-		case 3:
-			b = 1.0f;
-			// diff = -diff;
-			break;
-		default:
-			break;
-		}
-
-		if (b > 0)
-		{
-			switch (physicsParams().collisionEnergyType)
-			{
-			case 0:
-				collisionRepulsiveForce = k * b * diff.norm();
-				break;
-			case 1:
-				// simplified point-plane
-				collisionRepulsiveForce = k * b * penetrationDepth;
-				break;
-			default:
-				break;
-			}
-
-		}
-	}
-	return abs(collisionRepulsiveForce);
-}
+//FloatingType GAIA::VBDPhysics::computeCollisionRepulsiveForcePerCollision(int collisionId, int collisionVertexOrder, VBDCollisionDetectionResult& collisionResult,
+//	Vec3& contactNormal)
+//{
+//	int curMeshID = collisionResult.idTMQuery;
+//	VBDBaseTetMesh* pCurTM = tMeshes[curMeshID].get();
+//	CollidingPointInfo& collidingPt = collisionResult.collidingPts[collisionId];
+//
+//	if (!collidingPt.shortestPathFound)
+//	{
+//		return 0.f;
+//	}
+//
+//	int collidedMeshID = collidingPt.intersectedMeshId;
+//	int closestFaceId = collidingPt.closestSurfaceFaceId;
+//	VBDBaseTetMesh* pIntersectedTM = tMeshes[collidedMeshID].get();
+//
+//	FloatingType b;
+//	Vec3 p = pCurTM->vertex(collisionResult.idVQuery);
+//	Vec3 diff, c, n;
+//	CFloatingType k = physicsParams().collisionStiffness;
+//	CFloatingType collisionRadius = physicsParams().collisionAirDistance;
+//	n = collidingPt.closestPointNormal;
+//	c = collidingPt.closestSurfacePt;
+//	diff = p - c;
+//
+//	contactNormal = n;
+//	FloatingType penetrationDepth = -diff.dot(n);
+//
+//	if (physicsParams().collisionEnergyType == 1)
+//	{
+//		penetrationDepth += physicsParams().collisionAirDistance;
+//	}
+//
+//	FloatingType collisionRepulsiveForce = 0.f;
+//	if (penetrationDepth > 0)
+//	{
+//		switch (collisionVertexOrder)
+//		{
+//		case 0:
+//			b = -collidingPt.closestSurfacePtBarycentrics[0];
+//			break;
+//		case 1:
+//			b = -collidingPt.closestSurfacePtBarycentrics[1];
+//			break;
+//		case 2:
+//			b = -collidingPt.closestSurfacePtBarycentrics[2];
+//			break;
+//		case 3:
+//			b = 1.0f;
+//			// diff = -diff;
+//			break;
+//		default:
+//			break;
+//		}
+//
+//		if (b > 0)
+//		{
+//			switch (physicsParams().collisionEnergyType)
+//			{
+//			case 0:
+//				collisionRepulsiveForce = k * b * diff.norm();
+//				break;
+//			case 1:
+//				// simplified point-plane
+//				collisionRepulsiveForce = k * b * penetrationDepth;
+//				break;
+//			default:
+//				break;
+//			}
+//
+//		}
+//	}
+//	return abs(collisionRepulsiveForce);
+//}
 
 Vec3 GAIA::VBDPhysics::applyFrictinalVelocityDamping(Vec3 velocity, Vec3& contactNormal, CFloatingType vertInvMass,
 	CFloatingType frictionRatio, CFloatingType contactForce, CFloatingType dt)
@@ -2833,13 +2846,13 @@ void GAIA::VBDPhysics::accumlateBoundaryForceAndHessian(TetMeshFEM* pMesh, IdTyp
 			CFloatingType mu = physicsParams().boundaryFrictionDynamic;
 			CFloatingType epsV = physicsParams().boundaryFrictionEpsV;
 			CFloatingType epsU = epsV * dt;
-			Vec3 frictionForce;
+			Vec3 collisionForce;
 			Mat3 frictionForceHessian;
-			computeVertexFriction(mu, lambda, T, u, epsU, frictionForce, frictionForceHessian);
+			computeVertexFriction(mu, lambda, T, u, epsU, collisionForce, frictionForceHessian);
 			debugOperation(DEBUG_LVL_DEBUG_VEBOSE, [&]() {
-				boundaryFrictionForce[meshId].col(vertexId) += frictionForce;
+				boundaryFrictionForce[meshId].col(vertexId) += collisionForce;
 				});
-			force += frictionForce;
+			force += collisionForce;
 			hessian += frictionForceHessian;
 		}
 	}
@@ -2873,21 +2886,21 @@ void GAIA::VBDPhysics::accumlateBoundaryForceAndHessian(TetMeshFEM* pMesh, IdTyp
 					CFloatingType mu = physicsParams().boundaryFrictionDynamic;
 					CFloatingType epsV = physicsParams().boundaryFrictionEpsV;
 					CFloatingType epsU = epsV * dt;
-					Vec3 frictionForce;
+					Vec3 collisionForce;
 					Mat3 frictionForceHessian;
-					computeVertexFriction(mu, lambda, T, u, epsU, frictionForce, frictionForceHessian);
-					//CFloatingType frictionForceNorm = frictionForce.norm();
+					computeVertexFriction(mu, lambda, T, u, epsU, collisionForce, frictionForceHessian);
+					//CFloatingType frictionForceNorm = collisionForce.norm();
 					//CFloatingType maxFrictionForceNorm = u.norm() * pMesh->vertexMass(vertexId);
 					//if (frictionForceNorm > maxFrictionForceNorm)
 					//{
 					//	CFloatingType ratio = maxFrictionForceNorm / frictionForceNorm;
-					//	// frictionForce *= ratio;
+					//	// collisionForce *= ratio;
 					//	// frictionForceHessian *= ratio;
 					//}
 					debugOperation(DEBUG_LVL_DEBUG_VEBOSE, [&]() {
-						boundaryFrictionForce[meshId].col(vertexId) += frictionForce;
+						boundaryFrictionForce[meshId].col(vertexId) += collisionForce;
 						});
-					force += frictionForce;
+					force += collisionForce;
 					hessian += frictionForceHessian;
 				}
 
@@ -2912,21 +2925,21 @@ void GAIA::VBDPhysics::accumlateBoundaryForceAndHessian(TetMeshFEM* pMesh, IdTyp
 					CFloatingType mu = physicsParams().boundaryFrictionDynamic;
 					CFloatingType epsV = physicsParams().boundaryFrictionEpsV;
 					CFloatingType epsU = epsV * dt;
-					Vec3 frictionForce;
+					Vec3 collisionForce;
 					Mat3 frictionForceHessian;
-					computeVertexFriction(mu, lambda, T, u, epsU, frictionForce, frictionForceHessian);
-					//CFloatingType frictionForceNorm = frictionForce.norm();
+					computeVertexFriction(mu, lambda, T, u, epsU, collisionForce, frictionForceHessian);
+					//CFloatingType frictionForceNorm = collisionForce.norm();
 					//CFloatingType maxFrictionForceNorm = u.norm() * pMesh->vertexMass(vertexId);
 					//if (frictionForceNorm > maxFrictionForceNorm)
 					//{
 					//	CFloatingType ratio = maxFrictionForceNorm / frictionForceNorm;
-					//	// frictionForce *= ratio;
+					//	// collisionForce *= ratio;
 					//	// frictionForceHessian *= ratio;
 					//}
 					debugOperation(DEBUG_LVL_DEBUG_VEBOSE, [&]() {
-						boundaryFrictionForce[meshId].col(vertexId) += frictionForce;
+						boundaryFrictionForce[meshId].col(vertexId) += collisionForce;
 						});
-					force += frictionForce;
+					force += collisionForce;
 					hessian += frictionForceHessian;
 				}
 			}
@@ -2995,21 +3008,8 @@ void GAIA::VBDPhysics::accumlateCollisionForceAndHessianPerCollision(int collisi
 	}
 
 	FloatingType b;
-	CFloatingType k = physicsParams().collisionStiffness;
-	CFloatingType collisionRadius = physicsParams().collisionAirDistance;
-	const auto& n = collidingPt.closestPointNormal;
-	const auto& diff = collisionFH.diff;
-	const auto& frictionForce = collisionFH.frictionForce;
-	const auto& frictionHessian = collisionFH.frictionHessian;
 
-	FloatingType penetrationDepth = diff.dot(n);
-
-	if (physicsParams().collisionEnergyType == 1)
-	{
-		penetrationDepth += physicsParams().collisionAirDistance;
-	}
-
-	if (penetrationDepth > 0)
+	if (collisionFH.penetrationDepth > 0)
 	{
 		switch (collisionVertexOrder)
 		{
@@ -3031,37 +3031,11 @@ void GAIA::VBDPhysics::accumlateCollisionForceAndHessianPerCollision(int collisi
 
 		if (b != 0)
 		{
-			// Friction
-			CFloatingType lambda = penetrationDepth * k;
-
-			switch (physicsParams().collisionEnergyType)
-			{
-			case 0:
-				force += k * b * diff;
-				hessian += k * b * b * Mat3::Identity();
-				break;
-			case 1:
-				// simplified point-plane
-				// Penalty force
-				debugOperation(DEBUG_LVL_DEBUG_VEBOSE, [&]() {
-					collisionForce[meshId].col(vertexId) += k * b * penetrationDepth * n;
-					});
-				force += k * b * penetrationDepth * n;
-				hessian += k * b * b * n * n.transpose();
-
-				// Friction
-				if (apply_friction) {
-					debugOperation(DEBUG_LVL_DEBUG_VEBOSE, [&]() {
-						this->frictionForce[meshId].col(vertexId) += frictionForce * (lambda * b);
-						});
-					force += frictionForce * (lambda * b);
-					hessian += frictionHessian * (lambda * b * b);
-				}
-				break;
-			default:
-				break;
-			}
-
+			debugOperation(DEBUG_LVL_DEBUG_VEBOSE, [&]() {
+				collisionForceAll[meshId].col(vertexId) = collisionFH.collisionForce;
+			});
+			force += collisionFH.collisionForce * b;
+			hessian += collisionFH.collisionHessian * b * b;
 		}
 	}
 }
@@ -3456,9 +3430,9 @@ void GAIA::VBDPhysics::outputForces()
 		boundaryFrictionFile.write((char*)bdff.data(), sizeof(FloatingType) * bdff.size());
 		const auto& bdcf = boundaryCollisionForce[iMesh];
 		boundaryCollisionFile.write((char*)bdcf.data(), sizeof(FloatingType) * bdcf.size());
-		const auto& ff = frictionForce[iMesh];
+		const auto& ff = frictionForceAll[iMesh];
 		frictionFile.write((char*)ff.data(), sizeof(FloatingType) * ff.size());
-		const auto& cf = collisionForce[iMesh];
+		const auto& cf = collisionForceAll[iMesh];
 		collisionFile.write((char*)cf.data(), sizeof(FloatingType) * cf.size());
 	}
 }
@@ -3471,8 +3445,8 @@ void GAIA::VBDPhysics::clearForces()
 		InertiaForce[iMesh].setZero();
 		boundaryFrictionForce[iMesh].setZero();
 		boundaryCollisionForce[iMesh].setZero();
-		frictionForce[iMesh].setZero();
-		collisionForce[iMesh].setZero();
+		frictionForceAll[iMesh].setZero();
+		collisionForceAll[iMesh].setZero();
 	}
 }
 

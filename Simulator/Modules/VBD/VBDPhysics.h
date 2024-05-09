@@ -112,10 +112,8 @@ namespace GAIA {
 		void solveBoxBoundaryConstraintForVertex(TetMeshFEM* pMesh, IdType vertexId);
 		void accumlateBoundaryForceAndHessian(TetMeshFEM* pMesh, IdType meshId, IdType vertexId, Vec3& force, Mat3& hessian, bool apply_friction = false);
 		void applyBoudnaryFriction(TetMeshFEM* pMesh, IdType vertexId);
-		void applyCollisionFriction(VBDBaseTetMesh* pMesh, IdType meshId, IdType vertexId);
+		// void applyCollisionFriction(VBDBaseTetMesh* pMesh, IdType meshId, IdType vertexId);
 		// FloatingType computeCollisionRepulsiveForce(VBDBaseTetMesh* pMesh, IdType meshId, IdType vertexId);
-		FloatingType computeCollisionRepulsiveForcePerCollision(int collisionId, int collisionVertexOrder,
-			VBDCollisionDetectionResult& collisionResult, Vec3& contactNormal);
 
 		// collision Id: 0~3; 0~2 the 3 vertices of the colliding face
 		void accumlateCollisionForceAndHessian(TetMeshFEM* pMesh, IdType meshId, IdType vertexId,
@@ -185,8 +183,8 @@ namespace GAIA {
 		std::vector<TVerticesMat> InertiaForce{};
 		std::vector<TVerticesMat> boundaryFrictionForce{};
 		std::vector<TVerticesMat> boundaryCollisionForce{};
-		std::vector<TVerticesMat> frictionForce{};
-		std::vector<TVerticesMat> collisionForce{};
+		std::vector<TVerticesMat> frictionForceAll{};
+		std::vector<TVerticesMat> collisionForceAll{};
 
 		std::vector<std::shared_ptr<VBDBaseDeformer>> deformers;
 

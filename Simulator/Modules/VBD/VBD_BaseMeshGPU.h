@@ -19,9 +19,9 @@ namespace GAIA {
 	{
 		CollisionRelationGPU collisionRelations[GPU_COLLISION_RELATION_PREALLOCATION_SIZE];
 		// outputs
-		//FloatingTypeGPU closestPointNormal[3];
-		//FloatingTypeGPU closestSurfacePt[3];
-		FloatingTypeGPU closestSurfacePtBarycentrics[3];
+		// FloatingTypeGPU closestPointNormal[3];
+		// FloatingTypeGPU closestSurfacePt[3];
+		// FloatingTypeGPU closestSurfacePtBarycentrics[3];
 
 		// when computing collision infos: 
 		//     0~2: force
@@ -30,7 +30,7 @@ namespace GAIA {
 		//     0~2: tangential relative velocity direction
 		//     3: tangential relative velocity norm
 		//     4: tangential relative force norm
-		FloatingTypeGPU collisionForceAndHessian[12]; 
+		// FloatingTypeGPU collisionForceAndHessian[12]; 
 		// inputs
 		int32_t closestSurfaceFaceVIds[3];
 		int32_t closestSurfaceFaceId;
