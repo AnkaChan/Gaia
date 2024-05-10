@@ -131,6 +131,11 @@ struct InputHandlerEBD {
 	void handleInput(std::string& inModelInputFile, std::string& inParameterFile, std::string& outFolder,
 		PhysicsCommandParser& configs, PhysicsFramework& physics) {
 
+		if (outFolder == "noOutput")
+		{
+			physics.physicsParams().saveOutputs = false;
+		}
+
 		if (configs.repoRoot != "")
 		{
 			inModelInputFile = MF::STR::replace(inModelInputFile, "${REPO_ROOT}", configs.repoRoot);

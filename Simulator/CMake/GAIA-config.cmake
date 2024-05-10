@@ -112,6 +112,11 @@ file(GLOB GAIA_SRCS
 	${MESHFRAME_SOURCE_CPP_UTILITY}
 )
 
+file(GLOB GAIA_COLORING_SRCS
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/GraphColoring/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/GraphColoring/*.cpp"
+)
+
 list(REMOVE_ITEM GAIA_COLLISION_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/TetMeshContactDetector.h" "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/TetMeshContactDetector.cpp")
 
 if (BUILD_VBD)
