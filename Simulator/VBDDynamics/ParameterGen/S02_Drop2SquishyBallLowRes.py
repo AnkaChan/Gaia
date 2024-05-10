@@ -44,7 +44,7 @@ if __name__ == '__main__':
         model["dampingDeviatoric"] = 1e-7
 
         # model["epsV"] = 1
-        model["epsV"] = 0.1
+        model["frictionEpsV"] = 0.01
 
         models.append(model)
 

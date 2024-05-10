@@ -42,8 +42,8 @@
       -10.0,
       0.0
     ],
-    "iterations": 40,
-    "numFrames": 720,
+    "iterations": 30,
+    "numFrames": 900,
     "numSubsteps": 2,
     "outputExt": "ply",
     "outputIntermediateState": false,
@@ -77,6 +77,7 @@
         0
       ]
     ],
+    "saveOutputs": false,
     "useGPU": true,
     "useAccelerator": true,
     "acceleratorRho": 0.95,

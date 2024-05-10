@@ -44,7 +44,7 @@
       "frictionDynamic": 0.1,
       "dampingHydrostatic": 1e-07,
       "dampingDeviatoric": 1e-07,
-      "epsV": 0.1
+      "frictionEpsV": 0.01
     },
     {
       "density": 20,
@@ -90,7 +90,7 @@
       "frictionDynamic": 0.1,
       "dampingHydrostatic": 1e-07,
       "dampingDeviatoric": 1e-07,
-      "epsV": 0.1
+      "frictionEpsV": 0.01
     }
   ]
 }

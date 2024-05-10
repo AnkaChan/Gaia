@@ -119,7 +119,7 @@ if __name__ == '__main__':
     # parameters["PhysicsParams"]["useGPU"] = False
     parameters["PhysicsParams"]["collisionStiffness"] = 1e5
     parameters["PhysicsParams"]["numSubsteps"] = 2
-    parameters["PhysicsParams"]["iterations"] = 40
+    parameters["PhysicsParams"]["iterations"] = 30
     parameters["PhysicsParams"]["collisionSolutionType"] = 1
     # recoveryState = r"E:\Data2\VBDSimulation\S09_Experiment_Hybrid64_sequentiallyAppear\Test_64HybridModels_4steps_15Iters_stiff_Friction\RecoveryStates\A00000050.json"
     cmd = genRunningParameters2(machineName, genFileName, experimentName, modelsInfo, parameters, exeName=binaryFile, runCommand=run, recoverState=recoveryState)
