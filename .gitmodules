@@ -11,4 +11,4 @@
 
 [submodule "Simulator/3rdParty/polyscope"]
 	path = Simulator/3rdParty/polyscope
-	url = git@github.com:AnkaChan/polyscope.git
+	url = https://github.com/nmwsharp/polyscope.git
