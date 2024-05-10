@@ -1,0 +1,2 @@
+F:\Code\Projects\Graphics\VBDDynamics\Release\VBDDynamics.exe F:\Code\02_Graphics\Gaia\Simulator\VBDDynamics\ParameterGen\Parameters\S06_TestFriction_2Cube_GPU\TestFriction_2Cube_friction_0.1_Iter10\Models.json F:\Code\02_Graphics\Gaia\Simulator\VBDDynamics\ParameterGen\Parameters\S06_TestFriction_2Cube_GPU\TestFriction_2Cube_friction_0.1_Iter10\Parameters.json E:\Data2\VBDSimulation\S06_TestFriction_2Cube_GPU\TestFriction_2Cube_friction_0.1_Iter10 -R F:\Code\02_Graphics\Gaia
+cmd /k

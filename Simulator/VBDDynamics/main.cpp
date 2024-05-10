@@ -25,5 +25,10 @@ int main(int argc, char** argv) {
 		physics.recoverFromState(parser.recoveryStateFile);
 	}
 
+	if (outFolder == "noOutput")
+	{
+		physics.physicsParams().saveOutputs = false;
+	}
+
 	physics.simulate();
 }
