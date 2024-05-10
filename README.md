@@ -1,6 +1,9 @@
 # Gaia
 
 [\[Discord\]](https://discord.gg/BRRaSmRpkm "Gaia Engine")
+> There is no copy too small to be ignored, nor design too abstract to be embraced.
+>
+> -- <cite>Anka He Chen</cite>
 
 <img alt="teaser.gif" src="https://github.com/AnkaChan/Gaia/blob/main/teaser.gif?raw=true" data-hpc="true" class="Box-sc-g0xbh4-0 kzRgrI" height="256px">
 
@@ -24,10 +27,10 @@ This Algorithm has the following dependencies:
 - [cmake-git-version-tracking](https://github.com/andrew-hardin/cmake-git-version-tracking): for tracking the git version infos when running experiments (already included as a submodule)
 - [OneTBB](https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#onetbb) (Need to be installed, tested with 2021.12.0)
 - Eigen3 (Need to be installed, tested with 3.4.0)
-- Embree (Need to be installed, tested with 3.13.1, not compatible with Embree 4)'
+- Embree (Need to be installed, tested with 3.13.1, not compatible with Embree 4)
 - [polyscope](https://github.com/nmwsharp/polyscope): needed if the BUILD_GUI option for CMAKE is on. (already included as submodule)
 
-Make you installed OneTBB, Eigen3 and Embree. Then add the environment variables "Eigen3_DIR" and "embree_DIR", setting their values to the respective config.cmake paths. This step is necessary for CMake to successfully locate them.
+Make sure you installed OneTBB, Eigen3 and Embree. Then add the environment variables "Eigen3_DIR" and "embree_DIR", setting their values to the respective config.cmake paths. This step is necessary for CMake to successfully locate them.
 
 ### Use GAIA as a Standalone Simulator
 Currently, both VBD (Vertex Block Descent) and XPBD (Extended Position Based Dynamics) based simulatora re provided. The CMakelists.txt of the standalone simulators are located at Gaia/Simulator/VBDDynamics and Gaia/Simulator/PBDDynamics, respectively. To use the simulator, you need to
