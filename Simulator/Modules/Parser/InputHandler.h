@@ -126,7 +126,7 @@ struct InputHandlerVBDCloth {
 };
 
 template<typename PhysicsFramework>
-struct InputHandlerEBD {
+struct InputHandlerVBD {
 	template<typename PhysicsCommandParser>
 	void handleInput(std::string& inModelInputFile, std::string& inParameterFile, std::string& outFolder,
 		PhysicsCommandParser& configs, PhysicsFramework& physics) {

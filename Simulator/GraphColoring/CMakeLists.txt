@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.0)
-project (P00_GraphColoring)
+project (GraphColoring)
 
 if( CMAKE_BINARY_DIR STREQUAL CMAKE_SOURCE_DIR )
     message( FATAL_ERROR "Please select another Build Directory ! (and give it a clever name, like bin_Visual2012_64bits/)" )
@@ -41,15 +41,15 @@ file(GLOB SRC
 	"*.c"
 	)
 
-add_executable(P00_GraphColoring 
+add_executable(GraphColoring 
 	${SRC}
 	${GAIA_COLORING_SRCS}
 )
 
 
-target_compile_options(P00_GraphColoring PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:
+target_compile_options(GraphColoring PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:
                        --extended-lambda
 					   --default-stream per-thread
                        >)
 
-target_link_libraries(P00_GraphColoring ${GAIA_LIBRARY})
+target_link_libraries(GraphColoring ${GAIA_LIBRARY})
