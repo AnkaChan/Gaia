@@ -17,7 +17,7 @@ option (BUILD_VBD
        "Build VBD modules." ON)
 	   
 option (BUILD_VBD_Cloth
-       "Build VBD Cloth modules." OFF)
+       "Build VBD Cloth modules." ON)
 	   
 option (BUILD_PBD
        "Build PBD volumetric simulation modules." OFF)
@@ -108,14 +108,15 @@ file(GLOB GAIA_SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Framework/*.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/common/math/constants.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Viewer/*.cpp"
-	${MESHFRAME_SOURCE_CPP_UTILITY}
-)
-
-file(GLOB GAIA_CLOTH_SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/*.h"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/*.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TriMesh/**.h"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TriMesh/**.cpp"
+	${MESHFRAME_SOURCE_CPP_UTILITY}
+)
+
+file(GLOB GAIA_CLOTH_SRCS
+
 )
 
 file(GLOB GAIA_COLORING_SRCS
