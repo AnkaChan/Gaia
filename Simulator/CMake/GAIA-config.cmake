@@ -16,6 +16,9 @@ add_subdirectory ("${CMAKE_CURRENT_LIST_DIR}/../3rdParty/cmake-git-version-track
 option (BUILD_VBD
        "Build VBD modules." ON)
 	   
+option (BUILD_VBD_Cloth
+       "Build VBD Cloth modules." OFF)
+	   
 option (BUILD_PBD
        "Build PBD volumetric simulation modules." OFF)
 	   
@@ -78,8 +81,6 @@ file(GLOB GAIA_VBD_SRCS
 
 
 file (GLOB GAIA_COLLISION_SRCS
-	"${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/*.h"
-	"${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/*.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/BVH/*.h"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/BVH/*.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/BVH/*.cu"
@@ -91,8 +92,6 @@ file (GLOB GAIA_COLLISION_SRCS
 file(GLOB GAIA_SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TetMesh/**.h"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TetMesh/**.cpp"
-	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TriMesh/**.h"
-	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TriMesh/**.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Parallelization/*.h"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Parallelization/*.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/SolverUtils/*.h"
@@ -110,6 +109,13 @@ file(GLOB GAIA_SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/common/math/constants.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Viewer/*.cpp"
 	${MESHFRAME_SOURCE_CPP_UTILITY}
+)
+
+file(GLOB GAIA_CLOTH_SRCS
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/*.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TriMesh/**.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TriMesh/**.cpp"
 )
 
 file(GLOB GAIA_COLORING_SRCS
@@ -143,6 +149,15 @@ SET (GAIA_SRCS
 	${GAIA_COLLISION_SRCS}
 )
 endif (BUILD_Collision_Detector)
+
+if (BUILD_VBD_Cloth)
+message("GAIA: Build with VBD Cloth simulatio components!\n")
+SET (GAIA_SRCS 
+	${GAIA_SRCS}
+	${GAIA_CLOTH_SRCS}
+)
+endif (BUILD_VBD_Cloth)
+
 
 
 set (GAIA_LIBRARY
