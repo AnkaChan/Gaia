@@ -17,7 +17,7 @@ option (BUILD_VBD
        "Build VBD modules." ON)
 	   
 option (BUILD_VBD_Cloth
-       "Build VBD Cloth modules." ON)
+       "Build VBD Cloth modules." OFF)
 	   
 option (BUILD_PBD
        "Build PBD volumetric simulation modules." OFF)

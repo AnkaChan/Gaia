@@ -8,7 +8,7 @@
 <img alt="teaser.gif" src="https://github.com/AnkaChan/Gaia/blob/main/teaser.gif?raw=true" data-hpc="true" class="Box-sc-g0xbh4-0 kzRgrI" height="256px">
 
 The Gaia engine is a C++ codebase primarily designed for physics-based simulations. It can be compiled as a standalone simulator or integrated into other applications as a third-party module.
-It provides a set of useful tools, including a powerful triangular/tet mesh data structure, a convenient parameter IO module, a set of efficient collision detectors, and a virtual physics framework that can be extended to support all sorts of solvers.
+It provides a set of useful tools, including a powerful triangular/tet mesh data structure, a convenient parameter IO module, a set of efficient collision detectors, and an abstract base physics framework that can be extended to support all sorts of solvers.
 
 Gaia is engineered to enhance the efficiency of both developers and the hardware it operates on. Occasionally, compromises are necessary since optimizing for one can adversely affect the other. It may not have the smartest design in every way. However, it's assured that Gaia is free from any stupid designs.
 
@@ -33,11 +33,13 @@ This Algorithm has the following dependencies:
 Make sure you installed OneTBB, Eigen3 and Embree. Then add the environment variables "Eigen3_DIR" and "embree_DIR", setting their values to the respective config.cmake paths. This step is necessary for CMake to successfully locate them.
 
 ### Use GAIA as a Standalone Simulator
-Currently, both VBD (Vertex Block Descent) and XPBD (Extended Position Based Dynamics) based simulatora re provided. The CMakelists.txt of the standalone simulators are located at Gaia/Simulator/VBDDynamics and Gaia/Simulator/PBDDynamics, respectively. To use the simulator, you need to
+Currently, both VBD (Vertex Block Descent) and XPBD (Extended Position Based Dynamics) based simulator are provided. The CMakelists.txt of the standalone simulators are located at ```Gaia/Simulator/VBDDynamics``` and ```Gaia/Simulator/PBDDynamics```, respectively. To use the simulator, you need to
 use CMake to construct and build it. As of now, compatibility and testing have been conducted exclusively on Windows with Visual Studio.
 
 ### Use GAIA as a Module
-Gaia has its own GAIA-config.cmake located at Gaia/Simulator/CMake. To incorperate Gaia as a module, you need to add ```include([PATH_TO_GAIA]/Simulator/cmake/GAIA-config.cmake)``` to your project's CMakeLists, then add those commands to link Gaia to your project:
+Gaia provides its own ```GAIA-config.cmake``` file located in Gaia/Simulator/CMake. To incorporate Gaia as a module in your project, you should add the line ```include([PATH_TO_GAIA]/Simulator/cmake/GAIA-config.cmake)``` to your project's CMakeLists.txt file. Alternatively, you can make Gaia visible to CMake by defining an environment variable named ```GAIA_DIR```, setting its value to ```[PATH_TO_GAIA]/Simulator/cmake/```, and using the CMake command ```find_package(GAIA)```. Either method will allow CMake to parse the``` GAIA-config.cmake``` file.
+
+After loading the GAIA-config.cmake file, you need to add those commands to link Gaia to your project:
 ```
 include_directories(
 	${GAIA_INCLUDE_DIRS}
@@ -51,15 +53,20 @@ add_executable(YouApplication
 )
 target_link_libraries(YouApplication ${GAIA_LIBRARY})
 ```
-An alternative way to make GAIA visible to CMake is defining an Environment Variable named "GAIA_DIR", setting its value to [PATH_TO_GAIA]/Simulator/cmake/, and use CMake command ```find_package(GAIA)```.
 
 The Gaia engine provides various modules that can be enabled or disabled, applicable in both Standalone and Module modes. This functionality is achieved through a series of CMake options:
 ```set(GAIA_OPTION ON/OFF)```.
 You need to put this option before the command ```include([PATH_TO_GAIA]/Simulator/cmake/GAIA-config.cmake)``` or ```find_package(GAIA)``` to make it effective.
 Those options determine the source files included into ```${GAIA_SRCS}```, as well as the static libraries included into ```${GAIA_LIBRARY}```.
-Currently, only one option is avaliable, that is ```BUILD_PBD```.
+Those are the options that are avaiable now:
+- ```BUILD_PBD```: whether to build the XPBD related source files.
+- ```BUILD_VBD```: whether to build the VBD related source files.
+- ```BUILD_GUI```: whether to build the GUI related source files. polyscope is needed if this option is set to true.
+- ```BUILD_Collision_Detector```: whether to build the collision detection related source files. It will be turned on if either ```BUILD_PBD``` or ```BUILD_VBD``` is on.
 
 ## Gaia's VBD (Vertex Block Descent) Simulator  
+
+To use Gaia's VBD simulator you need to build the projected located at ```Gaia/Simulator/VBDDynamics```.
 
 GAIA simulators accept three positional command-line arguments along with several optional keyword arguments. Here's the basic syntax for running a GAIA simulator:
 ```
@@ -96,7 +103,7 @@ The PBD simulator uses commands similar to those of the VBD simulator. However, 
 Path-to-VBDDynamics.exe Models.json Parameters.json output-folder -R [PATH-to-Gaia-Repository]
 ```
 ## Tetmesh and Trimesh Coloring
-A coloring toolkit is located at:Gaia\Simulator\GraphColoring.
+A coloring toolkit is located at: \Simulator\GraphColoring.
 Exemplar usage:
 ```
 GraphColoring.exe model.t model.vertexColoring.json -v -b
