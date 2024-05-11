@@ -57,6 +57,12 @@ void  GAIA::TriMeshFEM::initialize(TriMeshParams::SharedPtr inObjectParams, bool
 			assert(tempMesh.positions_.cols() == positions_.cols());
 			positions_ = tempMesh.positions_;
 
+			if (inObjectParams->scaleInitialState)
+			{
+				positions_.row(0) *= pObjectParams->scale(0);
+				positions_.row(1) *= pObjectParams->scale(1);
+				positions_.row(2) *= pObjectParams->scale(2);
+			}
 		}
 		else if (fileParts.ext == ".json")
 		{
@@ -427,6 +433,7 @@ bool GAIA::TriMeshParams::fromJson(nlohmann::json& objectParam)
 	EXTRACT_FROM_JSON(objectParam, use3DRestpose);
 	EXTRACT_FROM_JSON(objectParam, triangleColoringCategoriesPath);
 	EXTRACT_FROM_JSON(objectParam, initialState);
+	EXTRACT_FROM_JSON(objectParam, scaleInitialState);
 	EXTRACT_FROM_JSON(objectParam, frictionDynamic);
 	EXTRACT_FROM_JSON(objectParam, frictionEpsV);
 	EXTRACT_FROM_JSON(objectParam, bendingStiffness);
@@ -439,6 +446,7 @@ bool GAIA::TriMeshParams::toJson(nlohmann::json& objectParam)
 	PUT_TO_JSON(objectParam, use3DRestpose);
 	PUT_TO_JSON(objectParam, triangleColoringCategoriesPath);
 	PUT_TO_JSON(objectParam, initialState);
+	PUT_TO_JSON(objectParam, scaleInitialState);
 	PUT_TO_JSON(objectParam, frictionDynamic);
 	PUT_TO_JSON(objectParam, frictionEpsV);
 	PUT_TO_JSON(objectParam, bendingStiffness);

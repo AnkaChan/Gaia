@@ -29,6 +29,7 @@ namespace GAIA {
 
 		std::string triangleColoringCategoriesPath;
 		std::string initialState;
+		bool scaleInitialState = false;
 
 		bool use3DRestpose = true;
 
