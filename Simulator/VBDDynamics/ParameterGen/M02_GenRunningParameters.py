@@ -29,7 +29,7 @@ def genRunningParameters2(machineName, experimentPath, experimentName, modelsInf
     machineInfo = machines[machineName]
     outputDir = machineInfo["OutputDirs"][outputDirId]
 
-    parameterOutputDir = join(".", "Parameters", experimentPath, experimentName)
+    parameterOutputDir = join(machineInfo["RepoPath"], "Simulator", "VBDDynamics", "ParameterGen", "Parameters", experimentPath, experimentName)
     os.makedirs(parameterOutputDir, exist_ok=True)
 
     json.dump(modelsInfo, open(join(parameterOutputDir, modelsFile), 'w'), indent=2)

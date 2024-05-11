@@ -1,9 +1,10 @@
 import copy
 import json
 from copy import deepcopy
+import pathlib
 
-modelExample = json.load(open("./Examples/Models.json"))["Models"][0]
-parametersExample = json.load(open("./Examples/Parameters.json"))
+modelExample = json.load(open(str(pathlib.Path(__file__).parent) + "/Examples/Models.json"))["Models"][0]
+parametersExample = json.load(open(str(pathlib.Path(__file__).parent) + "/Examples/Parameters.json"))
 
 
 def setToOutputEverySubsteps(physicsParameters):
