@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
 message( "Adding GAIA." )
 
+set(CMAKE_CUDA_ARCHITECTURES 75;80;86)
 
 find_package(Eigen3 REQUIRED)
 find_package(MeshFrame2 REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../3rdParty/MeshFrame2/MeshFrame/cmake)
@@ -52,7 +53,7 @@ else()
 endif (BUILD_GUI)
 
 if (BUILD_Collision_Detector)
-	message("GAIA: Build with Collision Detectors!\n")
+
 	SET (THIRD_PARTY_INCLUDE_DIRS 
 		${THIRD_PARTY_INCLUDE_DIRS}
 		${EMBREE_INCLUDE_DIRS}
