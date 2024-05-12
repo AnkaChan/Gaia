@@ -8,6 +8,7 @@
 #include <mutex>
 #include <map>
 #include <string>
+#include <set>
 
 #include "../Types/Types.h"
 #include "Materials/Materials.h"
@@ -29,6 +30,8 @@ namespace GAIA {
 
 		std::string triangleColoringCategoriesPath;
 		std::string initialState;
+		std::string sewingPath{};
+		std::string filteredPairsPath{};
 
 		bool use3DRestpose = true;
 
@@ -37,6 +40,8 @@ namespace GAIA {
 		FloatingType frictionDynamic = 0.1f;
 		FloatingType frictionEpsV = 0.01f;
 		FloatingType bendingStiffness = 0.f;
+
+		FloatingType sewingStiffness{};
 
 		virtual bool fromJson(nlohmann::json& objectParam);
 		virtual bool toJson(nlohmann::json& objectParam);
@@ -175,7 +180,7 @@ namespace GAIA {
 		std::vector<std::vector<int32_t>>& verticesColoringCategories() { return pTopology->verticesColoringCategories; }
 		std::vector<int32_t> globalColors{};
 		virtual int tearMesh(IdType v1, IdType v2);
-
+		void generate_sewing_filters();
 	public:
 		TriMeshParams::SharedPtr pObjectParams;
 
@@ -211,6 +216,12 @@ namespace GAIA {
 
 		bool updated = true;
 		bool activeForSim = true;
+
+		std::vector<std::array<int, 3>> sewingVertices{};
+		std::vector<FloatingType> sewingRatio{};
+		std::vector<std::vector<std::pair<int, int>>> sewingVMap{};
+		std::vector<std::set<int>> sewingVF{};
+		std::vector<std::set<int>> sewingEE{};
 	private:
 		int numVertices_;
 		// do not access this directly, use positions() instead
@@ -553,6 +564,83 @@ namespace GAIA {
 			assert(faces2.size() == neiFaces2 && faces4.size() == neiFaces2);
 		}
 		return ret;
+	}
+
+	inline void TriMeshFEM::generate_sewing_filters()
+	{
+		sewingVMap.clear();
+		sewingVF.clear();
+		sewingEE.clear();
+		sewingVMap.resize(numVertices());
+		sewingVF.resize(numVertices());
+		sewingEE.resize(numEdges());
+		if (pObjectParams->filteredPairsPath != "") {
+			std::vector<std::array<int, 2>> vfpairs{};
+			std::vector<std::array<int, 2>> eepairs{};
+			std::ifstream ifs(pObjectParams->filteredPairsPath);
+			nlohmann::json j;
+			ifs >> j;
+			MF::parseJsonParameters(j, "vf", vfpairs);
+			MF::parseJsonParameters(j, "ee", eepairs);
+			for (const auto& pair : vfpairs) {
+				int vi = pair[0];
+				int fi = pair[1];
+				sewingVF[vi].insert(fi);
+			}
+			for (const auto& pair : eepairs) {
+				int ei = pair[0];
+				int ej = pair[1];
+				sewingEE[ei].insert(ej);
+				sewingEE[ej].insert(ei);
+			}
+		}
+		for (int i = 0; i < sewingVertices.size(); ++i)
+		{
+			int v0 = sewingVertices[i][0];
+			int v1 = sewingVertices[i][1];
+			int v2 = sewingVertices[i][2];
+
+			sewingVMap[v0].push_back(std::pair<int, int>(i, 0));
+			sewingVMap[v1].push_back(std::pair<int, int>(i, 1));
+			sewingVMap[v2].push_back(std::pair<int, int>(i, 2));
+			//// get the triangles containing the edge (v1, v2)
+			//int n1 = numNeiFaces(v1);
+			//for (int j = 0; j < n1; ++j)
+			//{
+			//	int fId = getVertexIthNeiFace(v1, j);
+			//	if (facePosVId(fId, 0) == v2 || facePosVId(fId, 1) == v2 || facePosVId(fId, 2) == v2)
+			//	{
+			//		sewingVF[v0].insert(fId);
+			//	}
+			//}
+			//// get the triangles containing the vert v0
+			//n1 = numNeiFaces(v0);
+			//for (int j = 0; j < n1; ++j)
+			//{
+			//	int fId = getVertexIthNeiFace(v0, j);
+			//	sewingVF[v1].insert(fId);
+			//	sewingVF[v2].insert(fId);
+			//}
+			//// get the edge id of the edge (v1, v2)
+			//n1 = numNeiEdges(v1);
+			//int eId = -1;
+			//for (int j = 0; j < n1; ++j)
+			//{
+			//	eId = getVertexIthNeiEdge(v1, j);
+			//	if (getEdgeInfo(eId).eV1 == v2 || getEdgeInfo(eId).eV2 == v2)
+			//	{
+			//		break;
+			//	}
+			//}
+			//assert(eId != -1);
+			//int n0 = numNeiEdges(v0);
+			//for (int j = 0; j < n0; ++j)
+			//{
+			//	int eId0 = getVertexIthNeiEdge(v0, j);
+			//	sewingEE[eId0].insert(eId);
+			//	sewingEE[eId].insert(eId0);
+			//}
+		}
 	}
 
 	inline size_t TriMeshFEM::numNeiVertices(IdType iV) const

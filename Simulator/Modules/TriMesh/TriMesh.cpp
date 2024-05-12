@@ -83,6 +83,25 @@ void  GAIA::TriMeshFEM::initialize(TriMeshParams::SharedPtr inObjectParams, bool
 	}
 
 	globalColors.resize(numVertices());
+
+	if (pObjectParams->sewingPath != "") {
+		std::string sewingPath = pObjectParams->sewingPath;
+		std::string sewingPathExt = MF::IO::FileParts(sewingPath).ext;
+		if (sewingPathExt == ".json")
+		{
+			std::ifstream ifs(sewingPath);
+			nlohmann::json j;
+			ifs >> j;
+			MF::parseJsonParameters(j, "vertices", sewingVertices);
+			MF::parseJsonParameters(j, "ratios", sewingRatio);
+			generate_sewing_filters();
+		}
+		else
+		{
+			std::cout << "Error!!! Unsupported file format: " << sewingPathExt << std::endl;
+			exit(-1);
+		}
+	}
 }
 
 void GAIA::TriMeshFEM::applyRotationScalingTranslation()
@@ -427,6 +446,9 @@ bool GAIA::TriMeshParams::fromJson(nlohmann::json& objectParam)
 	EXTRACT_FROM_JSON(objectParam, use3DRestpose);
 	EXTRACT_FROM_JSON(objectParam, triangleColoringCategoriesPath);
 	EXTRACT_FROM_JSON(objectParam, initialState);
+	EXTRACT_FROM_JSON(objectParam, sewingPath);
+	EXTRACT_FROM_JSON(objectParam, filteredPairsPath);
+	EXTRACT_FROM_JSON(objectParam, sewingStiffness);
 	EXTRACT_FROM_JSON(objectParam, frictionDynamic);
 	EXTRACT_FROM_JSON(objectParam, frictionEpsV);
 	EXTRACT_FROM_JSON(objectParam, bendingStiffness);
@@ -439,6 +461,9 @@ bool GAIA::TriMeshParams::toJson(nlohmann::json& objectParam)
 	PUT_TO_JSON(objectParam, use3DRestpose);
 	PUT_TO_JSON(objectParam, triangleColoringCategoriesPath);
 	PUT_TO_JSON(objectParam, initialState);
+	PUT_TO_JSON(objectParam, sewingPath);
+	PUT_TO_JSON(objectParam, filteredPairsPath);
+	PUT_TO_JSON(objectParam, sewingStiffness);
 	PUT_TO_JSON(objectParam, frictionDynamic);
 	PUT_TO_JSON(objectParam, frictionEpsV);
 	PUT_TO_JSON(objectParam, bendingStiffness);
