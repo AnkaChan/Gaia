@@ -27,7 +27,7 @@ namespace GAIA {
 		typedef ObjectParamsVBD* Ptr;
 
 		FloatingType frictionDynamic = 0.1f;
-		FloatingType frictionEpsV = 1.0f;
+		FloatingType frictionEpsV = 0.01f;
 
 		FloatingType exponentialVelDamping = 1.0f;
 		FloatingType constantVelDamping = 0.0f;
@@ -58,6 +58,7 @@ namespace GAIA {
 #endif // GPU_JACOBI_DX
 
 		// for acceleration
+		ManagedBuffer<FloatingTypeGPU>::SharedPtr positionsPrevPrevIterBuffer;
 		ManagedBuffer<FloatingTypeGPU>::SharedPtr positionsPrevIterBuffer;
 
 
@@ -473,11 +474,11 @@ namespace GAIA {
 
 		if (withAccelerator)
 		{
+			positionsPrevPrevIterBuffer = std::make_shared<ManagedBuffer<FloatingTypeGPU>>(pTetMesh->inertia.size(), true);
+			SET_GPU_MESH_BUFER_PTR(pTetMeshGPU, positionsPrevPrevIter);
 			positionsPrevIterBuffer = std::make_shared<ManagedBuffer<FloatingTypeGPU>>(pTetMesh->inertia.size(), true);
 			SET_GPU_MESH_BUFER_PTR(pTetMeshGPU, positionsPrevIter);
-
 		}
-
 
 		collisionDataBuffer = std::make_shared<ManagedBuffer<CollisionDataGPU>>(pTetMesh->numVertices(), true);;
 		SET_GPU_MESH_BUFER_PTR(pTetMeshGPU, collisionData);

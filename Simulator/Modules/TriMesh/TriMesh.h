@@ -30,6 +30,7 @@ namespace GAIA {
 
 		std::string triangleColoringCategoriesPath;
 		std::string initialState;
+		bool scaleInitialState = false;
 		std::string sewingPath{};
 		std::string filteredPairsPath{};
 

@@ -559,12 +559,12 @@ void GAIA::VBDTetMeshNeoHookean::accumlateMaterialForceAndHessian2(int iV, Vec3&
 			break;
 		}
 		assembleVertexVForceAndHessian(dE_dF, d2E_dF_dF, m1, m2, m3, dE_dxi, d2E_dxi_dxi);
-		Mat3 dampingH = d2E_dxi_dxi * material.dampingVolume;
+		Mat3 dampingH = d2E_dxi_dxi * material.dampingHydrostatic;
 		FloatingType tmp = (m1 * m1 + m2 * m2 + m3 * m3) * miu * A;
 		d2E_dxi_dxi(0, 0) += tmp;
 		d2E_dxi_dxi(1, 1) += tmp;
 		d2E_dxi_dxi(2, 2) += tmp;
-		tmp *= material.dampingShear;
+		tmp *= material.dampingDeviatoric;
 		dampingH(0, 0) += tmp;
 		dampingH(1, 1) += tmp;
 		dampingH(2, 2) += tmp;
@@ -1101,7 +1101,7 @@ void GAIA::VBDTetMeshNeoHookean::computeElasticForceHessian(int tetId, FloatingT
 
 
 	assembleTetForceAndHessian(dE_dF, d2E_dF_dF, m, force, hessian);
-	Mat12 dampingH = hessian * material.dampingVolume;
+	Mat12 dampingH = hessian * material.dampingHydrostatic;
 	//for (int i = 0; i < 4; i++) {
 	//	for (int j = 0; j < 4; j++)
 	//	{
@@ -1109,7 +1109,7 @@ void GAIA::VBDTetMeshNeoHookean::computeElasticForceHessian(int tetId, FloatingT
 	//		hessian(3 * i, 3 * j) += tmp;
 	//		hessian(3 * i + 1, 3 * j + 1) += tmp;
 	//		hessian(3 * i + 2, 3 * j + 2) += tmp;
-	//		tmp *= material.dampingShear;
+	//		tmp *= material.dampingDeviatoric;
 	//		dampingH(3 * i, 3 * j) += tmp;
 	//		dampingH(3 * i + 1, 3 * j + 1) += tmp;
 	//		dampingH(3 * i + 2, 3 * j + 2) += tmp;
@@ -1293,7 +1293,7 @@ void GAIA::VBDTetMeshNeoHookean::computeElasticForceHessianDouble(int tetId, dou
 
 
 	assembleTetForceAndHessian(dE_dF, d2E_dF_dF, m, force, hessian);
-	Eigen::Matrix<double, 12, 12> dampingH = hessian * material.dampingVolume;
+	Eigen::Matrix<double, 12, 12> dampingH = hessian * material.dampingHydrostatic;
 	//for (int i = 0; i < 4; i++) {
 	//	for (int j = 0; j < 4; j++)
 	//	{
@@ -1301,7 +1301,7 @@ void GAIA::VBDTetMeshNeoHookean::computeElasticForceHessianDouble(int tetId, dou
 	//		hessian(3 * i, 3 * j) += tmp;
 	//		hessian(3 * i + 1, 3 * j + 1) += tmp;
 	//		hessian(3 * i + 2, 3 * j + 2) += tmp;
-	//		tmp *= material.dampingShear;
+	//		tmp *= material.dampingDeviatoric;
 	//		dampingH(3 * i, 3 * j) += tmp;
 	//		dampingH(3 * i + 1, 3 * j + 1) += tmp;
 	//		dampingH(3 * i + 2, 3 * j + 2) += tmp;
@@ -1617,8 +1617,8 @@ bool GAIA::ObjectParametersVBDNeoHookean::fromJson(nlohmann::json& objectJsonPar
 	EXTRACT_FROM_JSON(objectJsonParams, miu);
 	EXTRACT_FROM_JSON(objectJsonParams, lmbd);
 	EXTRACT_FROM_JSON(objectJsonParams, initializationType);
-	EXTRACT_FROM_JSON(objectJsonParams, dampingShear);
-	EXTRACT_FROM_JSON(objectJsonParams, dampingVolume);
+	EXTRACT_FROM_JSON(objectJsonParams, dampingDeviatoric);
+	EXTRACT_FROM_JSON(objectJsonParams, dampingHydrostatic);
 
 	return true;
 }
@@ -1629,8 +1629,8 @@ bool GAIA::ObjectParametersVBDNeoHookean::toJson(nlohmann::json& objectJsonParam
 	PUT_TO_JSON(objectJsonParams, miu);
 	PUT_TO_JSON(objectJsonParams, lmbd);
 	PUT_TO_JSON(objectJsonParams, initializationType);
-	PUT_TO_JSON(objectJsonParams, dampingShear);
-	PUT_TO_JSON(objectJsonParams, dampingVolume);
+	PUT_TO_JSON(objectJsonParams, dampingDeviatoric);
+	PUT_TO_JSON(objectJsonParams, dampingHydrostatic);
 
 	return true;
 }
@@ -1641,8 +1641,8 @@ void GAIA::VBDTetMeshNeoHookeanShared::initializeGPUTetMesh(VBDTetMeshNeoHookean
 
 	pTetMeshGPU->miu = pTetMesh->ObjectParametersMaterial().miu;
 	pTetMeshGPU->lmbd = pTetMesh->ObjectParametersMaterial().lmbd;
-	pTetMeshGPU->dampingVolume = pTetMesh->ObjectParametersMaterial().dampingVolume;
-	pTetMeshGPU->dampingShear = pTetMesh->ObjectParametersMaterial().dampingShear;
+	pTetMeshGPU->dampingHydrostatic = pTetMesh->ObjectParametersMaterial().dampingHydrostatic;
+	pTetMeshGPU->dampingDeviatoric = pTetMesh->ObjectParametersMaterial().dampingDeviatoric;
 
 }
 

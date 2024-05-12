@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
 	std::string inParameterFile = argv[2];
 	std::string outFolder = argv[3];
 
-	InputHandlerEBD<GAIA::VBDPhysics> inputHanlder;
+	InputHandlerVBD<GAIA::VBDPhysics> inputHanlder;
 	inputHanlder.handleInput(inModelInputFile, inParameterFile, outFolder, parser, physics);
 
 	physics.initialize();
@@ -23,6 +23,11 @@ int main(int argc, char** argv) {
 	if (parser.recoveryStateFile != "")
 	{
 		physics.recoverFromState(parser.recoveryStateFile);
+	}
+
+	if (outFolder == "noOutput")
+	{
+		physics.physicsParams().saveOutputs = false;
 	}
 
 	physics.simulate();

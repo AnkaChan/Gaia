@@ -1,0 +1,81 @@
+{
+  "CollisionParams": {
+    "allowCCD": true,
+    "allowDCD": true,
+    "centerShiftLevel": 0.009999999776482582,
+    "checkFeasibleRegion": true,
+    "checkTetTraverse": true,
+    "feasibleRegionEpsilon": 0.009999999776482582,
+    "handleSelfCollision": true,
+    "loopLessTraverse": false,
+    "maxSearchDistanceMultiplier": 1.7999999523162842,
+    "rayTriIntersectionEPSILON": 1.000000013351432e-10,
+    "restPoseCloestPoint": false,
+    "shiftQueryPointToCenter": true,
+    "stopTraversingAfterPassingQueryPoint": true,
+    "tetrahedralTraverseForNonSelfIntersection": true,
+    "useStaticTraverse": true
+  },
+  "PhysicsParams": {
+    "boundaryFrictionDynamic": 0.1,
+    "boundaryFrictionStatic": 0.1,
+    "bowlCap": false,
+    "bowlCenter": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "bowlOuterRadius": 1.0499999523162842,
+    "bowlRadius": 1.0,
+    "ccdBVHRebuildSteps": 7,
+    "checkAndUpdateWorldBounds": false,
+    "collisionDetectionSubSteps": 1,
+    "constantVelDamping": -1.0,
+    "dcdSurfaceSceneBVHRebuildSteps": 3,
+    "dcdTetMeshSceneBVHRebuildSteps": 16,
+    "debug": true,
+    "debugVerboseLvl": 1,
+    "doCollDetectionOnlyForFirstIteration": true,
+    "doStatistics": false,
+    "gravity": [
+      0.0,
+      -10.0,
+      0.0
+    ],
+    "iterations": 1,
+    "numFrames": 5000,
+    "numSubsteps": 20,
+    "outputExt": "ply",
+    "outputIntermediateState": false,
+    "outputRecoveryState": true,
+    "outputRecoveryStateStep": 10,
+    "outputStatistics": false,
+    "outputStatisticsStep": 10,
+    "outputT": false,
+    "outputVTK": false,
+    "perMeshParallelization": true,
+    "perTetParallelization": false,
+    "saveAllModelsTogether": true,
+    "saveSimulationParameters": true,
+    "shaderFolderPath": "",
+    "showSubstepProgress": false,
+    "showTimeConsumption": false,
+    "smoothSurfaceNormal": true,
+    "stepInvariantVelDamping": false,
+    "timeStep": 0.01666666753590107,
+    "useBowlGround": false,
+    "usePlaneGround": true,
+    "worldBounds": [
+      [
+        -10.0,
+        0.0,
+        -10.0
+      ],
+      [
+        10.0,
+        20.0,
+        10.0
+      ]
+    ]
+  }
+}

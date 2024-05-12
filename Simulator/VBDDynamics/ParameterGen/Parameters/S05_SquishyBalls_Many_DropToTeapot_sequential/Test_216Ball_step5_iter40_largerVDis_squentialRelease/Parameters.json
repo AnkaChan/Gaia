@@ -1,0 +1,91 @@
+{
+  "CollisionParams": {
+    "allowCCD": true,
+    "allowDCD": true,
+    "centerShiftLevel": 0.009999999776482582,
+    "checkFeasibleRegion": true,
+    "checkTetTraverse": true,
+    "feasibleRegionEpsilon": 0.009999999776482582,
+    "handleSelfCollision": true,
+    "loopLessTraverse": false,
+    "maxSearchDistanceMultiplier": 1.7999999523162842,
+    "rayTriIntersectionEPSILON": 1.000000013351432e-10,
+    "restPoseCloestPoint": true,
+    "shiftQueryPointToCenter": true,
+    "stopTraversingAfterPassingQueryPoint": true,
+    "tetrahedralTraverseForNonSelfIntersection": true,
+    "useStaticTraverse": true
+  },
+  "PhysicsParams": {
+    "boundaryFrictionDynamic": 0.0,
+    "boundaryFrictionStatic": 0.0,
+    "bowlCap": false,
+    "bowlCenter": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "bowlOuterRadius": 1.0499999523162842,
+    "bowlRadius": 1.0,
+    "ccdBVHRebuildSteps": 25,
+    "checkAndUpdateWorldBounds": true,
+    "collisionDetectionSubSteps": 1,
+    "constantVelDamping": -1.0,
+    "dcdSurfaceSceneBVHRebuildSteps": 100,
+    "dcdTetMeshSceneBVHRebuildSteps": 16,
+    "debug": true,
+    "debugVerboseLvl": 1,
+    "doCollDetectionOnlyForFirstIteration": true,
+    "doStatistics": false,
+    "gravity": [
+      0.0,
+      -10.0,
+      0.0
+    ],
+    "iterations": 40,
+    "numFrames": 10000,
+    "numSubsteps": 5,
+    "outputExt": "bin",
+    "outputIntermediateState": false,
+    "outputRecoveryState": true,
+    "outputRecoveryStateStep": 25,
+    "outputStatistics": false,
+    "outputStatisticsStep": 10,
+    "outputT": false,
+    "outputVTK": false,
+    "perMeshParallelization": true,
+    "perTetParallelization": false,
+    "saveAllModelsTogether": true,
+    "saveSimulationParameters": true,
+    "shaderFolderPath": "",
+    "showSubstepProgress": false,
+    "showTimeConsumption": false,
+    "smoothSurfaceNormal": true,
+    "stepInvariantVelDamping": false,
+    "timeStep": 0.01666666,
+    "useBowlGround": false,
+    "usePlaneGround": true,
+    "worldBounds": [
+      [
+        -10,
+        0,
+        -10
+      ],
+      [
+        10,
+        20,
+        10
+      ]
+    ],
+    "dcdBVHRebuildSteps": 25,
+    "useGPU": true,
+    "collisionStiffness": 50000000.0,
+    "useAccelerator": true,
+    "acceleratorRho": 0.9,
+    "binaryModeVisualizationSteps": 100,
+    "collisionOffHeight": 60
+  },
+  "ViewerParams": {
+    "enableViewer": true
+  }
+}

@@ -62,7 +62,7 @@ namespace GAIA {
 
 		// accelerator
 		bool useAccelerator = false;
-		FloatingType acceleratorPho = 0.95f;
+		FloatingType acceleratorRho = 0.93f;
 
 		// for debug
 		bool saveIntermediateResults = false;
@@ -118,7 +118,7 @@ namespace GAIA {
 		EXTRACT_FROM_JSON(physicsParams, useLineSearch);
 		EXTRACT_FROM_JSON(physicsParams, lineSearchGapIter);
 		EXTRACT_FROM_JSON(physicsParams, useAccelerator);
-		EXTRACT_FROM_JSON(physicsParams, acceleratorPho);
+		EXTRACT_FROM_JSON(physicsParams, acceleratorRho);
 		EXTRACT_FROM_JSON(physicsParams, GDSolverUseBlockJacobi);
 		EXTRACT_FROM_JSON(physicsParams, NewtonUseCG);
 
@@ -182,7 +182,7 @@ namespace GAIA {
 		PUT_TO_JSON(physicsParams, useLineSearch);
 		PUT_TO_JSON(physicsParams, lineSearchGapIter);
 		PUT_TO_JSON(physicsParams, useAccelerator);
-		PUT_TO_JSON(physicsParams, acceleratorPho);
+		PUT_TO_JSON(physicsParams, acceleratorRho);
 		PUT_TO_JSON(physicsParams, GDSolverUseBlockJacobi);
 		PUT_TO_JSON(physicsParams, NewtonUseCG);
 

@@ -58,27 +58,28 @@ namespace GAIA {
 
 		void sortVertexColorGroupsByMortonCode();
 
-
 		virtual TetMeshFEM::SharedPtr initializeMaterial(ObjectParams::SharedPtr objParam, std::shared_ptr<TetMeshMF> pTMeshMF,
 			BasePhysicsParams::SharedPtr physicsParaemters);
 
 		void timeStepEqualize();
 		void runStep();
-		void runStepGPU();
-		void runStepGPU_allInOneSweep();
-		void runStepGPU_acceleratedGS();
 		void runStepGPU_GD();
-		void runStepGPU_debugOnCPU();
-		void runStepGPUNoCollision();
 		void runStepNewton();
+		// GPU VBD
+		void runStepGPU();
+		// CPU VBD
+		void runStep_serialCollisionHandling();
+		void runStep_hybridCollisionHandling();
 
+		// void runStepGPU_debugOnCPU();
+		// void runStepGPUNoCollision();
+		// void runStepGPU_allInOneSweep();
+		// void runStepGPU_acceleratedGS();
+		
 		// record VBD graph
 		void recordVBDSolveGraph();
 
 		void applyDeformers();
-
-		void runStep_serialCollisionHandling();
-		void runStep_hybridCollisionHandling();
 
 		void prepareCollisionDataCPU();
 		void prepareCollisionDataGPU();
@@ -111,10 +112,8 @@ namespace GAIA {
 		void solveBoxBoundaryConstraintForVertex(TetMeshFEM* pMesh, IdType vertexId);
 		void accumlateBoundaryForceAndHessian(TetMeshFEM* pMesh, IdType meshId, IdType vertexId, Vec3& force, Mat3& hessian, bool apply_friction = false);
 		void applyBoudnaryFriction(TetMeshFEM* pMesh, IdType vertexId);
-		void applyCollisionFriction(VBDBaseTetMesh* pMesh, IdType meshId, IdType vertexId);
+		// void applyCollisionFriction(VBDBaseTetMesh* pMesh, IdType meshId, IdType vertexId);
 		// FloatingType computeCollisionRepulsiveForce(VBDBaseTetMesh* pMesh, IdType meshId, IdType vertexId);
-		FloatingType computeCollisionRepulsiveForcePerCollision(int collisionId, int collisionVertexOrder,
-			VBDCollisionDetectionResult& collisionResult, Vec3& contactNormal);
 
 		// collision Id: 0~3; 0~2 the 3 vertices of the colliding face
 		void accumlateCollisionForceAndHessian(TetMeshFEM* pMesh, IdType meshId, IdType vertexId,
@@ -153,7 +152,6 @@ namespace GAIA {
 		void syncAllToCPUVertPosOnly(bool sync = false);
 
 		// test code
-		void testGPUCollisionHandlingCode();
 		void prepareCollisionDataCPUAndGPU();
 		void printCPUCollisionDataForVertex(IdType meshId, IdType vertexId);
 		void printCPUCollisionData(VBDCollisionDetectionResult& colResult, int iIntersection = 0);
@@ -169,6 +167,7 @@ namespace GAIA {
 		// accelerator
 		FloatingType getAcceleratorOmega(int order, CFloatingType pho, CFloatingType prevOmega);
 		void recordInitialPositionForAccelerator(bool sync);
+		void recordPrevIterPositionsAccelerator(bool sync);
 
 		// data
 	public:
@@ -182,8 +181,8 @@ namespace GAIA {
 		std::vector<TVerticesMat> InertiaForce{};
 		std::vector<TVerticesMat> boundaryFrictionForce{};
 		std::vector<TVerticesMat> boundaryCollisionForce{};
-		std::vector<TVerticesMat> frictionForce{};
-		std::vector<TVerticesMat> collisionForce{};
+		std::vector<TVerticesMat> frictionForceAll{};
+		std::vector<TVerticesMat> collisionForceAll{};
 
 		std::vector<std::shared_ptr<VBDBaseDeformer>> deformers;
 

@@ -1,0 +1,2 @@
+F:\Code\Projects\Graphics\VBDDynamics\Release\VBDDynamics.exe F:\Code\02_Graphics\Gaia\Simulator\VBDDynamics\ParameterGen\Parameters\S04_HybridModels_Many_Drop_sequential\Test_Many_HybridModels_2steps_80Iters_sequential\Models.json F:\Code\02_Graphics\Gaia\Simulator\VBDDynamics\ParameterGen\Parameters\S04_HybridModels_Many_Drop_sequential\Test_Many_HybridModels_2steps_80Iters_sequential\Parameters.json E:\Data2\VBDSimulation\S04_HybridModels_Many_Drop_sequential\Test_Many_HybridModels_2steps_80Iters_sequential -R F:\Code\02_Graphics\Gaia
+cmd /k

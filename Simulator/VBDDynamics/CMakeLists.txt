@@ -8,7 +8,6 @@ project(VBDDynamics LANGUAGES CXX CUDA)
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_CUDA_STANDARD 11)   
 
-set(BUILD_EBD OFF)
 set(BUILD_VBD ON)
 set(BUILD_PBD OFF)
 include(../cmake/GAIA-config.cmake)

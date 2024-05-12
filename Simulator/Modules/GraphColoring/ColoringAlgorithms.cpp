@@ -181,13 +181,13 @@ void GAIA::GraphColoring::GraphColor::balanceColoredCategories(float goalMaxMinR
             }
         }
 
-        changeColor(biggestCategory, changableId, smallestCategory);
 
         if (changableId == -1)
         {
             std::cout << "The graph is not opimizable anymore, terminated with a max/min ratio: " << maxMinRatio << std::endl;
             return;
         }
+        changeColor(biggestCategory, changableId, smallestCategory);
 
         // change the color of changable id
 

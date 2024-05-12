@@ -4,9 +4,9 @@ namespace GAIA {
 
 	struct VBDCollisionInfo
 	{
-		Mat3 frictionHessian;
-		Vec3 frictionForce;
-		Vec3 diff;
+		Mat3 collisionHessian;
+		Vec3 collisionForce;
+		FloatingType penetrationDepth;
 	};
 
 	struct VBDCollisionDetectionResult : public CollisionDetectionResult

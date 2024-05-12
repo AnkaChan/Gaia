@@ -15,8 +15,8 @@ namespace GAIA {
 		//	collisionData->closestSurfacePt[1], collisionData->closestSurfacePt[2]);
 		//printf("    closestPointNormal (%f, %f, %f)\n", collisionData->closestPointNormal[0],
 		//	collisionData->closestPointNormal[1], collisionData->closestPointNormal[2]);
-		printf("    closestSurfacePtBarycentrics (%f, %f, %f)\n", collisionData->closestSurfacePtBarycentrics[0],
-			collisionData->closestSurfacePtBarycentrics[1], collisionData->closestSurfacePtBarycentrics[2]);
+		//printf("    closestSurfacePtBarycentrics (%f, %f, %f)\n", collisionData->closestSurfacePtBarycentrics[0],
+		//	collisionData->closestSurfacePtBarycentrics[1], collisionData->closestSurfacePtBarycentrics[2]);
 	}
 
 	GPU_CPU_INLINE_FUNC void printVBDPhysicsDataGPUForVertex(const VBDPhysicsDataGPU* pPhysicsData, 

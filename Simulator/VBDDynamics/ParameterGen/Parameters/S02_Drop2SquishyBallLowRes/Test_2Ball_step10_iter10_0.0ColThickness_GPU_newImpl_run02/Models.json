@@ -1,0 +1,96 @@
+{
+  "Models": [
+    {
+      "density": 20,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -5,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": -1.0,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\sphere-tentacles-v3\\Hollow\\sphere2-tentacles1-center85.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.3,
+        0.3,
+        0.3
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        0,
+        8.0,
+        0
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\sphere-tentacles-v3\\Hollow\\sphere2-tentacles1-center85.t.vertexColoring.json",
+      "miu": 20000000.0,
+      "lmbd": 100000000.0,
+      "fixedPoints": [],
+      "exponentialVelDamping": 0.95,
+      "constantVelDamping": 0.02,
+      "frictionDynamic": 0.1,
+      "dampingHydrostatic": 1e-07,
+      "dampingDeviatoric": 1e-07,
+      "frictionEpsV": 0.01
+    },
+    {
+      "density": 20,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -5,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": -1.0,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\sphere-tentacles-v3\\Hollow\\sphere2-tentacles1-center85.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.3,
+        0.3,
+        0.3
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        1,
+        20.0,
+        0
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\sphere-tentacles-v3\\Hollow\\sphere2-tentacles1-center85.t.vertexColoring.json",
+      "miu": 20000000.0,
+      "lmbd": 100000000.0,
+      "fixedPoints": [],
+      "exponentialVelDamping": 0.95,
+      "constantVelDamping": 0.02,
+      "frictionDynamic": 0.1,
+      "dampingHydrostatic": 1e-07,
+      "dampingDeviatoric": 1e-07,
+      "frictionEpsV": 0.01
+    }
+  ]
+}

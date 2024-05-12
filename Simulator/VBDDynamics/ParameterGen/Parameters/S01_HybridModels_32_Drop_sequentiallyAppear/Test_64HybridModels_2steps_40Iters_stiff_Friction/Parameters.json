@@ -1,0 +1,90 @@
+{
+  "CollisionParams": {
+    "allowCCD": true,
+    "allowDCD": true,
+    "centerShiftLevel": 0.009999999776482582,
+    "checkFeasibleRegion": true,
+    "checkTetTraverse": true,
+    "feasibleRegionEpsilon": 0.009999999776482582,
+    "handleSelfCollision": true,
+    "loopLessTraverse": false,
+    "maxSearchDistanceMultiplier": 1.7999999523162842,
+    "rayTriIntersectionEPSILON": 1.000000013351432e-10,
+    "restPoseCloestPoint": false,
+    "shiftQueryPointToCenter": true,
+    "stopTraversingAfterPassingQueryPoint": true,
+    "tetrahedralTraverseForNonSelfIntersection": true,
+    "useStaticTraverse": true
+  },
+  "PhysicsParams": {
+    "boundaryFrictionDynamic": 0.1,
+    "boundaryFrictionStatic": 0.1,
+    "bowlCap": false,
+    "bowlCenter": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "bowlOuterRadius": 1.0499999523162842,
+    "bowlRadius": 1.0,
+    "ccdBVHRebuildSteps": 7,
+    "checkAndUpdateWorldBounds": true,
+    "collisionDetectionSubSteps": 1,
+    "constantVelDamping": -1.0,
+    "dcdSurfaceSceneBVHRebuildSteps": 3,
+    "dcdTetMeshSceneBVHRebuildSteps": 16,
+    "debug": true,
+    "debugVerboseLvl": 1,
+    "doCollDetectionOnlyForFirstIteration": true,
+    "doStatistics": false,
+    "gravity": [
+      0.0,
+      -10.0,
+      0.0
+    ],
+    "iterations": 30,
+    "numFrames": 900,
+    "numSubsteps": 2,
+    "outputExt": "ply",
+    "outputIntermediateState": false,
+    "outputRecoveryState": true,
+    "outputRecoveryStateStep": 10,
+    "outputStatistics": false,
+    "outputStatisticsStep": 10,
+    "outputT": false,
+    "outputVTK": false,
+    "perMeshParallelization": true,
+    "perTetParallelization": false,
+    "saveAllModelsTogether": true,
+    "saveSimulationParameters": true,
+    "shaderFolderPath": "",
+    "showSubstepProgress": false,
+    "showTimeConsumption": false,
+    "smoothSurfaceNormal": true,
+    "stepInvariantVelDamping": false,
+    "timeStep": 0.01666666,
+    "useBowlGround": false,
+    "usePlaneGround": true,
+    "worldBounds": [
+      [
+        0,
+        0.0,
+        0
+      ],
+      [
+        0,
+        20.0,
+        0
+      ]
+    ],
+    "saveOutputs": false,
+    "useGPU": true,
+    "useAccelerator": true,
+    "acceleratorRho": 0.95,
+    "collisionStiffness": 100000.0,
+    "collisionSolutionType": 1
+  },
+  "ViewerParams": {
+    "enableViewer": true
+  }
+}

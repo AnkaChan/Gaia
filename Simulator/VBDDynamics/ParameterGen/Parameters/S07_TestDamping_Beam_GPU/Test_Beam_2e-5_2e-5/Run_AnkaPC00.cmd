@@ -1,0 +1,2 @@
+F:\Code\Projects\Graphics\VBDDynamics\Release\VBDDynamics.exe F:\Code\02_Graphics\Gaia\Simulator\VBDDynamics\ParameterGen\Parameters\S07_TestDamping_Beam_GPU\Test_Beam_2e-5_2e-5\Models.json F:\Code\02_Graphics\Gaia\Simulator\VBDDynamics\ParameterGen\Parameters\S07_TestDamping_Beam_GPU\Test_Beam_2e-5_2e-5\Parameters.json E:\Data2\VBDSimulation\S07_TestDamping_Beam_GPU\Test_Beam_2e-5_2e-5 -R F:\Code\02_Graphics\Gaia
+cmd /k

@@ -19,9 +19,9 @@ namespace GAIA {
 	{
 		CollisionRelationGPU collisionRelations[GPU_COLLISION_RELATION_PREALLOCATION_SIZE];
 		// outputs
-		//FloatingTypeGPU closestPointNormal[3];
-		//FloatingTypeGPU closestSurfacePt[3];
-		FloatingTypeGPU closestSurfacePtBarycentrics[3];
+		// FloatingTypeGPU closestPointNormal[3];
+		// FloatingTypeGPU closestSurfacePt[3];
+		// FloatingTypeGPU closestSurfacePtBarycentrics[3];
 
 		// when computing collision infos: 
 		//     0~2: force
@@ -30,7 +30,7 @@ namespace GAIA {
 		//     0~2: tangential relative velocity direction
 		//     3: tangential relative velocity norm
 		//     4: tangential relative force norm
-		FloatingTypeGPU collisionForceAndHessian[12]; 
+		// FloatingTypeGPU collisionForceAndHessian[12]; 
 		// inputs
 		int32_t closestSurfaceFaceVIds[3];
 		int32_t closestSurfaceFaceId;
@@ -51,7 +51,9 @@ namespace GAIA {
 #endif // !GPU_JACOBI_DX
 
 		// for Chebyshev accelerator
+		FloatingTypeGPU* positionsPrevPrevIter;
 		FloatingTypeGPU* positionsPrevIter;
+
 		int8_t* activeCollisionMask;
 		FloatingTypeGPU* inertia;
 
@@ -67,6 +69,10 @@ namespace GAIA {
 
 		GPU_CPU_INLINE_FUNC FloatingTypeGPU* getVert(int32_t iVert) { return vertPos + VERTEX_BUFFER_STRIDE * iVert; }
 		GPU_CPU_INLINE_FUNC CFloatingTypeGPU* getVert(int32_t iVert) const { return vertPos + VERTEX_BUFFER_STRIDE * iVert; }
+
+
+		GPU_CPU_INLINE_FUNC FloatingTypeGPU* getVertPosNew(int32_t iVert) { return positionsNew + VERTEX_BUFFER_STRIDE * iVert; }
+		GPU_CPU_INLINE_FUNC CFloatingTypeGPU* getVertPosNew(int32_t iVert) const { return positionsNew + VERTEX_BUFFER_STRIDE * iVert; }
 
 		GPU_CPU_INLINE_FUNC FloatingTypeGPU* getVertPrevPos(int32_t iVert) { return vertPrevPos + VERTEX_BUFFER_STRIDE * iVert; }
 		GPU_CPU_INLINE_FUNC CFloatingTypeGPU* getVertPrevPos(int32_t iVert) const { return vertPrevPos + VERTEX_BUFFER_STRIDE * iVert; }

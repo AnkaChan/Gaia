@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
 message( "Adding GAIA." )
 
+set(CMAKE_CUDA_ARCHITECTURES 75;80;86)
 
 find_package(Eigen3 REQUIRED)
 find_package(MeshFrame2 REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../3rdParty/MeshFrame2/MeshFrame/cmake)
@@ -15,6 +16,9 @@ add_subdirectory ("${CMAKE_CURRENT_LIST_DIR}/../3rdParty/cmake-git-version-track
 
 option (BUILD_VBD
        "Build VBD modules." ON)
+	   
+option (BUILD_VBD_Cloth
+       "Build VBD Cloth modules." OFF)
 	   
 option (BUILD_PBD
        "Build PBD volumetric simulation modules." OFF)
@@ -49,7 +53,7 @@ else()
 endif (BUILD_GUI)
 
 if (BUILD_Collision_Detector)
-	message("GAIA: Build with Collision Detectors!\n")
+
 	SET (THIRD_PARTY_INCLUDE_DIRS 
 		${THIRD_PARTY_INCLUDE_DIRS}
 		${EMBREE_INCLUDE_DIRS}
@@ -78,8 +82,6 @@ file(GLOB GAIA_VBD_SRCS
 
 
 file (GLOB GAIA_COLLISION_SRCS
-	"${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/*.h"
-	"${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/*.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/BVH/*.h"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/BVH/*.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/BVH/*.cu"
@@ -91,8 +93,6 @@ file (GLOB GAIA_COLLISION_SRCS
 file(GLOB GAIA_SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TetMesh/**.h"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TetMesh/**.cpp"
-	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TriMesh/**.h"
-	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TriMesh/**.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Parallelization/*.h"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Parallelization/*.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/SolverUtils/*.h"
@@ -109,7 +109,20 @@ file(GLOB GAIA_SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Framework/*.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/common/math/constants.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/Viewer/*.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/*.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TriMesh/**.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/TriMesh/**.cpp"
 	${MESHFRAME_SOURCE_CPP_UTILITY}
+)
+
+file(GLOB GAIA_CLOTH_SRCS
+
+)
+
+file(GLOB GAIA_COLORING_SRCS
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/GraphColoring/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/GraphColoring/*.cpp"
 )
 
 list(REMOVE_ITEM GAIA_COLLISION_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/TetMeshContactDetector.h" "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_CURRENT_LIST_DIR}/../Modules/CollisionDetector/TetMeshContactDetector.cpp")
@@ -138,6 +151,15 @@ SET (GAIA_SRCS
 	${GAIA_COLLISION_SRCS}
 )
 endif (BUILD_Collision_Detector)
+
+if (BUILD_VBD_Cloth)
+message("GAIA: Build with VBD Cloth simulatio components!\n")
+SET (GAIA_SRCS 
+	${GAIA_SRCS}
+	${GAIA_CLOTH_SRCS}
+)
+endif (BUILD_VBD_Cloth)
+
 
 
 set (GAIA_LIBRARY

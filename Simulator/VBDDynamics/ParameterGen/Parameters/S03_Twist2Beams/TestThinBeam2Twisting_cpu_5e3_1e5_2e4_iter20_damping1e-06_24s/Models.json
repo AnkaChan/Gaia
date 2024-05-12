@@ -1,0 +1,92 @@
+{
+  "Models": [
+    {
+      "density": 100,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": -1.0,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/thinbeam/ThinbeamCentered_smooth.t",
+      "rotation": [
+        0,
+        0.2617993877991494,
+        0
+      ],
+      "scale": [
+        0.1,
+        0.1,
+        0.1
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        0,
+        0.2,
+        0
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "vtkPath": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/thinbeam/ThinbeamCentered_smooth.1.vtk",
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/thinbeam/ThinbeamCentered_smooth.t.vertexColoring.json",
+      "miu": 5000.0,
+      "lmbd": 100000.0,
+      "dampingShear": 1e-06,
+      "dampingVolume": 1e-06,
+      "frictionDynamic": 0.1,
+      "frictionEpsV": 0.3
+    },
+    {
+      "density": 100,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": -1.0,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/thinbeam/ThinbeamCentered_smooth.t",
+      "rotation": [
+        0,
+        -0.2617993877991494,
+        0
+      ],
+      "scale": [
+        0.1,
+        0.1,
+        0.1
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        0,
+        -0.2,
+        0
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "vtkPath": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/thinbeam/ThinbeamCentered_smooth.1.vtk",
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/thinbeam/ThinbeamCentered_smooth.t.vertexColoring.json",
+      "miu": 5000.0,
+      "lmbd": 100000.0,
+      "dampingShear": 1e-06,
+      "dampingVolume": 1e-06,
+      "frictionDynamic": 0.1,
+      "frictionEpsV": 0.3
+    }
+  ]
+}

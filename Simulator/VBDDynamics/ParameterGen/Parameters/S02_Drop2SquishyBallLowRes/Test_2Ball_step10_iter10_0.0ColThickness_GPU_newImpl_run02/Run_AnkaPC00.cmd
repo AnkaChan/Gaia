@@ -1,0 +1,2 @@
+F:\Code\Projects\Graphics\VBDDynamics\Release\VBDDynamics.exe F:\Code\02_Graphics\Gaia\Simulator\VBDDynamics\ParameterGen\Parameters\S02_Drop2SquishyBallLowRes\Test_2Ball_step10_iter10_0.0ColThickness_GPU_newImpl_run02\Models.json F:\Code\02_Graphics\Gaia\Simulator\VBDDynamics\ParameterGen\Parameters\S02_Drop2SquishyBallLowRes\Test_2Ball_step10_iter10_0.0ColThickness_GPU_newImpl_run02\Parameters.json E:\Data2\VBDSimulation\S02_Drop2SquishyBallLowRes\Test_2Ball_step10_iter10_0.0ColThickness_GPU_newImpl_run02 -R F:\Code\02_Graphics\Gaia
+cmd /k

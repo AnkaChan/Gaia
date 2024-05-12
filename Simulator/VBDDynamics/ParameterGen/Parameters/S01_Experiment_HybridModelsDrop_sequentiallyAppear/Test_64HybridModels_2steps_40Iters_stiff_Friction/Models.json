@@ -1,0 +1,1476 @@
+{
+  "Models": [
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t",
+      "rotation": [
+        -1.5707963,
+        0,
+        0
+      ],
+      "scale": [
+        1.5,
+        1.5,
+        1.5
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        2.25,
+        10.0,
+        0.0
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 120
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.2,
+        0.2,
+        0.2
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        1.1250000000000002,
+        9,
+        1.9485571585149868
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 126
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t",
+      "rotation": [
+        -1.5707963,
+        0,
+        0
+      ],
+      "scale": [
+        1.5,
+        1.5,
+        1.5
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        -1.1249999999999996,
+        10.0,
+        1.948557158514987
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 132
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t",
+      "rotation": [
+        -1.5707963,
+        0,
+        0
+      ],
+      "scale": [
+        1.5,
+        1.5,
+        1.5
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        -2.25,
+        10.0,
+        2.755455298081545e-16
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 138
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/Octopus3_Inflated/Octopus_Inflated_5k_noIntersection.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        -1.1250000000000009,
+        10.0,
+        -1.9485571585149866
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/Octopus3_Inflated/Octopus_Inflated_5k_noIntersection.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 144
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t",
+      "rotation": [
+        -1.5707963,
+        0,
+        0
+      ],
+      "scale": [
+        1.5,
+        1.5,
+        1.5
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        1.1250000000000002,
+        10.0,
+        -1.9485571585149868
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 150
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t",
+      "rotation": [
+        -1.5707963,
+        0,
+        0
+      ],
+      "scale": [
+        1.5,
+        1.5,
+        1.5
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        2.25,
+        10.0,
+        -5.51091059616309e-16
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 156
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.2,
+        0.2,
+        0.2
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        1.1250000000000009,
+        9,
+        1.9485571585149863
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 162
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\t\\Armadilo_lowres.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        3,
+        3,
+        3
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        -1.1249999999999982,
+        10.0,
+        1.9485571585149881
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\t\\Armadilo_lowres.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 168
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t",
+      "rotation": [
+        -1.5707963,
+        0,
+        0
+      ],
+      "scale": [
+        1.5,
+        1.5,
+        1.5
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        -2.25,
+        10.0,
+        8.266365894244633e-16
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 174
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\t\\Armadilo_lowres.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        3,
+        3,
+        3
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        -1.1249999999999996,
+        10.0,
+        -1.948557158514987
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\t\\Armadilo_lowres.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 180
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.2,
+        0.2,
+        0.2
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        1.124999999999998,
+        9,
+        -1.9485571585149881
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 186
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t",
+      "rotation": [
+        -1.5707963,
+        0,
+        0
+      ],
+      "scale": [
+        1.5,
+        1.5,
+        1.5
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        2.25,
+        10.0,
+        -1.102182119232618e-15
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 192
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.2,
+        0.2,
+        0.2
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        1.1249999999999998,
+        9,
+        1.948557158514987
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 198
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/Octopus3_Inflated/Octopus_Inflated_5k_noIntersection.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        -1.1249999999999978,
+        10.0,
+        1.9485571585149883
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/Octopus3_Inflated/Octopus_Inflated_5k_noIntersection.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 204
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.2,
+        0.2,
+        0.2
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        -2.25,
+        9,
+        5.3745305376913355e-15
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 210
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t",
+      "rotation": [
+        -1.5707963,
+        0,
+        0
+      ],
+      "scale": [
+        1.5,
+        1.5,
+        1.5
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        -1.1250000000000036,
+        10.0,
+        -1.9485571585149848
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 216
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\t\\Armadilo_lowres.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        3,
+        3,
+        3
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        1.1250000000000009,
+        10.0,
+        -1.9485571585149863
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\t\\Armadilo_lowres.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 222
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.2,
+        0.2,
+        0.2
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        2.25,
+        9,
+        -1.6532731788489267e-15
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 228
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/Octopus3_Inflated/Octopus_Inflated_5k_noIntersection.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        1.1250000000000038,
+        10.0,
+        1.9485571585149848
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/Octopus3_Inflated/Octopus_Inflated_5k_noIntersection.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 234
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t",
+      "rotation": [
+        -1.5707963,
+        0,
+        0
+      ],
+      "scale": [
+        1.5,
+        1.5,
+        1.5
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        -1.1250000000000007,
+        10.0,
+        1.9485571585149866
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 240
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/Octopus3_Inflated/Octopus_Inflated_5k_noIntersection.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        -2.25,
+        10.0,
+        1.9288187086570813e-15
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/Octopus3_Inflated/Octopus_Inflated_5k_noIntersection.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 246
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\t\\Armadilo_lowres.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        3,
+        3,
+        3
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        -1.125000000000004,
+        10.0,
+        -1.9485571585149846
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\t\\Armadilo_lowres.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 252
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.2,
+        0.2,
+        0.2
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        1.1249999999999936,
+        9,
+        -1.9485571585149906
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 258
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\t\\Armadilo_lowres.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        3,
+        3,
+        3
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        2.25,
+        10.0,
+        -2.204364238465236e-15
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\t\\Armadilo_lowres.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 264
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t",
+      "rotation": [
+        -1.5707963,
+        0,
+        0
+      ],
+      "scale": [
+        1.5,
+        1.5,
+        1.5
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        1.1249999999999973,
+        10.0,
+        1.9485571585149883
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\UnitTest\\Teapot\\teapot.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 270
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.2,
+        0.2,
+        0.2
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        -1.1250000000000002,
+        9,
+        1.9485571585149868
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 276
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/Octopus3_Inflated/Octopus_Inflated_5k_noIntersection.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        -2.25,
+        10.0,
+        2.4799097682733903e-15
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/Octopus3_Inflated/Octopus_Inflated_5k_noIntersection.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 282
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/Octopus3_Inflated/Octopus_Inflated_5k_noIntersection.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        -1.1250000000000044,
+        10.0,
+        -1.9485571585149843
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/Octopus3_Inflated/Octopus_Inflated_5k_noIntersection.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 288
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/Octopus3_Inflated/Octopus_Inflated_5k_noIntersection.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        1.125,
+        10.0,
+        -1.9485571585149868
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/Octopus3_Inflated/Octopus_Inflated_5k_noIntersection.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 294
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/Octopus3_Inflated/Octopus_Inflated_5k_noIntersection.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        2.25,
+        10.0,
+        -1.0749061075382671e-14
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/ModelsDifferentRes/Octopus3_Inflated/Octopus_Inflated_5k_noIntersection.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 300
+    },
+    {
+      "density": 50,
+      "dampingGamma": 0.0,
+      "hasNoGravZone": false,
+      "initialVelocity": [
+        0,
+        -10,
+        0
+      ],
+      "materialName": "NeoHookean",
+      "maxVelocityMagnitude": 25,
+      "noGravZoneThreshold": 0.0,
+      "path": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.2,
+        0.2,
+        0.2
+      ],
+      "shuffleParallelizationGroup": true,
+      "tetsColoringCategoriesPath": "${REPO_ROOT}\\Data\\mesh_models\\ModelsDifferentRes\\Octopus3_Inflated\\Octopus_Inflated_5k_noIntersection.t.coloring.json",
+      "translation": [
+        1.1250000000000047,
+        9,
+        1.9485571585149841
+      ],
+      "translationBeforeScaling": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verticesColoringCategoriesPath": "${REPO_ROOT}/Data/mesh_models/t/bunny_small.t.vertexColoring.json",
+      "miu": 100000.0,
+      "lmbd": 1000000.0,
+      "exponentialVelDamping": 0.9,
+      "constantVelDamping": 0.1,
+      "frictionDynamic": 0.2,
+      "frictionEpsV": 0.01,
+      "dampingShear": 1e-07,
+      "dampingVolume": 1e-07,
+      "frameToAppear": 306
+    }
+  ]
+}
