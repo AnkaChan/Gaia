@@ -181,6 +181,7 @@ namespace GAIA {
 		std::vector<std::vector<int32_t>>& verticesColoringCategories() { return pTopology->verticesColoringCategories; }
 		std::vector<int32_t> globalColors{};
 		virtual int tearMesh(IdType v1, IdType v2);
+		Vec3 edgeLerp(const IdType edgeId, const FloatingType t) const;
 		void generate_sewing_filters();
 	public:
 		TriMeshParams::SharedPtr pObjectParams;
@@ -565,6 +566,12 @@ namespace GAIA {
 			assert(faces2.size() == neiFaces2 && faces4.size() == neiFaces2);
 		}
 		return ret;
+	}
+
+	inline Vec3 TriMeshFEM::edgeLerp(const IdType edgeId, const FloatingType t) const
+	{
+		const EdgeInfo& eInfo = getEdgeInfo(edgeId);
+		return (1.f - t) * vertex(eInfo.eV1) + t * vertex(eInfo.eV2);
 	}
 
 	inline void TriMeshFEM::generate_sewing_filters()
