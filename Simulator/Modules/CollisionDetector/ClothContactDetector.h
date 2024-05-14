@@ -136,7 +136,7 @@ namespace GAIA {
 		typedef ClothContactDetector* Ptr;
 
 		ClothContactDetector(const ClothContactDetectorParameters::SharedPtr pParameters);
-		void initialize(std::vector<TriMeshFEM::SharedPtr> in_targetMeshes);
+		void initialize(std::vector<TriMeshFEM::SharedPtr> in_targetMeshes, int in_numSimMeshes);
 		bool contactQueryVF(IdType meshId, IdType vId, ClothVFContactQueryResult* pResult);
 		bool contactQueryFV(IdType meshId, IdType fId, ClothVFContactQueryResult* pResult, IdType centerVId = -1);
 		bool contactQueryEE(IdType meshId, IdType vId, ClothEEContactQueryResult* pResult);
@@ -175,6 +175,7 @@ namespace GAIA {
 		std::vector<std::vector<std::atomic<FloatingType>>> faceMinDisToVertices;
 		std::vector<std::vector<CPArrayStaticAtomic<FVContactInfo, FV_CONTACT_PREALLOCATE>>> faceContactInfos;
 		std::vector<TriMeshFEM::SharedPtr> targetMeshes;
+		int numSimMeshes;
 
 		RTCScene targetMeshFacesScene;
 		RTCDevice device;

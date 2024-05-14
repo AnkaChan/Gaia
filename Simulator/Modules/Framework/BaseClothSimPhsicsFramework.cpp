@@ -70,13 +70,13 @@ void BaseClothPhsicsFramework::initialize()
 		triMeshesAll.push_back(colliderMeshes[i]);
 	}
 
-	pClothContactDetector->initialize(triMeshesAll);
+	pClothContactDetector->initialize(triMeshesAll, baseTriMeshesForSimulation.size());
 }
 
 void GAIA::BaseClothPhsicsFramework::initializeCollider()
 {
 	pDynamicCollider = std::make_shared<DynamicCollider>(pDynamicColliderParameter);
-	
+
 	nlohmann::json colliderMeshsJson = colliderJsonParams["ColliderMeshes"];
 	for (size_t i = 0; i < colliderMeshsJson.size(); i++)
 	{
@@ -99,7 +99,7 @@ ColliderTrimeshBase::SharedPtr GAIA::BaseClothPhsicsFramework::createColliderMes
 		pColliderMeshParams->fromJson(colliderMeshJsonParams);
 		pColliderMesh = std::make_shared<ColliderTrimeshSequence>();
 	}
-	else 
+	else
 	{
 		std::cerr << "Error! Unrecognized collider type: " << pColliderMeshParams->colliderType << std::endl;
 		exit(-1);
