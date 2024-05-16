@@ -126,6 +126,10 @@ namespace GAIA {
 
 		Eigen::Block<TVerticesMat, 3, -1> positions();
 
+		// Dangerous function, use with caution! This will change the pointer to the position buffer
+		// you should know what you are doing
+		void resizePositions(int numVertices);
+
 		int numFaces();
 		int numEdges();
 		int numVertices();
@@ -230,6 +234,20 @@ namespace GAIA {
 		TVerticesMat positions_;
 	};
 
+
+	inline void TriMeshFEM::resizePositions(int numVertices)
+	{
+		positions_.conservativeResize(Eigen::NoChange, numVertices + 1);
+		positionsPrev.conservativeResize(Eigen::NoChange, numVertices + 1);
+		velocities.conservativeResize(Eigen::NoChange, numVertices + 1);
+		velocitiesPrev.conservativeResize(Eigen::NoChange, numVertices + 1);
+		fixedMask.conservativeResize(numVertices + 1);
+		vertexMass.conservativeResize(numVertices + 1);
+		vertexInvMass.conservativeResize(numVertices + 1);
+		globalColors.resize(numVertices + 1);
+
+		numVertices_ = numVertices;
+	}
 
 	inline int TriMeshFEM::numFaces()
 	{

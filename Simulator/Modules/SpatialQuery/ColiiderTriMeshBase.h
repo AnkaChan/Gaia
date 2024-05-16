@@ -26,10 +26,10 @@ namespace GAIA {
 		}
 	};
 
-	struct ColliderTrimeshBase : public TriMeshFEM
+	struct ColliderTriMeshBase : public TriMeshFEM
 	{
-		typedef std::shared_ptr<ColliderTrimeshBase> SharedPtr;
-		typedef ColliderTrimeshBase* Ptr;
+		typedef std::shared_ptr<ColliderTriMeshBase> SharedPtr;
+		typedef ColliderTriMeshBase* Ptr;
 
 		virtual void update(IdType frameId, IdType substepId, IdType iter, size_t numSubsteps, size_t numIters) = 0;
 		virtual void initialize(ColliderTrimeshBaseParams::SharedPtr inObjectParams)
