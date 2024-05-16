@@ -39,7 +39,7 @@ namespace GAIA {
 		FloatingType UVScale = 150.f;
 
 		FloatingType frictionDynamic = 0.1f;
-		FloatingType frictionEpsV = 0.01f;
+		FloatingType frictionEpsV = 0.1f;
 		FloatingType bendingStiffness = 0.f;
 
 		FloatingType sewingStiffness{};
