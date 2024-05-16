@@ -5,14 +5,38 @@ namespace GAIA {
 	{
 		typedef std::shared_ptr<ColliderTrimeshSequenceParams> SharedPtr;
 		typedef ColliderTrimeshSequenceParams* Ptr;
-		std::vector<std::string> meshFiles;
-		bool interpolate = true;
+		std::vector<std::string> meshFiles{};
+		std::vector<int> keyFrames{};
+		bool interpolateSubstep = true;
+		int interpolateIter = 1;
 
 		inline bool fromJson(nlohmann::json& objectParam)
 		{
 			ColliderTrimeshBaseParams::fromJson(objectParam);
 			EXTRACT_FROM_JSON(objectParam, meshFiles);
-			EXTRACT_FROM_JSON(objectParam, interpolate);
+			EXTRACT_FROM_JSON(objectParam, interpolateSubstep);
+			EXTRACT_FROM_JSON(objectParam, interpolateIter);
+			EXTRACT_FROM_JSON(objectParam, keyFrames);
+			assert(interpolateIter >= 1);
+			if (interpolateIter > 1 && !interpolateSubstep) {
+				interpolateSubstep = true;
+				std::cout << "Warning: interpolateIter is set to be larger than 0, but interpolateSubstep is set to be false, set interpolateSubstep to be true" << std::endl;
+			}
+			if (keyFrames.size() == 0)
+			{
+				keyFrames.resize(meshFiles.size());
+				std::iota(keyFrames.begin(), keyFrames.end(), 0);
+			}
+			if (keyFrames.size() > meshFiles.size()) {
+				keyFrames.resize(meshFiles.size());
+				std::cout << "Warning: keyFrames size is larger than meshFiles size, resize to meshFiles size" << std::endl;
+			}
+			for (int i = 1; i < keyFrames.size(); ++i) {
+				if (keyFrames[i] <= keyFrames[i - 1]) {
+					std::cout << "Error: keyFrames should be in increasing order" << std::endl;
+					return false;
+				}
+			}
 			return true;
 		}
 
@@ -20,7 +44,9 @@ namespace GAIA {
 		{
 			ColliderTrimeshBaseParams::toJson(objectParam);
 			PUT_TO_JSON(objectParam, meshFiles);
-			PUT_TO_JSON(objectParam, interpolate);
+			PUT_TO_JSON(objectParam, interpolateSubstep);
+			PUT_TO_JSON(objectParam, interpolateIter);
+			PUT_TO_JSON(objectParam, keyFrames);
 			return true;
 		}
 
@@ -30,82 +56,63 @@ namespace GAIA {
 	// currently, only mesh files share the same topology are supported
 	struct ColliderTrimeshSequence : public ColliderTrimeshBase
 	{
-		virtual void update(IdType frameId, IdType substepId, IdType iter, size_t numsubsteps, size_t numIters) 
+		virtual void update(IdType frameId, IdType substepId, IdType iter, size_t numsubsteps, size_t numIters)
 		{
-			if (frameId != curFrameId && frameId >= 0)
+			assert(colliderParameters().interpolateIter < numIters);
+			// do not update during iterations, only update at the first iteration
+			if (frameId < colliderParameters().keyFrames.front() || frameId >= colliderParameters().keyFrames.back())
 			{
-				// move to the next frame
-				if (frameId == curFrameId + 1)
-				{
-					if (frameId + 1 < colliderParameters().meshFiles.size())
-					{
-						curFrameId = frameId;
-						curFrameMesh.positions() = nextFrameMesh.positions();
-						nextFrameMesh.loadObj(colliderParameters().meshFiles[frameId + 1]);
-					}
-				}
-				// inconsistent frame id
-				else
-				{
-					// reload the mesh
-					if (frameId < colliderParameters().meshFiles.size())
-					{
-						curFrameId = frameId;
-						curFrameMesh.loadObj(colliderParameters().meshFiles[frameId]);
-					}
-					else
-					{
-						curFrameId = colliderParameters().meshFiles.size() - 1;
-						curFrameMesh.loadObj(colliderParameters().meshFiles[colliderParameters().meshFiles.size()-1]);
-					}
-
-					if (frameId + 1 < colliderParameters().meshFiles.size())
-					{
-						nextFrameMesh.loadObj(colliderParameters().meshFiles[frameId + 1]);
-					}
-					else {
-						nextFrameMesh.positions() = curFrameMesh.positions();
-					}
-				}
+				updated = false;
+				return;
 			}
-
-			if (iter == 0)
+			auto pos = std::upper_bound(colliderParameters().keyFrames.begin(), colliderParameters().keyFrames.end(), frameId);
+			const auto prevFrameId = *(pos - 1);
+			const auto nextFrameId = *pos;
+			const auto& prevPos = meshes[std::distance(colliderParameters().keyFrames.begin(), pos) - 1].positions();
+			const auto& nextPos = meshes[std::distance(colliderParameters().keyFrames.begin(), pos)].positions();
+			int numFrames = nextFrameId - prevFrameId;
+			if (colliderParameters().interpolateSubstep)
 			{
-				if (colliderParameters().interpolate)
+				if (iter < colliderParameters().interpolateIter)
 				{
-					FloatingType t = FloatingType(numsubsteps - substepId) / numsubsteps;
-					positions() = curFrameMesh.positions() * t + nextFrameMesh.positions() * (1-t);
+					FloatingType t = FloatingType(frameId - prevFrameId) / numFrames;
+					t += FloatingType(substepId) / (numsubsteps * numFrames);
+					t += FloatingType(iter) / (colliderParameters().interpolateIter * numsubsteps * numFrames);
+					positions() = prevPos * (1 - t) + nextPos * t;
+					updated = true;
 				}
 				else
 				{
-					positions() = curFrameMesh.positions();
+					updated = false;
 				}
-				updated = true;
 			}
 			else
 			{
-				updated = false;
+				if (substepId == 0 && iter == 0) {
+					FloatingType t = FloatingType(frameId - prevFrameId) / numFrames;
+					positions() = prevPos * (1 - t) + nextPos * t;
+					updated = true;
+				}
+				else {
+					updated = false;
+				}
 			}
 		};
-		virtual void initialize(ColliderTrimeshBaseParams::SharedPtr inObjectParams) 
+		virtual void initialize(ColliderTrimeshBaseParams::SharedPtr inObjectParams)
 		{
 			ColliderTrimeshBase::initialize(inObjectParams);
 			pParams = inObjectParams;
 			// no need to call the base class' initialization function, because it's not used for simulation
-			if (colliderParameters().meshFiles.size())
+			if (colliderParameters().keyFrames.size())
 			{
+				meshes.resize(colliderParameters().keyFrames.size());
 				inObjectParams->path = colliderParameters().meshFiles[0];
 				TriMeshFEM::initialize(inObjectParams, true);
-				curFrameMesh.loadObj(colliderParameters().meshFiles[0]);
-
-				curFrameId = 0;
-				if (colliderParameters().meshFiles.size()>=2)
-				{
-					nextFrameMesh.loadObj(colliderParameters().meshFiles[1]);
-				}
-				else
-				{
-					nextFrameMesh.loadObj(colliderParameters().meshFiles[0]);
+				for (int i = 0; i < colliderParameters().keyFrames.size(); ++i) {
+					inObjectParams->path = colliderParameters().meshFiles[i];
+					meshes[i].pObjectParams = inObjectParams;
+					meshes[i].loadObj(inObjectParams->path);
+					meshes[i].applyRotationScalingTranslation();
 				}
 			}
 		};
@@ -113,9 +120,6 @@ namespace GAIA {
 		ColliderTrimeshSequenceParams& colliderParameters() {
 			return *(ColliderTrimeshSequenceParams*)pParams.get();
 		}
-
-		IdType curFrameId = -1;
-		TriMeshFEM curFrameMesh;
-		TriMeshFEM nextFrameMesh;
+		std::vector<TriMeshFEM> meshes{};
 	};
 }

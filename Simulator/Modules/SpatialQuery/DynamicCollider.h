@@ -15,7 +15,7 @@ namespace GAIA {
 		}
 
 		// intepolate per step
-		bool interpolate = true;
+		bool interpolateSubstep = true;
 
 
 	};

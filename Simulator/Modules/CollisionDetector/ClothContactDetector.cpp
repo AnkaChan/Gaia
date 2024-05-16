@@ -311,7 +311,6 @@ bool triMeshVFRadiusQueryWithTopologyFilteringAndFaceMinDisCaculatingFuncWithSew
 	const unsigned int geomID_face = args->geomID;
 	const unsigned int primID_face = args->primID;
 	TriMeshFEM* pTargetMesh = pContactDetector->targetMeshes[geomID_face].get();
-
 	if (pMeshQuery == pTargetMesh)
 	{
 		// filter out the adjacent face
@@ -327,6 +326,157 @@ bool triMeshVFRadiusQueryWithTopologyFilteringAndFaceMinDisCaculatingFuncWithSew
 		if (pMeshQuery->sewingVF[queryPremitiveId_vertex].find(primID_face) != pMeshQuery->sewingVF[queryPremitiveId_vertex].end())
 		{
 			return false;
+		}
+	}
+
+	const embree::Vec3fa queryPt(args->query->x, args->query->y, args->query->z);
+
+	//const embree::Vec3ia face(pTargetMesh->facePos(0, primID),
+	//    pTargetMesh->facePos(1, primID), pTargetMesh->facePos(2, primID));
+	const IdType* face = pTargetMesh->facePos.col(primID_face).data();
+
+	const embree::Vec3fa a = embree::Vec3fa::loadu(pTargetMesh->vertex(face[0]).data());
+	const embree::Vec3fa b = embree::Vec3fa::loadu(pTargetMesh->vertex(face[1]).data());
+	const embree::Vec3fa c = embree::Vec3fa::loadu(pTargetMesh->vertex(face[2]).data());
+
+	ClosestPointOnTriangleType pointType;
+	embree::Vec3fa closestPtBarycentrics;
+	const embree::Vec3fa closestP = GAIA::closestPointTriangle(queryPt, a, b, c, closestPtBarycentrics, pointType);
+	float d = embree::distance(queryPt, closestP);
+
+	if (d < args->query->radius)
+	{
+		result->minDisToPrimitives = std::min(d, result->minDisToPrimitives);
+
+		// face is always in vertex' feasible region, therefore we always need to update face's conservative region
+		// result->minDisToPrimitives = std::min(d, result->minDisToPrimitives);
+		update_min(pContactDetector->faceMinDisToVertices[geomID_face][primID_face], d);
+
+		// evalute whether this closest has been added 
+		int primitiveId = -1;
+		switch (pointType)
+		{
+		case GAIA::ClosestPointOnTriangleType::AtA:
+			primitiveId = pTargetMesh->facePosVId(primID_face, 0);
+			break;
+		case GAIA::ClosestPointOnTriangleType::AtB:
+			primitiveId = pTargetMesh->facePosVId(primID_face, 1);
+			break;
+		case GAIA::ClosestPointOnTriangleType::AtC:
+			primitiveId = pTargetMesh->facePosVId(primID_face, 2);
+			break;
+		case GAIA::ClosestPointOnTriangleType::AtAB:
+			primitiveId = pTargetMesh->pTopology->faces3NeighborEdges(0, primID_face);
+			break;
+		case GAIA::ClosestPointOnTriangleType::AtBC:
+			primitiveId = pTargetMesh->pTopology->faces3NeighborEdges(1, primID_face);
+			break;
+		case GAIA::ClosestPointOnTriangleType::AtAC:
+			primitiveId = pTargetMesh->pTopology->faces3NeighborEdges(2, primID_face);
+			break;
+		case GAIA::ClosestPointOnTriangleType::AtInterior:
+			primitiveId = primID_face;
+			break;
+		case GAIA::ClosestPointOnTriangleType::NotFound:
+			break;
+		default:
+			break;
+		}
+
+		ClosestPointOnPrimitiveType primitiveType = getClosestPointOnPrimitiveType(pointType);
+
+		for (size_t iClosestP = 0; iClosestP < result->contactPts.size(); iClosestP++)
+		{
+			if (result->contactPts[iClosestP].primitiveType == primitiveType
+				&& result->contactPts[iClosestP].primitiveId == primitiveId)
+			{
+				return false;
+			}
+		}
+
+#ifndef SKIP_FEASIBLE_REGION_CHECK
+
+		bool inFeasibleRegion = checkFeasibleRegion(queryPt, pTargetMesh, primID_face, pointType, 1e-3);
+		if (!inFeasibleRegion)
+		{
+			return false;
+		}
+#endif // !SKIP_FEASIBLE_REGION_CHECK
+
+		result->contactPts.emplace_back();
+
+		result->contactPts.back().contactVertexId = queryPremitiveId_vertex;
+		result->contactPts.back().contactVertexSideMeshId = queryMeshId;
+		result->contactPts.back().contactFaceId = primID_face;
+		result->contactPts.back().contactFaceSideMeshId = geomID_face;
+		result->contactPts.back().d = d;
+		result->contactPts.back().contactPoint << closestP.x, closestP.y, closestP.z;
+
+		computeVFContactNormalTriMesh(a, b, c, queryPt, closestP, pointType, result->contactPts.back().contactPointNormal);
+
+		result->contactPts.back().barycentrics << closestPtBarycentrics.x, closestPtBarycentrics.y, closestPtBarycentrics.z;
+		result->contactPts.back().closestPtType = pointType;
+
+		result->contactPts.back().primitiveId = primitiveId;
+		result->contactPts.back().primitiveType = primitiveType;
+
+		// link to faces
+		CPArrayStaticAtomic<FVContactInfo, FV_CONTACT_PREALLOCATE>& contactingFaceInfo
+			= pContactDetector->faceContactInfos[geomID_face][primID_face];
+
+		FVContactInfo fvConstactInfo;
+		fvConstactInfo.vertexId = queryPremitiveId_vertex;
+		fvConstactInfo.meshIdVSide = queryMeshId;
+		fvConstactInfo.contactId = result->contactPts.size() - 1;
+		bool succeed = contactingFaceInfo.push_back(fvConstactInfo);
+		if (!succeed)
+		{
+			std::cout << "Contact info array for face " << primID_face
+				<< " from mesh " << geomID_face << " has overflown.\n";
+		}
+
+		//result->closestPtBarycentrics = closestPtBarycentrics;
+
+		// record that at least one closest point search has succeeded
+		result->found = true;
+
+		return false; // Return true to indicate that the query radius changed.
+	}
+
+	return false;
+}
+
+bool triMeshVFRadiusQueryWithTopologyFilteringAndFaceMinDisCaculatingFuncCollider(RTCPointQueryFunctionArguments* args)
+{
+	ClothVFContactQueryResult* result = (ClothVFContactQueryResult*)args->userPtr;
+	// TetMeshFEM* pTMQuery = result->pDCD->tMeshPtrs[result->idTMQuery].get();
+	assert(args->userPtr);
+
+	ClothContactDetector* pContactDetector = result->pContactDetector;
+	IdType queryMeshId = result->queryMeshId;
+	const TriMeshFEM* pMeshQuery = pContactDetector->targetMeshes[queryMeshId].get();
+	// face Id
+	const int queryPremitiveId_vertex = result->queryPrimitiveId;
+
+	const unsigned int geomID_face = args->geomID;
+	// Only consider the collision with simulated meshes
+	if (geomID_face >= pContactDetector->numSimMeshes)
+	{
+		return false;
+	}
+	const unsigned int primID_face = args->primID;
+	TriMeshFEM* pTargetMesh = pContactDetector->targetMeshes[geomID_face].get();
+
+	if (pMeshQuery == pTargetMesh)
+	{
+		// filter out the adjacent face
+		for (size_t faceNeiVId = 0; faceNeiVId < 3; faceNeiVId++)
+		{
+			int neiVId = pTargetMesh->facePosVId(primID_face, faceNeiVId);
+			if (neiVId == queryPremitiveId_vertex)
+			{
+				return false;
+			}
 		}
 	}
 
@@ -766,10 +916,10 @@ GAIA::ClothContactDetector::ClothContactDetector(const ClothContactDetectorParam
 
 }
 
-void GAIA::ClothContactDetector::initialize(std::vector<TriMeshFEM::SharedPtr> in_targetMeshes)
+void GAIA::ClothContactDetector::initialize(std::vector<TriMeshFEM::SharedPtr> in_targetMeshes, int in_numSimMeshes)
 {
 	targetMeshes = in_targetMeshes;
-
+	numSimMeshes = in_numSimMeshes;
 	device = rtcNewDevice(NULL);
 
 	targetMeshFacesScene = rtcNewScene(device);
@@ -789,11 +939,18 @@ void GAIA::ClothContactDetector::initialize(std::vector<TriMeshFEM::SharedPtr> i
 			RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, targetMeshes[meshId]->facePos.data(), 0, 3 * sizeof(unsigned),
 			targetMeshes[meshId]->numFaces());
 
-		if (!targetMeshes[meshId]->sewingVertices.empty()) {
-			rtcSetGeometryPointQueryFunction(geomRTC, triMeshVFRadiusQueryWithTopologyFilteringAndFaceMinDisCaculatingFuncWithSewing);
+		if (true) { // sim mesh
+
+			if (!targetMeshes[meshId]->sewingVertices.empty()) {
+				rtcSetGeometryPointQueryFunction(geomRTC, triMeshVFRadiusQueryWithTopologyFilteringAndFaceMinDisCaculatingFuncWithSewing);
+			}
+			else {
+				rtcSetGeometryPointQueryFunction(geomRTC, triMeshVFRadiusQueryWithTopologyFilteringAndFaceMinDisCaculatingFunc);
+			}
 		}
-		else {
-			rtcSetGeometryPointQueryFunction(geomRTC, triMeshVFRadiusQueryWithTopologyFilteringAndFaceMinDisCaculatingFunc);
+		else { // collider mesh
+			rtcSetGeometryPointQueryFunction(geomRTC, triMeshVFRadiusQueryWithTopologyFilteringAndFaceMinDisCaculatingFuncCollider);
+
 		}
 
 
