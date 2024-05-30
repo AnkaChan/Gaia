@@ -1,7 +1,7 @@
 #include "ColiiderTriMeshBase.h"
 
 namespace GAIA {
-	struct ColliderTrimeshSequenceParams : ColliderTriMeshBaseParams
+	struct ColliderTrimeshSequenceParams : ColliderTrimeshBaseParams
 	{
 		typedef std::shared_ptr<ColliderTrimeshSequenceParams> SharedPtr;
 		typedef ColliderTrimeshSequenceParams* Ptr;
@@ -12,7 +12,7 @@ namespace GAIA {
 
 		inline bool fromJson(nlohmann::json& objectParam)
 		{
-			ColliderTriMeshBaseParams::fromJson(objectParam);
+			ColliderTrimeshBaseParams::fromJson(objectParam);
 			EXTRACT_FROM_JSON(objectParam, meshFiles);
 			EXTRACT_FROM_JSON(objectParam, interpolateSubstep);
 			EXTRACT_FROM_JSON(objectParam, interpolateIter);
@@ -42,7 +42,7 @@ namespace GAIA {
 
 		inline bool toJson(nlohmann::json& objectParam)
 		{
-			ColliderTriMeshBaseParams::toJson(objectParam);
+			ColliderTrimeshBaseParams::toJson(objectParam);
 			PUT_TO_JSON(objectParam, meshFiles);
 			PUT_TO_JSON(objectParam, interpolateSubstep);
 			PUT_TO_JSON(objectParam, interpolateIter);
@@ -54,12 +54,16 @@ namespace GAIA {
 
 	// the simpliest type of collider, which is a sequence of mesh files
 	// currently, only mesh files share the same topology are supported
-	struct ColliderTrimeshSequence : public ColliderTriMeshBase
+	struct ColliderTrimeshSequence : public ColliderTrimeshBase
 	{
 		virtual void update(IdType frameId, IdType substepId, IdType iter, size_t numsubsteps, size_t numIters)
 		{
+			if (first_time) {
+				set_state(frameId);
+				first_time = false;
+				return;
+			}
 			assert(colliderParameters().interpolateIter < numIters);
-			// do not update during iterations, only update at the first iteration
 			if (frameId < colliderParameters().keyFrames.front() || frameId >= colliderParameters().keyFrames.back())
 			{
 				updated = false;
@@ -98,9 +102,30 @@ namespace GAIA {
 				}
 			}
 		};
-		virtual void initialize(ColliderTriMeshBaseParams::SharedPtr inObjectParams)
+
+		virtual void set_state(IdType frameId) {
+			if (frameId < colliderParameters().keyFrames.front()) {
+				positions() = meshes.front().positions();
+			}
+			else if (frameId >= colliderParameters().keyFrames.back()) {
+				positions() = meshes.back().positions();
+			}
+			else {
+				auto pos = std::upper_bound(colliderParameters().keyFrames.begin(), colliderParameters().keyFrames.end(), frameId);
+				const auto prevFrameId = *(pos - 1);
+				const auto nextFrameId = *pos;
+				const auto& prevPos = meshes[std::distance(colliderParameters().keyFrames.begin(), pos) - 1].positions();
+				const auto& nextPos = meshes[std::distance(colliderParameters().keyFrames.begin(), pos)].positions();
+				FloatingType t = FloatingType(frameId - prevFrameId) / (nextFrameId - prevFrameId);
+				positions() = prevPos * (1 - t) + nextPos * t;
+			}
+			updated = true;
+			return;
+		}
+
+		virtual void initialize(ColliderTrimeshBaseParams::SharedPtr inObjectParams)
 		{
-			ColliderTriMeshBase::initialize(inObjectParams);
+			ColliderTrimeshBase::initialize(inObjectParams);
 			pParams = inObjectParams;
 			// no need to call the base class' initialization function, because it's not used for simulation
 			if (colliderParameters().keyFrames.size())
@@ -114,6 +139,7 @@ namespace GAIA {
 					meshes[i].loadObj(inObjectParams->path);
 					meshes[i].applyRotationScalingTranslation();
 				}
+				updated = true;
 			}
 		};
 
@@ -121,5 +147,6 @@ namespace GAIA {
 			return *(ColliderTrimeshSequenceParams*)pParams.get();
 		}
 		std::vector<TriMeshFEM> meshes{};
+		bool first_time = true;
 	};
 }

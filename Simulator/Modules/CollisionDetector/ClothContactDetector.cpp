@@ -460,7 +460,7 @@ bool triMeshVFRadiusQueryWithTopologyFilteringAndFaceMinDisCaculatingFuncCollide
 
 	const unsigned int geomID_face = args->geomID;
 	// Only consider the collision with simulated meshes
-	if (geomID_face >= pContactDetector->numSimMeshes)
+	if (queryMeshId >= pContactDetector->numSimMeshes)
 	{
 		return false;
 	}
@@ -939,7 +939,7 @@ void GAIA::ClothContactDetector::initialize(std::vector<TriMeshFEM::SharedPtr> i
 			RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, targetMeshes[meshId]->facePos.data(), 0, 3 * sizeof(unsigned),
 			targetMeshes[meshId]->numFaces());
 
-		if (true) { // sim mesh
+		if (meshId < numSimMeshes) { // sim mesh
 
 			if (!targetMeshes[meshId]->sewingVertices.empty()) {
 				rtcSetGeometryPointQueryFunction(geomRTC, triMeshVFRadiusQueryWithTopologyFilteringAndFaceMinDisCaculatingFuncWithSewing);
