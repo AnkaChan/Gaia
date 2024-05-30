@@ -81,7 +81,7 @@
     "collisionStiffness": 20000000.0,
     "saveOutputs": false,
     "useAccelerator": true,
-    "acceleratorRho": 0.94
+    "acceleratorRho": 0.98
   },
   "ViewerParams": {
     "enableViewer": true

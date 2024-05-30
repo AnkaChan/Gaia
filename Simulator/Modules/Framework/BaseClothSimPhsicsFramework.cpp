@@ -65,9 +65,9 @@ void BaseClothPhsicsFramework::initialize()
 	pClothContactDetector = std::make_shared<ClothContactDetector>(pClothContactDetectorParameters);
 	triMeshesAll = baseTriMeshesForSimulation;
 
-	for (int i = 0; i < colliderMeshes.size(); i++)
+	for (int i = 0; i < colliderTriMeshes.size(); i++)
 	{
-		triMeshesAll.push_back(colliderMeshes[i]);
+		triMeshesAll.push_back(colliderTriMeshes[i]);
 	}
 
 	pClothContactDetector->initialize(triMeshesAll, baseTriMeshesForSimulation.size());
@@ -80,18 +80,18 @@ void GAIA::BaseClothPhsicsFramework::initializeCollider()
 	nlohmann::json colliderMeshsJson = colliderJsonParams["ColliderMeshes"];
 	for (size_t i = 0; i < colliderMeshsJson.size(); i++)
 	{
-		colliderMeshes.push_back(createColliderMesh(colliderMeshsJson[i]));
+		colliderTriMeshes.push_back(createColliderMesh(colliderMeshsJson[i]));
 	}
 
-	pDynamicCollider->initialize(colliderMeshes);
+	pDynamicCollider->initialize(colliderTriMeshes);
 }
 
 
 
-ColliderTrimeshBase::SharedPtr GAIA::BaseClothPhsicsFramework::createColliderMesh(nlohmann::json& colliderMeshJsonParams)
+ColliderTriMeshBase::SharedPtr GAIA::BaseClothPhsicsFramework::createColliderMesh(nlohmann::json& colliderMeshJsonParams)
 {
-	ColliderTrimeshBase::SharedPtr pColliderMesh = nullptr;
-	ColliderTrimeshBaseParams::SharedPtr pColliderMeshParams = nullptr;
+	ColliderTriMeshBase::SharedPtr pColliderMesh = nullptr;
+	ColliderTriMeshBaseParams::SharedPtr pColliderMeshParams = nullptr;
 
 	if (colliderMeshJsonParams["colliderType"] == "TriMeshSequence")
 	{

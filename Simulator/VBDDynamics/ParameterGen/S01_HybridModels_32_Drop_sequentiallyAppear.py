@@ -114,7 +114,7 @@ if __name__ == '__main__':
     parameters["PhysicsParams"]["useGPU"] = True
     parameters["PhysicsParams"]["useAccelerator"]=True
     # parameters["PhysicsParams"]["useAccelerator"]=False
-    parameters["PhysicsParams"]["acceleratorRho"] = 0.95
+    parameters["PhysicsParams"]["acceleratorRho"] = 0.98
 
     # parameters["PhysicsParams"]["useGPU"] = False
     parameters["PhysicsParams"]["collisionStiffness"] = 1e5

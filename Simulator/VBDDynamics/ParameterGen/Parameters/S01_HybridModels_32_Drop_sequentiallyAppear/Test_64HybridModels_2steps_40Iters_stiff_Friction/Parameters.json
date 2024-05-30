@@ -80,7 +80,7 @@
     "saveOutputs": false,
     "useGPU": true,
     "useAccelerator": true,
-    "acceleratorRho": 0.95,
+    "acceleratorRho": 0.98,
     "collisionStiffness": 100000.0,
     "collisionSolutionType": 1
   },

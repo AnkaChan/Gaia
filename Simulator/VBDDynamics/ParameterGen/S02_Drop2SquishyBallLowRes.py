@@ -84,7 +84,7 @@ if __name__ == '__main__':
 
     parameters["PhysicsParams"]["useAccelerator"]=True
     # parameters["PhysicsParams"]["useAccelerator"]=False
-    parameters["PhysicsParams"]["acceleratorRho"] = 0.94
+    parameters["PhysicsParams"]["acceleratorRho"] = 0.98
     cmd = genRunningParameters2(machineName, genFileName, experimentName, modelsInfo, parameters, exeName=binaryFile,
                                 runCommand=run, recoverState=recoveryState)
 

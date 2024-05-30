@@ -1,7 +1,7 @@
 #include "ColiiderTriMeshBase.h"
 
 namespace GAIA {
-	struct ColliderTrimeshSequenceParams : ColliderTrimeshBaseParams
+	struct ColliderTrimeshSequenceParams : ColliderTriMeshBaseParams
 	{
 		typedef std::shared_ptr<ColliderTrimeshSequenceParams> SharedPtr;
 		typedef ColliderTrimeshSequenceParams* Ptr;
@@ -12,7 +12,7 @@ namespace GAIA {
 
 		inline bool fromJson(nlohmann::json& objectParam)
 		{
-			ColliderTrimeshBaseParams::fromJson(objectParam);
+			ColliderTriMeshBaseParams::fromJson(objectParam);
 			EXTRACT_FROM_JSON(objectParam, meshFiles);
 			EXTRACT_FROM_JSON(objectParam, interpolateSubstep);
 			EXTRACT_FROM_JSON(objectParam, interpolateIter);
@@ -42,7 +42,7 @@ namespace GAIA {
 
 		inline bool toJson(nlohmann::json& objectParam)
 		{
-			ColliderTrimeshBaseParams::toJson(objectParam);
+			ColliderTriMeshBaseParams::toJson(objectParam);
 			PUT_TO_JSON(objectParam, meshFiles);
 			PUT_TO_JSON(objectParam, interpolateSubstep);
 			PUT_TO_JSON(objectParam, interpolateIter);
@@ -54,7 +54,7 @@ namespace GAIA {
 
 	// the simpliest type of collider, which is a sequence of mesh files
 	// currently, only mesh files share the same topology are supported
-	struct ColliderTrimeshSequence : public ColliderTrimeshBase
+	struct ColliderTrimeshSequence : public ColliderTriMeshBase
 	{
 		virtual void update(IdType frameId, IdType substepId, IdType iter, size_t numsubsteps, size_t numIters)
 		{
@@ -98,9 +98,9 @@ namespace GAIA {
 				}
 			}
 		};
-		virtual void initialize(ColliderTrimeshBaseParams::SharedPtr inObjectParams)
+		virtual void initialize(ColliderTriMeshBaseParams::SharedPtr inObjectParams)
 		{
-			ColliderTrimeshBase::initialize(inObjectParams);
+			ColliderTriMeshBase::initialize(inObjectParams);
 			pParams = inObjectParams;
 			// no need to call the base class' initialization function, because it's not used for simulation
 			if (colliderParameters().keyFrames.size())

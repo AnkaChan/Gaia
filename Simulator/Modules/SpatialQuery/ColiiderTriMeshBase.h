@@ -2,12 +2,12 @@
 #include "../TriMesh/TriMesh.h"
 
 namespace GAIA {
-	struct ColliderTrimeshBaseParams : public TriMeshParams
+	struct ColliderTriMeshBaseParams : public TriMeshParams
 	{
-		typedef std::shared_ptr<ColliderTrimeshBaseParams> BaseSharedPtr;
-		typedef ColliderTrimeshBaseParams* BasePtr;
-		typedef std::shared_ptr<ColliderTrimeshBaseParams> SharedPtr;
-		typedef ColliderTrimeshBaseParams* Ptr;
+		typedef std::shared_ptr<ColliderTriMeshBaseParams> BaseSharedPtr;
+		typedef ColliderTriMeshBaseParams* BasePtr;
+		typedef std::shared_ptr<ColliderTriMeshBaseParams> SharedPtr;
+		typedef ColliderTriMeshBaseParams* Ptr;
 
 		std::string colliderType;
 
@@ -32,11 +32,11 @@ namespace GAIA {
 		typedef ColliderTriMeshBase* Ptr;
 
 		virtual void update(IdType frameId, IdType substepId, IdType iter, size_t numSubsteps, size_t numIters) = 0;
-		virtual void initialize(ColliderTrimeshBaseParams::SharedPtr inObjectParams)
+		virtual void initialize(ColliderTriMeshBaseParams::SharedPtr inObjectParams)
 		{
 			pParams = inObjectParams;
 		};
 
-		ColliderTrimeshBaseParams::SharedPtr pParams;
+		ColliderTriMeshBaseParams::SharedPtr pParams;
 	};
 }
