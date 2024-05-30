@@ -38,6 +38,9 @@ namespace GAIA {
 		
 		void frameTick();
 
+		// no need to call it from main thread
+		void killWindow();
+
 		std::shared_ptr<ViewerImpl> pImpl;
 		ViewerParams::SharedPtr pViewerParams;
 	};

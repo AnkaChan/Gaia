@@ -303,7 +303,7 @@ void GAIA::BasePhysicFramework::simulate()
 	{
 		// viewer must run in the main thread, therefore we need to open a thread to do the compute
 		std::thread t([this]() {
-			while (frameId < basePhysicsParams->numFrames-1) {
+			while (frameId < basePhysicsParams->numFrames) {
 				TICK(timeCsmpFrame);
 				debugOperation(DEBUG_LVL_INFO, [&]() {
 					std::cout
@@ -326,6 +326,7 @@ void GAIA::BasePhysicFramework::simulate()
 
 				pViewer->setAllMeshesToUpdated();
 
+
 				TOCK_STRUCT((*baseTimeStatistics), timeCsmpFrame);
 
 				debugPrint(DEBUG_LVL_INFO, baseTimeStatistics->getString());
@@ -337,9 +338,10 @@ void GAIA::BasePhysicFramework::simulate()
 
 				baseTimeStatistics->setToZero();
 			}
+
+			pViewer->killWindow();
 		});
-		while (frameId < basePhysicsParams->numFrames)
-		{
+		while (frameId < basePhysicsParams->numFrames) {
 			pViewer->show();
 		}
 		t.join();

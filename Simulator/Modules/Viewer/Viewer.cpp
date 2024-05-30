@@ -32,6 +32,17 @@ bool GAIA::ViewerParams::toJson(nlohmann::json& viewerParams)
 #include <MeshFrame/Utility/Str.h>
 #include <iostream>
 
+bool closeGui = false;
+
+void myCallback() {
+
+	if (closeGui)
+	{
+		polyscope::unshow();
+	}
+}
+
+
 namespace polyscope {
 	// Forward declare compressed binary font functions
 	namespace render {
@@ -103,7 +114,8 @@ namespace GAIA {
 		ViewerImpl(ViewerParams::SharedPtr pViewerParams_in) 
 			: pViewerParams(pViewerParams_in)
 			, setFontcallBack(pViewerParams_in)
-		{}
+		{
+		}
 		void update();
 		void registerTrimeshes(const std::vector<TriMeshFEM::SharedPtr>& inTrimeshes);
 		void registerTetmeshes(const std::vector<TetMeshFEM::SharedPtr>& inTetmeshes);
@@ -211,10 +223,12 @@ void GAIA::Viewer::init()
 	polyscope::options::groundPlaneEnabled = pViewerParams->enableGround;
 	polyscope::options::programName = "Gaia Viewer";
 	polyscope::options::printPrefix = "[Gaia Viewer]";
+
 	polyscope::init();
 	polyscope::state::userCallback = [this]() {
 		//std::cout << "Viewer callback invoked." << std::endl;
 		this->update(); 
+		myCallback();
 		};
 }
 void GAIA::Viewer::update()
@@ -241,6 +255,12 @@ void GAIA::Viewer::registerTetmeshes(const std::vector<TetMeshFEM::SharedPtr>& i
 void GAIA::Viewer::frameTick()
 {
 	polyscope::frameTick();
+	
+}
+
+void GAIA::Viewer::killWindow()
+{
+	closeGui = true;
 }
 
 // !GAIA_NO_GUI
@@ -278,6 +298,14 @@ void GAIA::Viewer::show()
 	GUINoCompliationError();
 }
 void GAIA::Viewer::init()
+{
+	GUINoCompliationError();
+}
+void GAIA::Viewer::killWindow()
+{
+	GUINoCompliationError();
+}
+void GAIA::Viewer::frameTick()
 {
 	GUINoCompliationError();
 }
