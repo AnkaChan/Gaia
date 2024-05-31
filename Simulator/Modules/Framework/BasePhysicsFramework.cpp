@@ -336,9 +336,13 @@ void GAIA::BasePhysicFramework::simulate()
 						<< "----------------------------------------------------\n";
 					});
 
+				if (basePhysicsParams->outputStatistics)
+				{
+					writeStatistics(outputFolder, frameId);
+				}
+
 				baseTimeStatistics->setToZero();
 			}
-
 			pViewer->killWindow();
 		});
 		while (frameId < basePhysicsParams->numFrames) {
@@ -369,11 +373,6 @@ void GAIA::BasePhysicFramework::simulate()
 				TOCK_STRUCT((*baseTimeStatistics), timeCsmpSaveOutputs);
 			}
 
-			if (pViewerParams->enableViewer)
-			{
-				pViewer->setAllMeshesToUpdated();
-			}
-
 			TOCK_STRUCT((*baseTimeStatistics), timeCsmpFrame);
 
 			debugPrint(DEBUG_LVL_INFO, baseTimeStatistics->getString());
@@ -383,6 +382,10 @@ void GAIA::BasePhysicFramework::simulate()
 					<< "----------------------------------------------------\n";
 				});
 
+			if (basePhysicsParams->outputStatistics)
+			{
+				writeStatistics(outputFolder, frameId);
+			}
 			baseTimeStatistics->setToZero();
 		}
 	}
@@ -444,7 +447,6 @@ void GAIA::BasePhysicFramework::writeOutputs(std::string outFolder, int frameId)
 	std::string outFile = outFolder + "/A" + outNumber + "." + basePhysicsParams->outputExt;
 
 	std::string tetMeshOutOutPath = outFolder + "/TetMesh";
-	std::string tetMeshOutStatistics = outFolder + "/Statistics";
 
 	if (basePhysicsParams->outputExt == "bin")
 	{
@@ -490,18 +492,6 @@ void GAIA::BasePhysicFramework::writeOutputs(std::string outFolder, int frameId)
 		// writeAllTetMeshToVtk(outFileVtk.c_str(), getSoftBodies());
 	}
 
-	if (basePhysicsParams->outputStatistics)
-	{
-		//pSoftbodyManager->statistics.writeToJsonFile(outFolder + "/Statistics.json");
-		baseTimeStatistics->writeToJsonFile(tetMeshOutStatistics + "/A" + outNumber + ".json");
-		if (frameId % basePhysicsParams->outputRecoveryStateStep == 0) {
-#ifdef DO_COLLISION_STATISTICS
-			collisionStatistics.writeToJsonFile(tetMeshOutStatistics + "/CollisionStatisticsAll.json");
-#endif // DO_COLLISION_STATISTICS
-
-		}
-	}
-
 	if (basePhysicsParams->outputRecoveryState && !(frameId % basePhysicsParams->outputRecoveryStateStep))
 	{
 		std::string stateOutOutPath = outFolder + "/RecoveryStates";
@@ -512,6 +502,25 @@ void GAIA::BasePhysicFramework::writeOutputs(std::string outFolder, int frameId)
 		state.fromPhysics(*this);
 		state.writeToJsonFile(outFileState, 2, &outFileState);
 
+	}
+}
+
+void GAIA::BasePhysicFramework::writeStatistics(std::string outFolder, int frameId)
+{
+	std::ostringstream aSs;
+	aSs << std::setfill('0') << std::setw(8) << frameId;
+	std::string outNumber = aSs.str();
+	std::string outFolderStatistics = outFolder + "/Statistics";
+	if (basePhysicsParams->outputStatistics)
+	{
+		//pSoftbodyManager->statistics.writeToJsonFile(outFolder + "/Statistics.json");
+		baseTimeStatistics->writeToJsonFile(outFolderStatistics + "/A" + outNumber + ".json");
+		if (frameId % basePhysicsParams->outputRecoveryStateStep == 0) {
+#ifdef DO_COLLISION_STATISTICS
+			collisionStatistics.writeToJsonFile(tetMeshOutStatistics + "/CollisionStatisticsAll.json");
+#endif // DO_COLLISION_STATISTICS
+
+		}
 	}
 }
 

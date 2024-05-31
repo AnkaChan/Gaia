@@ -81,6 +81,7 @@ namespace GAIA {
 
 		virtual void setUpOutputFolders(std::string outFolder);
 		virtual void writeOutputs(std::string outFolder, int frameId);
+		virtual void writeStatistics(std::string outFolder, int frameId);
 		virtual void saveExperimentParameters(const std::string& paramsOutOutPath, int indent = 2);
 
 		virtual bool writeSimulationParameters(nlohmann::json& outPhysicsParams);

@@ -82,6 +82,8 @@ namespace GAIA {
             return std::string();
         }
 
+        virtual void customToJson(nlohmann::json& j) {}
+
         virtual std::string getString() {
             std::stringstream ss;
             ss << "---FRAME INFORMATION" << "\n";
@@ -112,6 +114,8 @@ namespace GAIA {
 
         virtual bool toJson(nlohmann::json& j)
         {
+            PUT_TO_JSON(j, timeCsmpFrame);
+
             PUT_TO_JSON(j, timeCsmpAllSubSteps);
 
             PUT_TO_JSON(j, timeCsmpMaterialSolve);
@@ -134,6 +138,7 @@ namespace GAIA {
             PUT_TO_JSON(j, timeCsmpSaveOutputs);
 
             PUT_TO_JSON(j, meritEnergy);
+            customToJson(j);
 
             return true;
         }

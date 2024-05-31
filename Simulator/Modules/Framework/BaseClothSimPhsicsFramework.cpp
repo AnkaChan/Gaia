@@ -128,7 +128,7 @@ void BaseClothPhsicsFramework::writeOutputs(std::string outFolder, int frameId)
 	std::string outNumber = aSs.str();
 	std::string outFile = outFolder + "/A" + outNumber + "." + basePhysicsParams->outputExt;
 
-	std::string tetMeshOutStatistics = outFolder + "/Statistics";
+	std::string statisticsOutFolder = outFolder + "/Statistics";
 
 	if (basePhysicsParams->outputExt == "ply")
 	{
@@ -152,7 +152,6 @@ void BaseClothPhsicsFramework::writeOutputs(std::string outFolder, int frameId)
 		state.fromPhysics(*this);
 		state.writeToJsonFile(outFileState, 2, &outFileState);
 	}
-
 }
 
 void GAIA::BaseClothPhsicsFramework::recoverFromState(std::string& stateFile)
