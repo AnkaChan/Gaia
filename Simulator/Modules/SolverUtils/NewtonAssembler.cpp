@@ -334,7 +334,10 @@ void GAIA::TriMeshNewtonAssembler::analyzeCollision(const std::vector<std::vecto
 			}
 		}
 
-		const std::vector<ClothEEContactQueryResult> eeCollisionsMesh = eeCollisions[iMesh];
+	}
+	for (IdType iMesh = 0; iMesh < eeCollisions.size(); iMesh++)
+	{
+		const std::vector<ClothEEContactQueryResult>& eeCollisionsMesh = eeCollisions[iMesh];
 
 		for (IdType iE = 0; iE < eeCollisionsMesh.size(); iE++)
 		{
@@ -343,7 +346,6 @@ void GAIA::TriMeshNewtonAssembler::analyzeCollision(const std::vector<std::vecto
 			{
 				const EEContactPointInfo& eeContact = eeCollision.contactPts[iEEContact];
 				TriMeshFEM* pMesh = meshes[eeContact.contactMeshId1].get();
-
 
 				IdType e2v1 = -1, e2v2 = -1;
 				if (eeContact.contactMeshId2 < numSimulatedMeshes)
