@@ -416,7 +416,14 @@ void GAIA::TriMeshNewtonAssembler::computeBendingHessian()
 	x.resize(numAllVertices * 3);
 	for (int iMesh = 0; iMesh < meshes.size(); iMesh++) {
 		TriMeshFEM::SharedPtr pMesh = meshes[iMesh];
-		x.segment(meshOffsets[iMesh] * 3, (meshOffsets[iMesh] + pMesh->numVertices()) * 3) = Eigen::Map<NVecDynamic>(pMesh->positions().data(), pMesh->numVertices() * 3);
+
+		/*std::cout << "x.segment(meshOffsets[iMesh], meshOffsets[iMesh] + pMesh->numVertices() * 3).rows()"
+			<< x.segment(meshOffsets[iMesh], meshOffsets[iMesh] + pMesh->numVertices() * 3).rows()
+			<< "\nx.segment(meshOffsets[iMesh], meshOffsets[iMesh] + pMesh->numVertices() * 3).cols()"
+			<< x.segment(meshOffsets[iMesh], meshOffsets[iMesh] + pMesh->numVertices() * 3).cols()
+			<< std::endl;*/
+		x.segment(meshOffsets[iMesh], pMesh->numVertices() * 3)
+			= Eigen::Map<NVecDynamic>(pMesh->positions().data(), pMesh->numVertices() * 3);
 		const auto& offset = meshOffsets[iMesh];
 		const auto& bendingStiffness = pMesh->pObjectParams->bendingStiffness;
 		const auto numEdges = pMesh->numEdges();
@@ -455,9 +462,9 @@ void GAIA::TriMeshNewtonAssembler::computeBendingHessian()
 			NFloatingType A1 = 0.5 * (l0 * l2 * sin02);
 			NFloatingType scale = 3.0 * bendingStiffness / (A0 + A1);
 			for (int i = 0; i < 4; ++i) {
-				const auto i_pos = (offset + vi[i]) * 3;
+				const auto i_pos = offset + (vi[i]) * 3;
 				for (int j = 0; j < 4; ++j) {
-					const auto j_pos = (offset + vi[j]) * 3;
+					const auto j_pos = offset + (vi[j]) * 3;
 					for (int k = 0; k < 3; ++k) {
 						bendingHessianTriplets.emplace_back(i_pos + k, j_pos + k, K[i] * K[j] * scale);
 						newtonHessianTripletsBending.emplace_back(i_pos + k, j_pos + k, 1);
