@@ -333,7 +333,7 @@ void GAIA::BasePhysicFramework::simulate()
 				debugOperation(DEBUG_LVL_INFO, [&]() {
 					std::cout
 						<< "Frame " << frameId << " completed, Time consumption: " << baseTimeStatistics->timeCsmpFrame << "\n"
-						<< "----------------------------------------------------\n";
+						<< "----------------------------------------------------" << std::endl;
 					});
 
 				if (basePhysicsParams->outputStatistics)
@@ -379,7 +379,7 @@ void GAIA::BasePhysicFramework::simulate()
 			debugOperation(DEBUG_LVL_INFO, [&]() {
 				std::cout
 					<< "Frame " << frameId << " completed, Time consumption: " << baseTimeStatistics->timeCsmpFrame << "\n"
-					<< "----------------------------------------------------\n";
+					<< "----------------------------------------------------" << std::endl;
 				});
 
 			if (basePhysicsParams->outputStatistics)
