@@ -82,6 +82,40 @@ void GAIA::writeAllToBinary(const char* output, std::vector<TetMeshFEM::SharedPt
 	out.close();
 }
 
+
+void GAIA::writeAllToBinary(const char* output, std::vector<TriMeshFEM::SharedPtr>& triMeshes)
+{
+	if (!triMeshes.size())
+	{
+		return;
+	}
+	int mAllVerts = 0;
+	std::vector<FloatingType> verts;
+
+	verts.reserve(3 * triMeshes.size() * triMeshes[0]->numVertices());
+
+	for (int iMesh = 0; iMesh < triMeshes.size(); ++iMesh) {
+		TriMeshFEM::SharedPtr pMesh = triMeshes[iMesh];
+
+		for (int iV = 0; iV < pMesh->numVertices(); ++iV)
+		{
+			auto v = pMesh->vertex(iV);
+
+			verts.push_back(v[0]);
+			verts.push_back(v[1]);
+			verts.push_back(v[2]);
+		}
+	}
+
+	std::ofstream out;
+	out.open(output, std::ios::out | std::ios::binary);
+	for (int iV = 0; iV < verts.size(); iV++)
+	{
+		out.write(reinterpret_cast<char*>(&verts[iV]), sizeof(float));
+	}
+	out.close();
+}
+
 void GAIA::writeAllToPLY(const char* output, std::vector<TetMeshFEM::SharedPtr>& tetMeshes, bool saveAllInOneFile, bool addModelName)
 {
 	if (!saveAllInOneFile)
@@ -150,7 +184,7 @@ void GAIA::writeAllToPLY(const char* output, std::vector<TetMeshFEM::SharedPtr>&
 	}
 }
 
-void GAIA::writeAllToPLY(const char* output, std::vector<TriMeshFEM::SharedPtr>& triMeshes, bool saveAllInOneFile)
+void GAIA::writeAllToPLY(const char* output, std::vector<TriMeshFEM::SharedPtr>& triMeshes, bool saveAllInOneFile, bool addModelName)
 {
 	if (!saveAllInOneFile)
 	{
@@ -162,9 +196,15 @@ void GAIA::writeAllToPLY(const char* output, std::vector<TriMeshFEM::SharedPtr>&
 			aSs << std::setfill('0') << std::setw(4) << iMesh;
 			std::string modelNumber = aSs.str();
 
-			std::string outFileCurModel = fp.path + "/" + "Model_" + modelNumber ;
+			std::string outFileCurModel = fp.path + "/" + fp.name + "Model_" + modelNumber;
+			if (addModelName)
+			{
+				std::string modelPath = pMesh->pObjectParams->path;
+				MF::IO::FileParts fp_modelPath(modelPath);
+				outFileCurModel = outFileCurModel + "_" + fp_modelPath.name;
+			}
 		
-			outFileCurModel = outFileCurModel + "_" + fp.name + fp.ext;
+			outFileCurModel = outFileCurModel + "_" + fp.ext;
 
 			pMesh->saveAsPLY(outFileCurModel.c_str());
 		}

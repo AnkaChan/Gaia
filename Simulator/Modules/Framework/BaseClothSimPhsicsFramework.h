@@ -46,6 +46,8 @@ namespace GAIA {
 
         // baseTriMeshesForSimulation + colliderTriMeshes, in that order
         std::vector<TriMeshFEM::SharedPtr> triMeshesAll;
+
+        size_t numAllFaces;
         
         ClothContactDetectorParameters::SharedPtr pClothContactDetectorParameters;
         ClothContactDetector::SharedPtr pClothContactDetector;

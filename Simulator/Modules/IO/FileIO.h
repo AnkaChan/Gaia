@@ -7,7 +7,8 @@ namespace GAIA {
 	//void writeAllToObj(const char* output, std::vector<SoftBodyPtr>& softBodies, bool saveAllInOneFile = false);
 	void writeAllToPLY(const char* output, std::vector<TetMeshFEM::SharedPtr>& tetMeshes, bool saveAllInOneFile = false, bool addModelName = false);
 	void writeAllToBinary(const char* output, std::vector<TetMeshFEM::SharedPtr>& tetMeshes);
-	void writeAllToPLY(const char* output, std::vector<TriMeshFEM::SharedPtr>& tetMeshes, bool saveAllInOneFile = false);
+	void writeAllToPLY(const char* output, std::vector<TriMeshFEM::SharedPtr>& tetMeshes, bool saveAllInOneFile = false, bool addModelName = false);
+	void writeAllToBinary(const char* output, std::vector<TriMeshFEM::SharedPtr>& tetMeshes);
 	//void writeTetMeshToVtk(const char* output, TetMeshInterFace& tIf);
 	//void writeAllTetMeshToVtk(const char* output, std::vector<SoftBodyPtr>& softBodies);
 	//void writeAllTetMeshToT(const char* output, std::vector<SoftBodyPtr>& softBodies);

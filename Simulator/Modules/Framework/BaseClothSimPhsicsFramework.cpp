@@ -42,10 +42,14 @@ void BaseClothPhsicsFramework::initialize()
 	//#endif // KEEP_MESHFRAME_MESHES
 
 	//cpu_parallel_for(0, objectParamsList.objectParams.size(), [&](int iMesh) {
+	numAllVertices = 0;
 	for (int iMesh = 0; iMesh < objectParamsList->objectParams.size(); ++iMesh) {
 
-
 		TriMeshFEM::SharedPtr pTriMesh = initializeMaterial(objectParamsList->objectParams[iMesh], basePhysicsParams, this);
+		numAllVertices += pTriMesh->numVertices();
+		numAllEdges += pTriMesh->numEdges();
+		numAllFaces += pTriMesh->numFaces();
+
 		baseTriMeshesForSimulation[iMesh] = pTriMesh;
 
 		std::cout << "Added " << objectParamsList->objectParams[iMesh]->materialName
@@ -136,6 +140,25 @@ void BaseClothPhsicsFramework::writeOutputs(std::string outFolder, int frameId)
 	}
 	else if (basePhysicsParams->outputExt == "obj") {
 		// writeAllToObj(outFile.c_str(), getSoftBodies(), physicsAllParams.pPhysicsParams.saveAllModelsTogether);
+	}
+	else if (basePhysicsParams->outputExt == "bin")
+	{
+		if (frameId == 0)
+		{
+			std::string templateMeshOutOutPath = outFolder + "/TemplateMesh";
+			MF::IO::createFolder(templateMeshOutOutPath);
+
+			std::string templateMeshesName = outFolder + "/TemplateMesh/TemplateMesh.ply";
+			writeAllToPLY(templateMeshesName.c_str(), baseTriMeshesForSimulation, false, true);
+		}
+		writeAllToBinary(outFile.c_str(), baseTriMeshesForSimulation);
+
+		if (!(frameId % basePhysicsParams->binaryModeVisualizationSteps))
+		{
+			std::string outFileVis = outFolder + "/A" + outNumber + ".ply";
+
+			writeAllToPLY(outFileVis.c_str(), baseTriMeshesForSimulation, basePhysicsParams->saveAllModelsTogether, basePhysicsParams->saveAllModelsTogether);
+		}
 	}
 	else
 	{
