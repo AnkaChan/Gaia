@@ -768,7 +768,6 @@ bool triMeshEdgeContactQueryFunc(RTCPointQueryFunctionArguments* args)
 		}
 	}
 
-
 	const embree::Vec3fa p1 = embree::Vec3fa::loadu(pMeshQuery->vertex(edgeInfoQuery.eV1).data());
 	const embree::Vec3fa p2 = embree::Vec3fa::loadu(pMeshQuery->vertex(edgeInfoQuery.eV2).data());
 
@@ -779,26 +778,44 @@ bool triMeshEdgeContactQueryFunc(RTCPointQueryFunctionArguments* args)
 	get_closest_points_between_segments(p1, p2, q1, q2, c1, c2, mua, mub);
 
 	FloatingType d = embree::distance(c1, c2);
+	result->minDisToPrimitives = std::min(d, result->minDisToPrimitives);
 
 	if (d < pContactDetector->pParams->maxQueryDis
-		&& mua > 0.f && mua < 1.f
-		&& mub > 0.f && mub < 1.f
+		// && mua > 0.f && mua < 1.f
+		// && mub > 0.f && mub < 1.f
 		) // otherwise it degenerates to a v-f contact case
 	{
-		result->minDisToPrimitives = std::min(d, result->minDisToPrimitives);
-		result->found = true;
+		// evaluate feasible region
+		bool inFeasibleRegion = false;
+		const embree::Vec3fa eVec1 = p2 - p1;
+		const embree::Vec3fa eVec2 = q2 - q1;
 
-		result->contactPts.emplace_back();
-		result->contactPts.back().contactEdgeId1 = queryPremitiveId;
-		result->contactPts.back().contactMeshId1 = queryMeshId;
+		if (embree::dot((c2 - p1), eVec1) >= 0
+			&& embree::dot((p2 - c2), eVec1) >= 0
+			) {
+			inFeasibleRegion = true;
+		}
+		else if (embree::dot((c1 - q1), eVec2) >= 0
+			&& embree::dot((q2 - c1), eVec2) >= 0) {
+			inFeasibleRegion = true;
+		}
 
-		result->contactPts.back().contactEdgeId2 = primID;
-		result->contactPts.back().contactMeshId2 = geomID;
-		result->contactPts.back().mu1 = mua;
-		result->contactPts.back().mu2 = mub;
-		result->contactPts.back().c1 << c1.x, c1.y, c1.z;
-		result->contactPts.back().c2 << c2.x, c2.y, c2.z;
-		result->contactPts.back().d = d;
+		if (inFeasibleRegion)
+		{
+			result->found = true;
+
+			result->contactPts.emplace_back();
+			result->contactPts.back().contactEdgeId1 = queryPremitiveId;
+			result->contactPts.back().contactMeshId1 = queryMeshId;
+
+			result->contactPts.back().contactEdgeId2 = primID;
+			result->contactPts.back().contactMeshId2 = geomID;
+			result->contactPts.back().mu1 = mua;
+			result->contactPts.back().mu2 = mub;
+			result->contactPts.back().c1 << c1.x, c1.y, c1.z;
+			result->contactPts.back().c2 << c2.x, c2.y, c2.z;
+			result->contactPts.back().d = d;
+		}
 	}
 
 	return false;
@@ -843,7 +860,6 @@ bool triMeshEdgeContactQueryFuncWithSewing(RTCPointQueryFunctionArguments* args)
 		}
 	}
 
-
 	const embree::Vec3fa p1 = embree::Vec3fa::loadu(pMeshQuery->vertex(edgeInfoQuery.eV1).data());
 	const embree::Vec3fa p2 = embree::Vec3fa::loadu(pMeshQuery->vertex(edgeInfoQuery.eV2).data());
 
@@ -854,26 +870,44 @@ bool triMeshEdgeContactQueryFuncWithSewing(RTCPointQueryFunctionArguments* args)
 	get_closest_points_between_segments(p1, p2, q1, q2, c1, c2, mua, mub);
 
 	FloatingType d = embree::distance(c1, c2);
+	result->minDisToPrimitives = std::min(d, result->minDisToPrimitives);
 
 	if (d < pContactDetector->pParams->maxQueryDis
-		&& mua > 0.f && mua < 1.f
-		&& mub > 0.f && mub < 1.f
+		//&& mua > 0.f && mua < 1.f
+		//&& mub > 0.f && mub < 1.f
 		) // otherwise it degenerates to a v-f contact case
 	{
-		result->minDisToPrimitives = std::min(d, result->minDisToPrimitives);
-		result->found = true;
+		// evaluate feasible region
+		bool inFeasibleRegion = false;
+		const embree::Vec3fa eVec1 = p2 - p1;
+		const embree::Vec3fa eVec2 = q2 - q1;
 
-		result->contactPts.emplace_back();
-		result->contactPts.back().contactEdgeId1 = queryPremitiveId;
-		result->contactPts.back().contactMeshId1 = queryMeshId;
+		if (embree::dot((c2 - p1), eVec1)  >= 0
+			&& embree::dot((p2 - c2), eVec1) >= 0
+			) {
+			inFeasibleRegion = true;
+		}
+		else if (embree::dot((c1 - q1), eVec2) >= 0
+			&& embree::dot((q2 - c1), eVec2) >= 0) {
+			inFeasibleRegion = true;
+		}
 
-		result->contactPts.back().contactEdgeId2 = primID;
-		result->contactPts.back().contactMeshId2 = geomID;
-		result->contactPts.back().mu1 = mua;
-		result->contactPts.back().mu2 = mub;
-		result->contactPts.back().c1 << c1.x, c1.y, c1.z;
-		result->contactPts.back().c2 << c2.x, c2.y, c2.z;
-		result->contactPts.back().d = d;
+		if (inFeasibleRegion)
+		{
+			result->found = true;
+
+			result->contactPts.emplace_back();
+			result->contactPts.back().contactEdgeId1 = queryPremitiveId;
+			result->contactPts.back().contactMeshId1 = queryMeshId;
+
+			result->contactPts.back().contactEdgeId2 = primID;
+			result->contactPts.back().contactMeshId2 = geomID;
+			result->contactPts.back().mu1 = mua;
+			result->contactPts.back().mu2 = mub;
+			result->contactPts.back().c1 << c1.x, c1.y, c1.z;
+			result->contactPts.back().c2 << c2.x, c2.y, c2.z;
+			result->contactPts.back().d = d;
+		}
 	}
 
 	return false;
@@ -1034,6 +1068,7 @@ bool GAIA::ClothContactDetector::contactQueryVF(IdType meshId, IdType vId, Cloth
 	pResult->queryMeshId = meshId;
 	pResult->queryPrimitiveId = vId;
 	pResult->pContactDetector = this;
+	pResult->minDisToPrimitives = pParams->maxQueryDis;
 
 	query.x = p(0);
 	query.y = p(1);
@@ -1096,6 +1131,7 @@ bool GAIA::ClothContactDetector::contactQueryEE(IdType meshId, IdType eId, Cloth
 	pResult->queryMeshId = meshId;
 	pResult->queryPrimitiveId = eId;
 	pResult->pContactDetector = this;
+	pResult->minDisToPrimitives = pParams->maxQueryDis;
 
 	query.x = p(0);
 	query.y = p(1);
