@@ -130,15 +130,15 @@ vector<int>& GAIA::GraphColoring::Mcs::color()
         //Thanks to Michael Kochte @ Universitaet Stuttgart for the below speedup snippit
 
         //Collect color numbers of neighbors
-        std::set<int> colorset;
+        vector<int> colorvec;
         for (unsigned i = 0; i < graph[min].size(); i++) {
             int col = graph_colors[graph[min][i]];
-            colorset.insert(col);
+            if (std::find(colorvec.cbegin(), colorvec.cend(), col) == colorvec.cend()) {
+                colorvec.push_back(col);
+            }
         }
-
+        
         //Sort and uniquify
-        vector<int> colorvec;
-        std::copy(colorset.begin(), colorset.end(), std::back_inserter(colorvec));
         std::sort(colorvec.begin(), colorvec.end());
 
         //Pick the lowest color not contained
