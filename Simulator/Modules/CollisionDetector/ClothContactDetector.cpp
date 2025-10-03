@@ -12,15 +12,6 @@
 
 using namespace GAIA;
 
-template<typename T>
-inline void update_min(std::atomic<T>& atom, const T val)
-{
-	for (T atom_val = atom;
-		atom_val > val &&
-		!atom.compare_exchange_weak(atom_val, val, std::memory_order_relaxed);
-		);
-}
-
 // if the closest point is on the edge, the contact will be detected twice, so is the case when the closest point is on the vertex,
 // we need to avoid those duplications; this is done by recording the id of the contact primitive and the type of the closest point
 // when a new closest point is found, we check whether it has been added before

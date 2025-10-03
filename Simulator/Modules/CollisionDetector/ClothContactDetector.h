@@ -183,4 +183,22 @@ namespace GAIA {
 
 	void updateVFContactPointInfo(std::vector<std::shared_ptr<TriMeshFEM>>& meshPtrs, VFContactPointInfo& contactPointInfo);
 	void updateEEContactPointInfo(std::vector<std::shared_ptr<TriMeshFEM>>& meshPtrs, EEContactPointInfo& contactPointInfo);
+
+	template<typename T>
+	inline void update_min(std::atomic<T>& atom, const T val)
+	{
+		for (T atom_val = atom;
+			atom_val > val &&
+			!atom.compare_exchange_weak(atom_val, val, std::memory_order_relaxed);
+			);
+	}
+
+	template<typename T>
+	inline void update_max(std::atomic<T>& atom, const T val)
+	{
+		for (T atom_val = atom;
+			atom_val < val &&
+			!atom.compare_exchange_weak(atom_val, val, std::memory_order_relaxed);
+			);
+	}
 }
