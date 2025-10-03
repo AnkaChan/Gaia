@@ -80,6 +80,13 @@ file(GLOB GAIA_VBD_SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/VBD/*.cuh"
 )
 
+file(GLOB GAIA_CLOTH_SRCS
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/VBDCloth/*.h"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/VBDCloth/*.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/VBDCloth/*.cu"
+	"${CMAKE_CURRENT_LIST_DIR}/../Modules/VBDCloth/*.cuh"
+)
+
 
 file (GLOB GAIA_COLLISION_SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/BVH/*.h"
@@ -116,9 +123,6 @@ file(GLOB GAIA_SRCS
 	${MESHFRAME_SOURCE_CPP_UTILITY}
 )
 
-file(GLOB GAIA_CLOTH_SRCS
-
-)
 
 file(GLOB GAIA_COLORING_SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/../Modules/GraphColoring/*.h"
