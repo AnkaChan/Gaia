@@ -1,0 +1,240 @@
+{
+  "CollisionParams": {
+    "allowCCD": true,
+    "allowDCD": true,
+    "centerShiftLevel": 0.009999999776482582,
+    "checkFeasibleRegion": true,
+    "checkTetTraverse": true,
+    "feasibleRegionEpsilon": 0.009999999776482582,
+    "handleSelfCollision": true,
+    "loopLessTraverse": false,
+    "maxSearchDistanceMultiplier": 1.7999999523162842,
+    "rayTriIntersectionEPSILON": 1.000000013351432e-10,
+    "restPoseCloestPoint": false,
+    "shiftQueryPointToCenter": true,
+    "stopTraversingAfterPassingQueryPoint": true,
+    "tetrahedralTraverseForNonSelfIntersection": true,
+    "useStaticTraverse": true
+  },
+  "ContactDetectorParams": {
+    "maxQueryDis": 0.3
+  },
+  "PhysicsParams": {
+    "boundaryFrictionDynamic": 0.3,
+    "boundaryFrictionStatic": 0.3,
+    "bowlCap": false,
+    "bowlCenter": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "bowlOuterRadius": 1.0499999523162842,
+    "bowlRadius": 1.0,
+    "ccdBVHRebuildSteps": 7,
+    "checkAndUpdateWorldBounds": true,
+    "collisionDetectionSubSteps": 1,
+    "constantVelDamping": -1.0,
+    "dcdSurfaceSceneBVHRebuildSteps": 3,
+    "dcdTetMeshSceneBVHRebuildSteps": 16,
+    "debug": true,
+    "debugVerboseLvl": 1,
+    "doCollDetectionOnlyForFirstIteration": true,
+    "doStatistics": false,
+    "gravity": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "iterations": 5,
+    "numFrames": 1000,
+    "numSubsteps": 10,
+    "outputExt": "ply",
+    "outputIntermediateState": false,
+    "outputRecoveryState": true,
+    "outputRecoveryStateStep": 10,
+    "outputStatistics": false,
+    "outputStatisticsStep": 10,
+    "outputT": false,
+    "outputVTK": false,
+    "perMeshParallelization": true,
+    "perTetParallelization": false,
+    "saveAllModelsTogether": true,
+    "saveSimulationParameters": true,
+    "shaderFolderPath": "",
+    "showSubstepProgress": false,
+    "showTimeConsumption": false,
+    "smoothSurfaceNormal": true,
+    "stepInvariantVelDamping": false,
+    "timeStep": 0.01666666,
+    "useBowlGround": false,
+    "usePlaneGround": true,
+    "worldBounds": [
+      [
+        -1000000.0,
+        -1000000.0,
+        -1000000.0
+      ],
+      [
+        1000000.0,
+        2000000.0,
+        1000000.0
+      ]
+    ],
+    "useLineSearch": false,
+    "contactStiffness": 100000.0,
+    "contactRadius": 0.2,
+    "convergenceAvgNormThres": 10,
+    "conservativeStepRelaxation": 0.42,
+    "handleCollision": true,
+    "saveIntermediateResults": false
+  },
+  "ViewerParams": {
+    "enableViewer": true
+  },
+  "Deformers": [
+    {
+      "DeformerName": "Rotator",
+      "center": [
+        0,
+        0,
+        0
+      ],
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "angularVelocity": 0.7853981633974483,
+      "selectedMeshes": [
+        0
+      ],
+      "selectedVertices": [
+        [
+          49,
+          99,
+          149,
+          199,
+          249,
+          299,
+          349,
+          399,
+          449,
+          499,
+          549,
+          599,
+          649,
+          699,
+          749,
+          799,
+          849,
+          899,
+          949,
+          999,
+          1049,
+          1099,
+          1149,
+          1199,
+          1249,
+          1299,
+          1349,
+          1399,
+          1449,
+          1499,
+          1549,
+          1599,
+          1649,
+          1699,
+          1749,
+          1799,
+          1849,
+          1899,
+          1949,
+          1999,
+          2049,
+          2099,
+          2149,
+          2199,
+          2249,
+          2299,
+          2349,
+          2399,
+          2449,
+          2499
+        ]
+      ],
+      "rotationEndTime": 60
+    },
+    {
+      "DeformerName": "Rotator",
+      "center": [
+        0,
+        0,
+        0
+      ],
+      "axis": [
+        -1,
+        0,
+        0
+      ],
+      "angularVelocity": 0.7853981633974483,
+      "selectedMeshes": [
+        0
+      ],
+      "selectedVertices": [
+        [
+          0,
+          50,
+          100,
+          150,
+          200,
+          250,
+          300,
+          350,
+          400,
+          450,
+          500,
+          550,
+          600,
+          650,
+          700,
+          750,
+          800,
+          850,
+          900,
+          950,
+          1000,
+          1050,
+          1100,
+          1150,
+          1200,
+          1250,
+          1300,
+          1350,
+          1400,
+          1450,
+          1500,
+          1550,
+          1600,
+          1650,
+          1700,
+          1750,
+          1800,
+          1850,
+          1900,
+          1950,
+          2000,
+          2050,
+          2100,
+          2150,
+          2200,
+          2250,
+          2300,
+          2350,
+          2400,
+          2450
+        ]
+      ],
+      "rotationEndTime": 60
+    }
+  ]
+}

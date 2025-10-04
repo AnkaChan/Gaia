@@ -19,7 +19,7 @@ def getModelInfoTestCloth(
 ):
     model = copy.deepcopy(modelExample)
     model["path"] = (
-        rf"${{REPO_ROOT}}\ParameterGen\Python_ParameterGen_VBDCloth\DataGen\Data\SyntheticData\C{N}{suffix}.obj"
+        rf"${{REPO_ROOT}}\Simulator\VBDCloth\ParameterGen\Data\C{N}{suffix}.obj"
     )
     if colorWithBending:
         model["verticesColoringCategoriesPath"] = (

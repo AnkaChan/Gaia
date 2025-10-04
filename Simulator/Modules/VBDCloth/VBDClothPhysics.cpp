@@ -1099,7 +1099,7 @@ void GAIA::VBDClothSimulationFramework::VBDStepWithExistingCollisions(IdType iMe
 		}
 	}
 
-#define DEBUG_COLLISION_F_H
+// #define DEBUG_COLLISION_F_H
 
 #ifdef DEBUG_COLLISION_F_H
 	Vec3 col_force = force;
@@ -1126,14 +1126,17 @@ void GAIA::VBDClothSimulationFramework::VBDStepWithExistingCollisions(IdType iMe
 	bool solverSuccess = CuMatrix::solve3x3_psd_stable(hessian.data(), force.data(), descentDirection.data());
 	if (descentDirection.hasNaN()) {
 		std::cout << "descentDirection has NaN at vertex " << vId << std::endl;
-		std::cout 
+#ifdef DEBUG_COLLISION_F_H
+		std::cout
 			<< "collision force: \n" << col_force << "\n"
 			<< "collision hessian: \n" << col_hessian << "\n"
 			<< "overall force: \n" << force << "\n"
 			<< "overall hessian: \n" << hessian << "\n"
 			<< std::endl;
 		return;
-		// std::exit(1);
+#else
+		std::exit(1);
+#endif // DEBUG_COLLISION_F_H
 	}
 	if (!solverSuccess)
 	{

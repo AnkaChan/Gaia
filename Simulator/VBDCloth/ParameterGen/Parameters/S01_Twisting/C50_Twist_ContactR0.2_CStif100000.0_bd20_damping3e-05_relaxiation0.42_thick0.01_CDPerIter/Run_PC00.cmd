@@ -1,0 +1,2 @@
+D:\Projects\Gaia_VBDCloth\Release\GAIA_VBDCloth.exe D:\Code\Graphics\Gaia\Simulator\VBDCloth\ParameterGen\Parameters\S01_Twisting\C50_Twist_ContactR0.2_CStif100000.0_bd20_damping3e-05_relaxiation0.42_thick0.01_CDPerIter\Models.json D:\Code\Graphics\Gaia\Simulator\VBDCloth\ParameterGen\Parameters\S01_Twisting\C50_Twist_ContactR0.2_CStif100000.0_bd20_damping3e-05_relaxiation0.42_thick0.01_CDPerIter\Parameters.json D:\Data\VBD_cloth_Results\S01_Twisting\C50_Twist_ContactR0.2_CStif100000.0_bd20_damping3e-05_relaxiation0.42_thick0.01_CDPerIter -R D:\Code\Graphics\Gaia
+cmd /k

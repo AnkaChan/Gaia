@@ -3,14 +3,10 @@ import copy
 from M01_Parameters import *
 from M02_GenRunningParameters import *
 import numpy as np
-from PyToolKit.Graphics.IO import *
 
 if __name__ == "__main__":
     genFileName = Path(__file__).stem
-    # machineName = "AnkaPC01"
-    machineName = "AnkaPC00"
-    # machineName = "ZihengLab"
-    # machineName = "AnkaLaptop"
+    machineName = "PC00"
     # run = False
     run = True
 
@@ -19,15 +15,14 @@ if __name__ == "__main__":
     binaryFile = machines[machineName]["binaryFile"]
 
     numberFrames = 1000
-    clothSize = 100
+    clothSize = 50
 
     # numberFrames = 15
 
     contactStiffness = 1e5
     contactDis = 0.2
-    queryDis = 0.6
+    queryDis = 0.3
     relaxiation = 0.42
-    thickness = 0.01
     bendingStiffness = 20
     # experimentName = "Test_SquareCloth"
     model = getModelInfoTestCloth(modelExample, N=clothSize, suffix="_horizontal")
@@ -55,33 +50,23 @@ if __name__ == "__main__":
     # model["lambda"] = 1e5
     parameter = getPhysicsParametersForTest(parametersExample)
     parameter["PhysicsParams"]["timeStep"] = 0.01666666
-    parameter["PhysicsParams"]["numSubsteps"] = 5
-    parameter["PhysicsParams"]["iterations"] = 10
+    parameter["PhysicsParams"]["numSubsteps"] = 10
+    parameter["PhysicsParams"]["iterations"] = 5
     parameter["PhysicsParams"]["gravity"] = [0.0, 0.0, 0.0]
     parameter["PhysicsParams"]["useLineSearch"] = False
 
     parameter["PhysicsParams"]["numFrames"] = numberFrames
 
-    parameter["PhysicsParams"]["stepSizeGD"] = 1
-    # parameter["PhysicsParams"]["stepSizeGD"] = 1e-7
-    parameter["PhysicsParams"]["convergenceThres"] = 1e-6
-    # parameter["PhysicsParams"]["outputRecoveryStateStep"] = 10
     parameter["PhysicsParams"]["outputRecoveryStateStep"] = 10
-    parameter["PhysicsParams"]["outputStatistics"] = False
-    parameter["PhysicsParams"]["usePreconditioner"] = True
-    parameter["PhysicsParams"]["convergenceAvgNormChangeThres"] = 1e-3
     parameter["PhysicsParams"]["contactStiffness"] = contactStiffness
-    parameter["PhysicsParams"]["thickness"] = thickness
     parameter["PhysicsParams"]["contactRadius"] = contactDis
     parameter["PhysicsParams"]["convergenceAvgNormThres"] = 10
     parameter["PhysicsParams"]["conservativeStepRelaxation"] = relaxiation
-    parameter["PhysicsParams"]["minStepSizeGD"] = 1e-3
-    # parameter["PhysicsParams"]["outputStatistics"] = True
     parameter["PhysicsParams"]["outputStatistics"] = False
 
     parameter["PhysicsParams"]["handleCollision"] = True
 
-    parameter["PhysicsParams"]["saveIntermediateResults"] = True
+    parameter["PhysicsParams"]["saveIntermediateResults"] = False
 
     parameter["ContactDetectorParams"]["maxQueryDis"] = queryDis
 
@@ -118,11 +103,7 @@ if __name__ == "__main__":
     ]
     parameter["Deformers"] = deformers
 
-    experimentName = f"C{clothSize}_Twist_ContactR{contactDis}_CStif{contactStiffness}_bd{bendingStiffness}_damping{model['dampingStVK']}_relaxiation{relaxiation}_thick{thickness}_CDPerIter"
-    # recoveryState = r'E:\Data2\VBD_cloth_Results\S11_Twisting\C100_Twist_ContactR0.2_ContactStiffness100000.0_bd20_damping3e-05_CDPerIter\RecoveryStates\A00000000.json'
-    # recoveryState = r'E:\Data2\VBD_cloth_Results\S11_Twisting\C100_Twist_ContactR0.2_CStif100000.0_bd20_damping3e-05_relaxiation0.45_thick0.1_CDPerIter\RecoveryStates\A00000000.json'
-    # recoveryState = r'E:\Data2\VBD_cloth_Results\S11_Twisting\C100_Twist_ContactR0.2_CStif100000.0_bd20_damping3e-05_relaxiation0.45_thick0.1_CDPerIter\RecoveryStates\A00000350.json'
-    # recoveryState = r'E:\Data2\VBD_cloth_Results\S11_Twisting\C100_Twist_ContactR0.2_CStif100000.0_bd20_damping3e-05_relaxiation0.4_thick0.05_CDPerIter\RecoveryStates\A00000200.json'
+    experimentName = f"C{clothSize}_Twist_ContactR{contactDis}_CStif{contactStiffness}_bd{bendingStiffness}_damping{model['dampingStVK']}_relaxiation{relaxiation}"
 
     recoveryState = None
 

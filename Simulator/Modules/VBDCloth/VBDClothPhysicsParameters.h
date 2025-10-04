@@ -67,7 +67,7 @@ namespace GAIA {
 		FloatingType boundaryFrictionEpsValue = 1e-2f;
 
 		int contactDetectionIters = 1;
-		int contactEnergyTypes = 1; // 0: quadratic, 1: quadratic-logrithmic-2-stages
+		int contactEnergyTypes = 1; // 0: quadratic, 1: quadratic-logrithmic-2-stages, 2: IPC
 		int contactBVHReconstructionSteps = 32;
 
 		// material solve
