@@ -1,0 +1,2 @@
+D:\Projects\Gaia_VBDCloth\Release\GAIA_VBDCloth.exe D:\Code\Graphics\Gaia\Simulator\VBDCloth\ParameterGen\Parameters\S02_KnotPulling\Knot_ContactR0.2_CStif1000000.0_bd50_damping1e-07_relaxiation0.42_pull10\Models.json D:\Code\Graphics\Gaia\Simulator\VBDCloth\ParameterGen\Parameters\S02_KnotPulling\Knot_ContactR0.2_CStif1000000.0_bd50_damping1e-07_relaxiation0.42_pull10\Parameters.json D:\Data\VBD_cloth_Results\S02_KnotPulling\Knot_ContactR0.2_CStif1000000.0_bd50_damping1e-07_relaxiation0.42_pull10 -R D:\Code\Graphics\Gaia
+cmd /k

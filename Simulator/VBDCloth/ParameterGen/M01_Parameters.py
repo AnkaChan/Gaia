@@ -88,29 +88,6 @@ def getModelInfoSuitSquare(
 
     return model
 
-
-def getModelInfo_PatternSkirt20K(
-    modelExample=modelExample, materialType="StVK_triMesh"
-):
-    model = copy.deepcopy(modelExample)
-    model["path"] = (
-        r"${REPO_ROOT}\ParameterGen\Python_ParameterGen_APAPCloth\Data\PatternedCloth\seamlessTextured-20Kf-cm.obj"
-    )
-    model["verticesColoringCategoriesPath"] = (
-        model["path"] + ".vertexColoring.withBendingEnergy.json"
-    )
-    model["miu"] = 1e5
-    model["lambda"] = 1e5
-
-    model["density"] = 174 * 1e-4
-    if materialType == "StVK_triMesh":
-        model["materialName"] = "StVK_triMesh"
-        model["bendingStiffness"] = 25
-    else:
-        print("Unrecognized material name!")
-        model["materialName"] = "StVK_triMesh"
-    return model
-
 def getModelInfo_dress_knife(dataFolder,
     modelExample=modelExample, materialType="StVK_triMesh"
 ):
@@ -137,7 +114,7 @@ def getModelInfo_dress_knife(dataFolder,
 def getModelInfoUnitTest1Triangle(modelExample, suffix="", materialType="StVK_triMesh"):
     model = copy.deepcopy(modelExample)
     model["path"] = (
-        rf"${{REPO_ROOT}}\ParameterGen\Python_ParameterGen_VBDCloth\DataGen\Data\SyntheticData\Triangle_1_on_C5.obj"
+        rf"${{REPO_ROOT}}\ParameterGen\Python_ParameterGen_VBDCloth\Data\SyntheticData\Triangle_1_on_C5.obj"
     )
     model["verticesColoringCategoriesPath"] = model["path"] + ".vertexColoring.json"
 

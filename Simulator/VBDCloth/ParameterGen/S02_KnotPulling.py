@@ -30,9 +30,8 @@ if __name__ == "__main__":
     # experimentName = "Test_SquareCloth"
     model = getModelKnot(modelExample)
 
-    current_path = os.path.abspath(__file__)
-
     # Get the folder where the script is located
+    current_path = os.path.abspath(__file__)
     folder = os.path.dirname(current_path)
 
     model["path"] = os.path.join(folder, 'KnotGenerator\Data\knot_V2_2400x20_restShape.obj')
